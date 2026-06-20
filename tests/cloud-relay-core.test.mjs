@@ -789,6 +789,100 @@ test("desktop heartbeat does not grow audit log", async () => {
   assert.equal(state.desktop_heartbeat.pending_count, 4);
 });
 
+test("state compaction keeps pending work and bounded recent history", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+  const devices = [
+    {
+      device_id: "active-device",
+      display_name: "Active Phone",
+      token_hash: "active-token-hash",
+      created_at: testTime(1000),
+      disabled: false
+    },
+    ...Array.from({ length: 80 }, (_, index) => ({
+      device_id: `disabled-${index}`,
+      display_name: `Disabled ${index}`,
+      token_hash: `disabled-token-${index}`,
+      created_at: testTime(index),
+      disabled_at: testTime(index + 1),
+      disabled: true
+    }))
+  ];
+  const mobileMessages = Array.from({ length: 620 }, (_, index) => ({
+    relay_id: `msg-${index}`,
+    created_at: testTime(index),
+    direction: "mobile_to_desktop",
+    device_id: index === 0 ? "disabled-0" : "active-device",
+    display_name: "Phone",
+    text: index === 0 ? "old pending" : `message ${index}`,
+    text_sha256: `hash-${index}`
+  }));
+  const commands = Array.from({ length: 620 }, (_, index) => ({
+    command_id: `cmd-${index}`,
+    created_at: testTime(index),
+    source: "codex-relay-cloud",
+    type: "status_check",
+    text: index === 0 ? "old pending" : `message ${index}`,
+    relay_id: `msg-${index}`,
+    device_id: index === 0 ? "disabled-0" : "active-device",
+    worker_status: index === 0 ? "" : "ok",
+    safety: { live_orders_enabled: false }
+  }));
+  const desktopReplies = Array.from({ length: 1200 }, (_, index) => {
+    const messageIndex = index < 200 ? 1 : 320 + (index % 300);
+    return {
+      relay_id: `reply-${index}`,
+      created_at: testTime(index + 1200),
+      direction: "desktop_to_mobile",
+      target_device_id: "active-device",
+      in_reply_to: `msg-${messageIndex}`,
+      display_name: "Desktop Codex Worker",
+      text: `reply ${index}`,
+      text_sha256: `reply-hash-${index}`,
+      worker_for_command_id: `cmd-${messageIndex}`,
+      worker_status: "ok"
+    };
+  });
+
+  await store.writeJson("state.json", {
+    devices,
+    mobile_messages: mobileMessages,
+    desktop_replies: desktopReplies,
+    commands,
+    audit: []
+  });
+
+  const heartbeat = await call({
+    method: "POST",
+    path: "/api/relay/desktop/heartbeat",
+    headers: { authorization: "Bearer desk-123" },
+    body: {
+      bridge: "netlify-local-bridge",
+      status: "online",
+      cursor: 620,
+      pending_count: 0
+    },
+    store,
+    env
+  });
+  assert.equal(heartbeat.status, 201);
+
+  const state = await store.readJson("state.json", {});
+  assert.ok(state.mobile_messages.length <= 500);
+  assert.ok(state.desktop_replies.length <= 1000);
+  assert.ok(state.commands.length <= 500);
+  assert.ok(state.devices.filter((device) => device.disabled).length <= 50);
+  assert.ok(state.devices.find((device) => device.device_id === "active-device"));
+  assert.ok(state.devices.find((device) => device.device_id === "disabled-0"));
+  assert.ok(state.mobile_messages.find((message) => message.relay_id === "msg-0"));
+  assert.ok(state.commands.find((command) => command.command_id === "cmd-0"));
+  assert.equal(state.commands.some((command) => command.command_id === "cmd-1"), false);
+});
+
 async function call(input) {
   return handleRelayRequest({
     method: input.method,
@@ -811,4 +905,8 @@ function memoryStore() {
       values.set(key, structuredClone(value));
     }
   };
+}
+
+function testTime(offsetSeconds) {
+  return new Date(Date.UTC(2026, 0, 1, 0, 0, offsetSeconds)).toISOString();
 }

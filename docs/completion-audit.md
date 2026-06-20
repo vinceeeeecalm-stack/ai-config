@@ -1,6 +1,6 @@
 # Codex Relay Completion Audit
 
-Last audited: 2026-06-20
+Last audited: 2026-06-21
 
 ## Current Objective
 
@@ -15,7 +15,7 @@ The current goal is to fix the mobile relay app after a poor phone experience:
 | Requirement | Current evidence | Status |
 | --- | --- | --- |
 | Minimal phone UI | Local, LAN, tunnel, and Netlify pages serve the WeChat-like `public/relay-chat.html` shell. The deployed phone page includes version `2026.06.21.4`, `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. | Complete |
-| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `POST /api/relay/mobile/device/revoke` disables reset device tokens; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, and transcript device scoping. | Complete |
+| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, transcript device scoping, and compaction retention. | Complete |
 | Local/LAN round trip | `node scripts/cloud-relay-doctor.cjs` passes `local_status`; local queue is `queued_commands=0`, `unresolved_commands=0`; local worker heartbeat is fresh. | Complete |
 | Public Netlify UI and API | Production Netlify deploy is ready. Static `relay-chat.js` hash matches local source, and `/api/relay/status` returns `ok: true`. The old `mobile-relay` function name is now compatibility-wrapped to the current implementation. | Complete |
 | Public queue path | `node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'` processes a real public message through the local worker and returns worker status `ok`; public status shows `queued_commands=0`. `node scripts/cloud-relay-netlify-bridge.cjs reconcile` closes stale consumed pre-fix residue with audit-only history replies. | Complete for queue/recovery |
@@ -39,7 +39,7 @@ Observed result:
 
 ```text
 npm run check: pass
-npm test: 18/18 pass
+npm test: 19/19 pass
 node scripts/cloud-relay-doctor.cjs: 7/7 pass
 local queue: queued_commands=0, unresolved_commands=0
 public queue: queued_commands=0, unresolved_commands=0

@@ -1,6 +1,6 @@
 # Codex Bridge MVP Runbook
 
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 ## Current Architecture
 
@@ -128,6 +128,8 @@ The reset flow revokes the current cloud mobile token, then removes the saved lo
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 
 Every mobile send includes a `client_message_id`. The relay treats repeated posts from the same phone with the same `client_message_id` as the same message, and the phone UI ignores a rapid duplicate tap of the same text. This prevents network retries or accidental double taps from creating duplicate worker tasks.
+
+Relay state is compacted on every write so long-running daily use does not grow the queue state without bound. The compaction keeps pending commands, active devices, worker replies still marked `working`, replies linked to retained commands, and the recent transcript window. Disabled device history and old terminal commands are capped after they are no longer needed for recovery or audit context.
 
 ## Commands Supported From Phone
 

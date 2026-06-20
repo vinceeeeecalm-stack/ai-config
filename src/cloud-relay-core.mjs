@@ -2,6 +2,10 @@ import crypto from "node:crypto";
 
 const STATE_KEY = "state.json";
 const MAX_AUDIT_ENTRIES = 1000;
+const MAX_MOBILE_MESSAGES = 500;
+const MAX_DESKTOP_REPLIES = 1000;
+const MAX_COMMANDS = 500;
+const MAX_DISABLED_DEVICES = 50;
 
 export async function handleRelayRequest({ method, path, query = {}, headers = {}, body = {}, store, env = {} }) {
   const normalizedPath = normalizePath(path);
@@ -537,8 +541,9 @@ async function readState(store) {
 }
 
 async function writeState(store, state) {
-  state.updated_at = now();
-  await store.writeJson(STATE_KEY, normalizeState(state));
+  const normalized = normalizeState(state);
+  normalized.updated_at = now();
+  await store.writeJson(STATE_KEY, compactState(normalized));
 }
 
 function normalizeState(value) {
@@ -561,6 +566,96 @@ function normalizeAudit(value) {
   return value
     .filter((entry) => entry && typeof entry === "object" && entry.type !== "desktop_heartbeat")
     .slice(-MAX_AUDIT_ENTRIES);
+}
+
+function compactState(state) {
+  const original = normalizeState(state);
+  const requiredCommands = new Set();
+  for (const command of original.commands) {
+    if (isCommandPending(command, original)) requiredCommands.add(command.command_id);
+  }
+
+  const commands = keepRecentWithRequired(
+    original.commands,
+    MAX_COMMANDS,
+    (command) => command.command_id,
+    (command) => requiredCommands.has(command.command_id)
+  );
+  const retainedCommandIds = new Set(commands.map((command) => command.command_id).filter(Boolean));
+  const requiredRelayIds = new Set(commands.map((command) => command.relay_id).filter(Boolean));
+
+  const desktopReplies = keepRecentWithRequired(
+    original.desktop_replies,
+    MAX_DESKTOP_REPLIES,
+    (reply) => reply.relay_id,
+    (reply) => {
+      if (cleanText(reply?.worker_status || "") === "working") return true;
+      if (reply.worker_for_command_id && retainedCommandIds.has(reply.worker_for_command_id)) return true;
+      if (reply.in_reply_to && requiredRelayIds.has(reply.in_reply_to)) return true;
+      return false;
+    }
+  );
+  desktopReplies.forEach((reply) => {
+    if (reply.in_reply_to) requiredRelayIds.add(reply.in_reply_to);
+  });
+
+  const mobileMessages = keepRecentWithRequired(
+    original.mobile_messages,
+    MAX_MOBILE_MESSAGES,
+    (message) => message.relay_id,
+    (message) => requiredRelayIds.has(message.relay_id)
+  );
+
+  const referencedDeviceIds = new Set();
+  commands.forEach((command) => {
+    if (command.device_id) referencedDeviceIds.add(command.device_id);
+  });
+  mobileMessages.forEach((message) => {
+    if (message.device_id) referencedDeviceIds.add(message.device_id);
+  });
+  desktopReplies.forEach((reply) => {
+    if (reply.target_device_id) referencedDeviceIds.add(reply.target_device_id);
+  });
+
+  const activeDevices = original.devices.filter((device) => !device.disabled);
+  const disabledDevices = keepRecentWithRequired(
+    original.devices.filter((device) => device.disabled),
+    MAX_DISABLED_DEVICES,
+    (device) => device.device_id,
+    (device) => referencedDeviceIds.has(device.device_id)
+  );
+
+  return {
+    ...original,
+    devices: [...activeDevices, ...disabledDevices],
+    mobile_messages: mobileMessages,
+    desktop_replies: desktopReplies,
+    commands
+  };
+}
+
+function keepRecentWithRequired(items, maxItems, keyFn, requiredFn) {
+  const requiredKeys = new Set();
+  items.forEach((item) => {
+    const key = keyFn(item);
+    if (key && requiredFn(item)) requiredKeys.add(key);
+  });
+
+  const keepKeys = new Set(requiredKeys);
+  const sorted = items
+    .map((item, index) => ({ item, index, time: Date.parse(item?.created_at || item?.disabled_at || "") }))
+    .sort((left, right) => {
+      const timeDelta = (Number.isFinite(right.time) ? right.time : 0) - (Number.isFinite(left.time) ? left.time : 0);
+      return timeDelta || right.index - left.index;
+    });
+
+  for (const { item } of sorted) {
+    if (keepKeys.size >= maxItems && !requiredKeys.has(keyFn(item))) continue;
+    const key = keyFn(item);
+    if (key) keepKeys.add(key);
+  }
+
+  return items.filter((item) => keepKeys.has(keyFn(item)));
 }
 
 function normalizeDesktopHeartbeat(value) {
