@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#ededed">
+    <title>Codex Relay</title>
+    <link rel="manifest" href="/relay-chat.webmanifest">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/relay-chat.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="chat-header">
+        <div class="avatar" aria-hidden="true">C</div>
+        <div class="chat-title">
+          <h1>Codex</h1>
+          <p id="setupNotice" role="status">正在检查连接...</p>
+        </div>
+        <span id="relayState" class="state-dot">checking</span>
+      </header>
+
+      <section id="registerPanel" class="setup-panel">
+        <div class="setup-copy">
+          <span id="pairingModeTag" class="mode-tag">检测入口</span>
+          <h2>连接这台手机</h2>
+          <p id="pairingHelpText">复制电脑端显示的配对码，填到下方。</p>
+        </div>
+
+        <label>
+          设备名
+          <input id="displayName" value="Vincent iPhone" autocomplete="name" inputmode="text">
+        </label>
+
+        <label>
+          <span id="pairingCodeLabel">Relay 配对码</span>
+          <input id="pairingCode" type="password" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="relay-... / pair_...">
+        </label>
+
+        <button id="registerButton" class="primary-action" type="button">连接</button>
+        <button id="setupResetButton" class="secondary-action" type="button">清除旧登录</button>
+
+        <details class="pairing-help">
+          <summary id="pairingHelpTitle">电脑端取码</summary>
+          <code id="pairingCommand">node scripts/cloud-relay-install.cjs pairing</code>
+        </details>
+
+        <p id="registerStatus" class="form-status">连接后即可像聊天一样发送报告、持仓分析和诊断。</p>
+        <p id="versionMeta" class="version-meta">版本检查中</p>
+      </section>
+
+      <section id="chatPanel" class="chat" hidden>
+        <section class="status-bar" aria-label="连接状态">
+          <span id="deviceMeta" class="device-chip">已注册设备</span>
+          <span class="cloud-chip">云端 <b id="apiStatus">检查中</b></span>
+          <span class="desktop-chip">电脑 <b id="workerStatus">检查中</b></span>
+          <span class="local-chip">本机 <b id="localStatus">待命</b></span>
+          <span class="queue-chip">队列 <b id="queueStatus">--</b></span>
+          <span class="sync-chip">同步 <b id="syncStatus">--</b></span>
+          <span class="version-chip">版本 <b id="appVersion">--</b></span>
+          <span class="safety">安全 <b id="safetyStatus">禁用下单</b></span>
+        </section>
+
+        <section id="deliveryCard" class="delivery">
+          <strong id="deliveryStatus">等待发送</strong>
+          <small id="deliveryMeta">电脑醒着时会自动回复；电脑刚恢复时点“唤醒”。</small>
+          <time id="deliveryLatency">--</time>
+        </section>
+
+        <section id="selfCheckPanel" class="self-check">
+          <div>
+            <strong>连接自检</strong>
+            <p id="selfCheckSummary">会发送一条“诊断”，确认公网、手机、本机 worker 回写。</p>
+          </div>
+          <ol class="check-list">
+            <li data-check="api" data-status="idle"><b>云端</b><span>等待检查</span></li>
+            <li data-check="device" data-status="idle"><b>手机</b><span>等待检查</span></li>
+            <li data-check="worker" data-status="idle"><b>电脑</b><span>等待回写</span></li>
+          </ol>
+        </section>
+
+        <section id="messageList" class="messages" aria-live="polite"></section>
+
+        <nav class="quick" aria-label="快速指令">
+          <button data-quick-text="状态" type="button">状态</button>
+          <button data-quick-text="诊断" type="button">诊断</button>
+          <button data-quick-text="报告" type="button">报告</button>
+          <button data-quick-text="分析持仓和机会" type="button">持仓</button>
+          <button data-quick-text="信号 BTC" type="button">BTC</button>
+        </nav>
+
+        <form id="messageForm" class="composer">
+          <button id="selfCheckButton" class="wake-action" type="button">唤醒</button>
+          <textarea id="messageText" rows="1" placeholder="输入消息"></textarea>
+          <button class="send-action" type="submit">发送</button>
+        </form>
+
+        <button id="forgetButton" class="forget-action" type="button">重置这台手机</button>
+      </section>
+    </main>
+    <script src="/relay-chat.js"></script>
+  </body>
+</html>
