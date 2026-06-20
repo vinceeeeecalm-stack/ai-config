@@ -87,6 +87,65 @@ test("desktop endpoints require desktop token", async () => {
   assert.equal(result.status, 401);
 });
 
+test("mobile device revoke disables the current mobile token", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  const registered = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: { display_name: "iPhone", pairing_code: "pair-123" },
+    store,
+    env
+  });
+  assert.equal(registered.status, 201);
+
+  const before = await call({ method: "GET", path: "/api/relay/status", store, env });
+  assert.equal(before.status, 200);
+  assert.equal(before.body.counts.registered_devices, 1);
+  assert.equal(before.body.counts.active_devices, 1);
+  assert.equal(before.body.counts.disabled_devices, 0);
+
+  const revoked = await call({
+    method: "POST",
+    path: "/api/relay/mobile/device/revoke",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    store,
+    env
+  });
+  assert.equal(revoked.status, 200);
+  assert.equal(revoked.body.device.disabled, true);
+  assert.ok(revoked.body.device.disabled_at);
+
+  const after = await call({ method: "GET", path: "/api/relay/status", store, env });
+  assert.equal(after.status, 200);
+  assert.equal(after.body.counts.registered_devices, 1);
+  assert.equal(after.body.counts.active_devices, 0);
+  assert.equal(after.body.counts.disabled_devices, 1);
+
+  const sendAfterRevoke = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    body: { text: "状态" },
+    store,
+    env
+  });
+  assert.equal(sendAfterRevoke.status, 401);
+
+  const transcriptAfterRevoke = await call({
+    method: "GET",
+    path: "/api/relay/mobile/transcript",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    store,
+    env
+  });
+  assert.equal(transcriptAfterRevoke.status, 401);
+});
+
 test("legacy desktop poll and direct replies remain compatible", async () => {
   const store = memoryStore();
   const env = {

@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.3";
+const APP_VERSION = "2026.06.21.4";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -7,8 +7,10 @@ const RESET_KEYS = [
 ];
 const resetRequested = new URLSearchParams(location.search).has("reset");
 let resetNotice = "";
+let resetRevocationToken = "";
 
 if (resetRequested) {
+  resetRevocationToken = localStorage.getItem("codexRelayCloudToken") || "";
   clearLocalRelayState();
   resetNotice = "已清除这台手机保存的旧登录。请重新输入当前入口对应的配对码。";
 }
@@ -92,6 +94,7 @@ async function boot() {
   applyRelayModeCopy();
   renderVersion();
   if (resetRequested) {
+    await revokeMobileToken(resetRevocationToken);
     await clearBrowserAppCache();
     history.replaceState(null, "", `${location.pathname}${location.hash || ""}`);
   }
@@ -405,6 +408,8 @@ function resolvePending(message) {
 
 async function resetDevice(message) {
   clearSelfCheckTimeout();
+  const tokenToRevoke = state.token;
+  await revokeMobileToken(tokenToRevoke);
   state.token = "";
   state.device = null;
   state.cursor = 0;
@@ -431,6 +436,22 @@ async function api(url, options = {}) {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.ok === false) throw new Error(body.error || "Relay request failed");
   return body;
+}
+
+async function revokeMobileToken(token) {
+  if (!token) return;
+  try {
+    await fetch("/api/relay/mobile/device/revoke", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`
+      },
+      body: "{}"
+    });
+  } catch (_error) {
+    // Local reset must still succeed if the token was already invalid or the network is offline.
+  }
 }
 
 function setRelayState(value) {

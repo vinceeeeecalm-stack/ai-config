@@ -7,6 +7,7 @@ export async function handleRelayRequest({ method, path, query = {}, headers = {
   const normalizedPath = normalizePath(path);
   if (method === "GET" && normalizedPath === "/api/relay/status") return relayStatus(store, env);
   if (method === "POST" && normalizedPath === "/api/relay/devices/register") return registerDevice(store, env, body);
+  if (method === "POST" && normalizedPath === "/api/relay/mobile/device/revoke") return revokeMobileDevice(store, env, headers);
   if (method === "POST" && normalizedPath === "/api/relay/mobile/messages") return postMobileMessage(store, env, headers, body);
   if (method === "GET" && normalizedPath === "/api/relay/mobile/messages") return listMobileMessages(store, env, headers, query);
   if (method === "GET" && normalizedPath === "/api/relay/mobile/transcript") return listMobileTranscript(store, env, headers, query);
@@ -35,6 +36,8 @@ async function relayStatus(store, env) {
     },
     counts: {
       registered_devices: state.devices.length,
+      active_devices: state.devices.filter((device) => !device.disabled).length,
+      disabled_devices: state.devices.filter((device) => device.disabled).length,
       mobile_messages: state.mobile_messages.length,
       desktop_replies: state.desktop_replies.length,
       queued_commands: counts.queued,
@@ -66,6 +69,22 @@ async function registerDevice(store, env, body) {
   audit(state, "device_registered", { device_id: device.device_id, display_name: device.display_name });
   await writeState(store, state);
   return response(201, { ok: true, service: "codex-relay-cloud", device: publicDevice(device), token, safety: safety() });
+}
+
+async function revokeMobileDevice(store, _env, headers) {
+  const state = await readState(store);
+  const device = requireMobileDevice(state, headers);
+  if (!device) return response(401, { ok: false, error: "Invalid relay mobile token.", safety: safety() });
+  device.disabled = true;
+  device.disabled_at = now();
+  audit(state, "device_revoked", { device_id: device.device_id, display_name: device.display_name });
+  await writeState(store, state);
+  return response(200, {
+    ok: true,
+    service: "codex-relay-cloud",
+    device: publicDevice(device),
+    safety: safety()
+  });
 }
 
 async function postMobileMessage(store, env, headers, body) {
@@ -719,6 +738,7 @@ function publicDevice(device) {
     device_id: device.device_id,
     display_name: device.display_name,
     created_at: device.created_at,
+    disabled_at: device.disabled_at || null,
     disabled: Boolean(device.disabled)
   };
 }
