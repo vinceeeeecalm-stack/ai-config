@@ -74,12 +74,33 @@ async function postMobileMessage(store, env, headers, body) {
   if (!device) return response(401, { ok: false, error: "Invalid relay mobile token.", safety: safety() });
   const text = cleanText(body.text);
   if (!text) return response(400, { ok: false, error: "text is required.", safety: safety() });
+  const clientMessageId = cleanClientMessageId(body.client_message_id || body.clientMessageId);
+  const duplicate = clientMessageId
+    ? state.mobile_messages.find((item) => item.device_id === device.device_id && item.client_message_id === clientMessageId)
+    : null;
+  if (duplicate) {
+    if (duplicate.text_sha256 !== sha256(text)) {
+      return response(409, {
+        ok: false,
+        error: "client_message_id already exists with different text.",
+        safety: safety()
+      });
+    }
+    return response(200, {
+      ok: true,
+      service: "codex-relay-cloud",
+      duplicate: true,
+      message: duplicate,
+      safety: safety()
+    });
+  }
 
   const message = {
     relay_id: `msg-${Date.now()}-${randomHex(3)}`,
     created_at: now(),
     direction: "mobile_to_desktop",
     device_id: device.device_id,
+    client_message_id: clientMessageId || null,
     display_name: device.display_name,
     text,
     text_sha256: sha256(text)
@@ -100,9 +121,14 @@ async function postMobileMessage(store, env, headers, body) {
   state.mobile_messages.push(message);
   if (commandResult.command) state.commands.push(commandResult.command);
   state.desktop_replies.push(reply);
-  audit(state, "mobile_message", { device_id: device.device_id, relay_id: message.relay_id, command_id: commandResult.command?.command_id || null });
+  audit(state, "mobile_message", {
+    device_id: device.device_id,
+    relay_id: message.relay_id,
+    client_message_id: clientMessageId || null,
+    command_id: commandResult.command?.command_id || null
+  });
   await writeState(store, state);
-  return response(201, { ok: true, service: "codex-relay-cloud", message, safety: safety() });
+  return response(201, { ok: true, service: "codex-relay-cloud", duplicate: false, message, safety: safety() });
 }
 
 async function listMobileMessages(store, _env, headers, query) {
@@ -465,6 +491,7 @@ function baseCommand(command_id, type, text, context, fields = {}) {
     type,
     text,
     relay_id: context.message?.relay_id || null,
+    client_message_id: context.message?.client_message_id || null,
     device_id: context.device?.device_id || null,
     display_name: context.device?.display_name || null,
     ...fields,
@@ -727,6 +754,10 @@ function safeEqual(left, right) {
 
 function cleanText(value) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, 4000);
+}
+
+function cleanClientMessageId(value) {
+  return String(value || "").replace(/[^A-Za-z0-9._:-]/g, "").trim().slice(0, 120);
 }
 
 function cleanName(value) {

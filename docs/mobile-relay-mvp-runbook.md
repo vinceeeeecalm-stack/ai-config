@@ -95,7 +95,7 @@ node scripts/cloud-relay-localhostrun-install.cjs repair
 Current verified tunnel URL:
 
 ```text
-https://f6cfb1571cec63.lhr.life/relay-chat.html
+https://1d66f4872450d1.lhr.life/relay-chat.html
 ```
 
 Use the local pairing code with this tunnel, because it is forwarding directly to the local relay:
@@ -123,9 +123,11 @@ Public reset URL:
 https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 ```
 
-The reset flow removes the saved mobile token, cursor, pending reply cache, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.2` and mode `公网 Netlify` before you enter the `pair_...` code.
+The reset flow removes the saved mobile token, cursor, pending reply cache, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.3` and mode `公网 Netlify` before you enter the `pair_...` code.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
+
+Every mobile send includes a `client_message_id`. The relay treats repeated posts from the same phone with the same `client_message_id` as the same message, and the phone UI ignores a rapid duplicate tap of the same text. This prevents network retries or accidental double taps from creating duplicate worker tasks.
 
 ## Commands Supported From Phone
 

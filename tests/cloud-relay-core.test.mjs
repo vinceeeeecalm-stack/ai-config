@@ -229,6 +229,76 @@ test("legacy desktop poll and direct replies remain compatible", async () => {
   assert.equal(inbox.body.messages[2].worker_status, "reported");
 });
 
+test("mobile messages are idempotent by client_message_id", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  const registered = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: { display_name: "iPhone", pairing_code: "pair-123" },
+    store,
+    env
+  });
+  assert.equal(registered.status, 201);
+
+  const first = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    body: { text: "信号 BTC", client_message_id: "web-test-001" },
+    store,
+    env
+  });
+  assert.equal(first.status, 201);
+  assert.equal(first.body.duplicate, false);
+  assert.equal(first.body.message.client_message_id, "web-test-001");
+
+  const repeated = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    body: { text: "信号 BTC", client_message_id: "web-test-001" },
+    store,
+    env
+  });
+  assert.equal(repeated.status, 200);
+  assert.equal(repeated.body.duplicate, true);
+  assert.equal(repeated.body.message.relay_id, first.body.message.relay_id);
+
+  const status = await call({ method: "GET", path: "/api/relay/status", store, env });
+  assert.equal(status.status, 200);
+  assert.equal(status.body.counts.mobile_messages, 1);
+  assert.equal(status.body.counts.desktop_replies, 1);
+  assert.equal(status.body.counts.total_commands, 1);
+  assert.equal(status.body.counts.queued_commands, 1);
+
+  const commands = await call({
+    method: "GET",
+    path: "/api/relay/desktop/commands",
+    query: { cursor: "0" },
+    headers: { authorization: "Bearer desk-123" },
+    store,
+    env
+  });
+  assert.equal(commands.status, 200);
+  assert.equal(commands.body.commands.length, 1);
+  assert.equal(commands.body.commands[0].client_message_id, "web-test-001");
+
+  const conflict = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${registered.body.token}` },
+    body: { text: "信号 ETH", client_message_id: "web-test-001" },
+    store,
+    env
+  });
+  assert.equal(conflict.status, 409);
+});
+
 test("mobile transcript restores recent bidirectional history for the current device", async () => {
   const store = memoryStore();
   const env = {

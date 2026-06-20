@@ -1,4 +1,4 @@
-const CACHE_NAME = "codex-relay-cloud-v10";
+const CACHE_NAME = "codex-relay-cloud-v11";
 const ASSETS = [
   "/relay-chat.html",
   "/relay-chat.css",

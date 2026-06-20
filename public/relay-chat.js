@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.2";
+const APP_VERSION = "2026.06.21.3";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -31,6 +31,7 @@ const state = {
   lastStatus: null,
   lastStatusRefreshAt: 0,
   lastPollAt: 0,
+  recentSends: {},
   relayMode: detectRelayMode()
 };
 
@@ -214,21 +215,37 @@ async function sendRelayTextNow(text, options = {}) {
     if (options.throwOnError) throw new Error("请先连接");
     return null;
   }
+  const duplicateKey = sendDuplicateKey(text);
+  const duplicate = state.recentSends[duplicateKey];
+  if (!options.allowDuplicate && duplicate && Date.now() - duplicate.started_at < 2500) {
+    els.deliveryStatus.textContent = "已忽略重复点击";
+    els.deliveryMeta.textContent = text;
+    els.deliveryLatency.textContent = "--";
+    return duplicate.message || null;
+  }
+  const clientMessageId = options.clientMessageId || createClientMessageId();
+  state.recentSends[duplicateKey] = {
+    started_at: Date.now(),
+    client_message_id: clientMessageId,
+    message: null
+  };
   els.deliveryStatus.textContent = "发送中";
   els.deliveryMeta.textContent = text;
   try {
     const result = await api("/api/relay/mobile/messages", {
       method: "POST",
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text, client_message_id: clientMessageId })
     });
     appendMessage(result.message);
-    state.pending[result.message.relay_id] = Date.now();
+    state.recentSends[duplicateKey].message = result.message;
+    state.pending[result.message.relay_id] = state.pending[result.message.relay_id] || Date.now();
     savePending();
-    els.deliveryStatus.textContent = "等待桌面 worker";
+    els.deliveryStatus.textContent = result.duplicate ? "发送已确认" : "等待桌面 worker";
     els.localStatus.textContent = "处理中";
     setTimeout(pollMessages, 350);
     return result.message;
   } catch (error) {
+    delete state.recentSends[duplicateKey];
     els.deliveryStatus.textContent = friendlyError(error);
     if (options.throwOnError) throw error;
     return null;
@@ -627,4 +644,17 @@ function readJson(key) {
 
 function savePending() {
   localStorage.setItem("codexRelayCloudPending", JSON.stringify(state.pending));
+}
+
+function sendDuplicateKey(text) {
+  return cleanInlineText(text).toLowerCase();
+}
+
+function cleanInlineText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function createClientMessageId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return `web-${crypto.randomUUID()}`;
+  return `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
