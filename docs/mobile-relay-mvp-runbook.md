@@ -271,7 +271,7 @@ Latest successful Netlify production deploy:
 6a3770f49529294af075ee70
 ```
 
-A later deploy attempt was skipped by Netlify with `account credit usage exceeded`. The Mac-installed runtime has the latest expanded cleanup matcher; publishing that exact final server matcher to Netlify requires the Netlify account credit limit to be cleared. The current live Netlify app remains healthy and usable.
+Later deploy attempts `6a37729c8ad80d76f3966a44` and `6a37804334af399f98db2849` were skipped by Netlify with `account credit usage exceeded`. The Mac-installed runtime has the latest frontend/runtime fixes; publishing that exact final version to Netlify requires the Netlify account credit limit to be cleared. The current live Netlify app remains healthy and usable, but the desktop pairing page should be treated as the source of truth for whether the stable public UI is current.
 
 ## Sleep And Wake Boundary
 

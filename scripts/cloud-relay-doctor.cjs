@@ -27,6 +27,7 @@ async function main() {
   await checkLocalStatus(checks);
   await checkPairingPage(checks);
   await checkPairingApi(checks);
+  await checkStableVersionAlignment(checks);
   await checkDocs(checks);
   await checkPublicBridge(checks);
   await checkPublicTunnel(checks);
@@ -105,6 +106,34 @@ async function checkPairingApi(checks) {
         pairing_code_configured: Boolean(pairing.pairing_code),
         desktop_token_configured: Boolean(pairing.desktop_token_configured),
         leaks_desktop_token_prefix: raw.includes("desk_")
+      }
+    };
+  });
+}
+
+async function checkStableVersionAlignment(checks) {
+  await record(checks, "stable_public_version_alignment", false, async () => {
+    const pairing = await fetchJson(`${localBaseUrl}/api/relay/local/pairing`);
+    const versions = pairing.app_versions || {};
+    const localVersion = versions.local?.version || null;
+    const stableVersion = versions.stable_public?.version || null;
+    const stableCurrent = Boolean(versions.stable_current);
+    const reason = stableCurrent
+      ? "stable public app is current"
+      : stableVersion
+        ? "stable public app version differs from local app version"
+        : versions.stable_public?.error || "stable public app version unavailable";
+    return {
+      ok: stableCurrent,
+      warning: !stableCurrent,
+      evidence: {
+        local_app_version: localVersion,
+        stable_public_app_version: stableVersion,
+        temporary_tunnel_app_version: versions.temporary_tunnel?.version || null,
+        stable_current: stableCurrent,
+        temporary_current: Boolean(versions.temporary_current),
+        recommended_source: versions.recommended_source || null,
+        reason
       }
     };
   });

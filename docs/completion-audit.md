@@ -17,7 +17,7 @@ The current goal is to fix the mobile relay app after a poor phone experience:
 | Minimal phone UI | Local, LAN, and tunnel pages serve the WeChat-like `public/relay-chat.html` shell at version `2026.06.21.10`; the current Netlify deploy still serves version `2026.06.21.8` until account credits allow redeploy. The phone page includes `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. The desktop pairing page now shows local/stable/tunnel app versions before pairing. | Complete |
 | Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; failed sends are kept in a capped local outbox and retried after network recovery; same-phone re-pairing sends a stable client instance id and replaces the old active token; phone-initiated re-pairing also explicitly disables older active tokens with the same display name to keep active device counts from drifting upward; delayed `唤醒`/`诊断` replies update the self-check panel from timeout warning back to pass when the worker reply eventually arrives; completed receipt polling now clears stale pending state even if the terminal reply was already rendered; `状态` now reports active/total/disabled device counts instead of a misleading all-device total; bridge/e2e temporary device tokens are revoked after use, and desktop-only cleanup can disable historical verification devices without touching real phones; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `GET /api/relay/mobile/message-status` lets the phone show queued/consumed/working/completed receipt states for its own messages; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; `node scripts/cloud-relay-netlify-bridge.cjs continuity` sends five sequential public messages and requires every one to complete with a terminal worker reply; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, same-instance and same-display-name replacement, temporary-device cleanup, transcript device scoping, receipt lifecycle, outbox retry, and compaction retention. | Complete |
 | Local/LAN round trip | `node scripts/cloud-relay-doctor.cjs` passes `local_status`; local queue is `queued_commands=0`, `unresolved_commands=0`; local worker heartbeat is fresh. | Complete |
-| Public Netlify UI and API | Production Netlify deploy `6a3770f49529294af075ee70` is ready. Static `relay-chat.js` currently serves version `2026.06.21.8`, and `/api/relay/status` returns `ok: true`. A later deploy attempt `6a37729c8ad80d76f3966a44` was skipped by Netlify because account credit usage was exceeded, so the local frontend version `2026.06.21.10`, expanded cleanup-name matcher, and latest source docs are installed locally but not published to Netlify yet. The old `mobile-relay` function name is now compatibility-wrapped to the current implementation. | Complete with deploy-credit note |
+| Public Netlify UI and API | Production Netlify deploy `6a3770f49529294af075ee70` is ready. Static `relay-chat.js` currently serves version `2026.06.21.8`, and `/api/relay/status` returns `ok: true`. Deploy attempts `6a37729c8ad80d76f3966a44` and `6a37804334af399f98db2849` were skipped by Netlify because account credit usage was exceeded, so the local frontend version `2026.06.21.10`, expanded cleanup-name matcher, and latest source docs are installed locally but not published to Netlify yet. The old `mobile-relay` function name is now compatibility-wrapped to the current implementation. | API usable; latest public UI blocked by Netlify credits |
 | Public queue path | `node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'` processes a real public message through the local worker and returns worker status `ok`; public status shows `queued_commands=0`. `node scripts/cloud-relay-netlify-bridge.cjs reconcile` closes stale consumed pre-fix residue with audit-only history replies. | Complete for queue/recovery |
 | Idle sleep mitigation | `cloud-relay-awake-install.cjs` installs `com.codex.relay.cloud.awake`, running `caffeinate -ims`. `pmset -g assertions` shows `PreventSystemSleep`, `PreventUserIdleSystemSleep`, and `PreventDiskIdle` owned by `caffeinate`. | Complete for open-lid idle sleep |
 | Lid-closed physical wake | A phone web page cannot physically wake a Mac that is already lid-closed or in deep sleep. Current evidence shows battery `womp=0`; LaunchAgents and tunnels do not run while the Mac is asleep. | Blocked by macOS/hardware/external hosting |
@@ -39,12 +39,12 @@ Observed result:
 
 ```text
 npm run check: pass
-npm test: 22/22 pass
-node scripts/cloud-relay-doctor.cjs --e2e: 10/10 pass
+npm test: 23/23 pass
+node scripts/cloud-relay-doctor.cjs --e2e: 10 pass, 1 warn, 0 fail; required_failed=0
 node scripts/cloud-relay-netlify-bridge.cjs continuity: pass, sent_count=5, completed_count=5
 local queue: queued_commands=0, unresolved_commands=0, active_devices=21
 public queue: queued_commands=0, unresolved_commands=0, active_devices=8
-tunnel URL: https://2d20efdf8c3202.lhr.life/relay-chat.html
+tunnel URL: https://6ed06b4b977a39.lhr.life/relay-chat.html
 awake helper: launchd_loaded=true, mode=caffeinate -ims
 ```
 
@@ -76,7 +76,7 @@ The Netlify path returned worker status `ok`. `doctor --e2e` now includes local 
 
 - Stable Netlify UI/API: `https://codex-bridge-relay.netlify.app/relay-chat.html`
 - Stable Netlify reset URL: `https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1`
-- Current public tunnel UI: `https://2d20efdf8c3202.lhr.life/relay-chat.html`
+- Current public tunnel UI: `https://6ed06b4b977a39.lhr.life/relay-chat.html`
 - LAN UI: `http://192.168.0.115:8798/relay-chat.html`
 - Local pairing page: `http://127.0.0.1:8798/pairing`
 - Local/tunnel pairing code: `relay-2ac288ea`
@@ -94,4 +94,4 @@ To make that requirement literally true, one of these external conditions is nee
 
 The implemented app handles the practical open-lid case and the wake-after-sleep recovery case: it queues messages, keeps the Mac awake while possible, and completes replies after the Mac is awake again.
 
-The current deployment blocker is Netlify account credit usage. Local code and the installed Mac runtime include the latest expanded cleanup matcher, but publishing that exact final server version requires Netlify credits to be available again. The current live Netlify deploy is still healthy and already has the desktop-only cleanup endpoint used to reduce public active devices.
+The current deployment blocker is Netlify account credit usage. Local code and the installed Mac runtime include the latest frontend/runtime fixes, but publishing that exact final version requires Netlify credits to be available again. The most recent deploy attempt, `6a37804334af399f98db2849`, was skipped with `Skipped due to account credit usage exceeded`. The current live Netlify deploy is still healthy and already has the desktop-only cleanup endpoint used to reduce public active devices.
