@@ -95,7 +95,7 @@ node scripts/cloud-relay-localhostrun-install.cjs repair
 Current verified tunnel URL:
 
 ```text
-https://da82eae64ea198.lhr.life/relay-chat.html
+https://9e42ba58559c17.lhr.life/relay-chat.html
 ```
 
 Use the local pairing code with this tunnel, because it is forwarding directly to the local relay:
@@ -211,6 +211,7 @@ Public:
 cd "/Users/vincentpan/Library/Application Support/CodexRelayCloud"
 node scripts/cloud-relay-netlify-bridge.cjs status
 node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'
+node scripts/cloud-relay-netlify-bridge.cjs continuity
 node scripts/cloud-relay-netlify-bridge.cjs reconcile
 ```
 
@@ -229,6 +230,7 @@ Installed runtime:
 cd "/Users/vincentpan/Library/Application Support/CodexRelayCloud"
 node scripts/cloud-relay-doctor.cjs
 node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'
+node scripts/cloud-relay-netlify-bridge.cjs continuity
 node /private/tmp/relay-playwright/relay-ui-check.mjs
 node /private/tmp/relay-playwright/relay-instance-replace-check.mjs
 node /private/tmp/relay-playwright/relay-public-instance-replace-check.mjs
@@ -239,7 +241,7 @@ node /private/tmp/relay-playwright/relay-public-chat-continuity-check.mjs
 node scripts/cloud-relay-netlify-bridge.cjs cleanup-devices 0
 ```
 
-`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, verifies the reply returns to the public queue, and revokes its temporary public mobile token. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The instance replacement checks re-pair from the same browser/client instance locally and through Netlify, then verify the old token becomes 401 while the new token remains valid. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`. The public chat continuity check opens the real Netlify phone page, pairs it, sends `状态` and `报告`, waits for terminal worker replies for both, and verifies there are no browser console issues. The cleanup command disables historical verification devices so status counts remain readable.
+`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, verifies the reply returns to the public queue, and revokes its temporary public mobile token. `continuity` sends five real Netlify messages in sequence (`状态`, `报告`, `诊断`, `状态`, `报告`) and verifies every message reaches `completed` with a terminal worker reply, catching the "only replies once" class of regressions. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The instance replacement checks re-pair from the same browser/client instance locally and through Netlify, then verify the old token becomes 401 while the new token remains valid. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`. The public chat continuity check opens the real Netlify phone page, pairs it, sends `状态` and `报告`, waits for terminal worker replies for both, and verifies there are no browser console issues. The cleanup command disables historical verification devices so status counts remain readable.
 
 Tunnel:
 

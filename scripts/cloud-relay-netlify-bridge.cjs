@@ -36,6 +36,7 @@ async function main() {
   if (command === "reconcile") return printJson(await reconcileOnce(process.argv[3]));
   if (command === "cleanup-devices") return printJson(await cleanupTemporaryDevices(process.argv[3]));
   if (command === "e2e") return printJson(await e2e(process.argv.slice(3).join(" ") || "信号 BTC"));
+  if (command === "continuity") return printJson(await continuity(process.argv.slice(3)));
   if (command === "uninstall") return printJson(uninstall());
   throw new Error(`Unknown command: ${command}`);
 }
@@ -299,6 +300,76 @@ async function e2e(text) {
   }
 }
 
+async function continuity(args) {
+  const config = readConfig();
+  const texts = parseContinuityTexts(args);
+  let registered = null;
+  let tempDeviceRevoked = false;
+  const results = [];
+  try {
+    registered = await fetchJson(`${config.public_relay_url}/api/relay/devices/register`, {
+      method: "POST",
+      body: {
+        display_name: `public chat continuity ${Date.now()}`,
+        pairing_code: config.public_pairing_code
+      }
+    });
+
+    for (const [index, text] of texts.entries()) {
+      const posted = await fetchJson(`${config.public_relay_url}/api/relay/mobile/messages`, {
+        method: "POST",
+        token: registered.token,
+        body: { text }
+      });
+      const cloudReceipt = await getPublicMessageStatus(config, registered.token, posted.message.relay_id);
+      if (!cloudReceipt.cloud_ack) throw new Error(`Message ${index + 1} did not receive cloud acknowledgement.`);
+
+      let processed = null;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        processed = await pollOnce();
+        if (processed.processed.some((item) => item.relay_id === posted.message.relay_id) || processed.flushed.some((item) => item.public_relay_id === posted.message.relay_id)) break;
+        await sleep(1000);
+      }
+
+      const completed = await waitForPublicReceiptCompleted(config, registered.token, posted.message.relay_id, 90000);
+      results.push({
+        index: index + 1,
+        text,
+        public_message_id: posted.message.relay_id,
+        cloud_ack: Boolean(cloudReceipt.cloud_ack),
+        initial_phase: cloudReceipt.phase || null,
+        final_phase: completed.phase || null,
+        reply_id: completed.terminal_reply?.relay_id || null,
+        worker_status: completed.terminal_reply?.worker_status || null,
+        reply_sha256: completed.terminal_reply?.text_sha256 || sha256(completed.terminal_reply?.text || ""),
+        processed
+      });
+    }
+
+    tempDeviceRevoked = await revokeMobileToken(config.public_relay_url, registered.token, { scope: "public_continuity" });
+    const tempCleanup = await cleanupTemporaryDevices(0).catch((error) => ({ ok: false, error: error.message || String(error) }));
+    const publicStatus = await fetchJson(`${config.public_relay_url}/api/relay/status`).catch((error) => ({ ok: false, error: error.message || String(error) }));
+    return {
+      ok: results.length === texts.length && results.every((item) => item.final_phase === "completed"),
+      service: "codex-relay-cloud-netlify-bridge",
+      command: "continuity",
+      public_url: `${config.public_relay_url}/relay-chat.html`,
+      sent_count: texts.length,
+      completed_count: results.filter((item) => item.final_phase === "completed").length,
+      mobile_token_preview: previewSecret(registered.token),
+      temp_device_revoked: tempDeviceRevoked,
+      temp_cleanup: cleanupSummary(tempCleanup),
+      public_status: summarizeRelayStatus(publicStatus),
+      results,
+      safety: safety()
+    };
+  } finally {
+    if (registered?.token && !tempDeviceRevoked) {
+      await revokeMobileToken(config.public_relay_url, registered.token, { scope: "public_continuity_finally" });
+    }
+  }
+}
+
 function uninstall() {
   const result = unloadPlist();
   return { ok: true, service: "codex-relay-cloud-netlify-bridge", command: "uninstall", label, result, safety: safety() };
@@ -406,6 +477,21 @@ async function waitForPublicReply(config, token, messageId, timeoutMs) {
     await sleep(1000);
   }
   throw new Error("Timed out waiting for public Netlify mobile reply.");
+}
+
+async function getPublicMessageStatus(config, token, messageId) {
+  return fetchJson(`${config.public_relay_url}/api/relay/mobile/message-status?relay_id=${encodeURIComponent(messageId)}`, { token });
+}
+
+async function waitForPublicReceiptCompleted(config, token, messageId, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let lastReceipt = null;
+  while (Date.now() < deadline) {
+    lastReceipt = await getPublicMessageStatus(config, token, messageId);
+    if (lastReceipt.phase === "completed" && lastReceipt.terminal_reply) return lastReceipt;
+    await sleep(1000);
+  }
+  throw new Error(`Timed out waiting for public receipt completion for ${messageId}; last phase was ${lastReceipt?.phase || "unknown"}.`);
 }
 
 async function flushPendingReplies(config, state) {
@@ -518,6 +604,15 @@ function parseStaleAfterMs(value, fallback) {
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.max(0, Math.round(parsed));
+}
+
+function parseContinuityTexts(args) {
+  const raw = (args || []).join(" ").trim();
+  const texts = raw
+    ? raw.split("|").map((item) => item.trim()).filter(Boolean)
+    : ["状态", "报告", "诊断", "状态", "报告"];
+  if (!texts.length) throw new Error("continuity requires at least one message.");
+  return texts.slice(0, 12);
 }
 
 async function postPublicWorkerReply(config, publicMessage, outcome) {

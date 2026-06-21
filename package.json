@@ -32,6 +32,7 @@
     "netlify-bridge:pairing": "node scripts/cloud-relay-netlify-bridge.cjs pairing",
     "netlify-bridge:poll-once": "node scripts/cloud-relay-netlify-bridge.cjs poll-once",
     "netlify-bridge:e2e": "node scripts/cloud-relay-netlify-bridge.cjs e2e '信号 BTC'",
+    "netlify-bridge:continuity": "node scripts/cloud-relay-netlify-bridge.cjs continuity",
     "worker": "node scripts/cloud-relay-worker.cjs",
     "worker:loop": "node scripts/cloud-relay-worker.cjs --loop"
   },
