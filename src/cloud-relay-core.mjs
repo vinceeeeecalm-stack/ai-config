@@ -20,6 +20,7 @@ export async function handleRelayRequest({ method, path, query = {}, headers = {
   if (method === "GET" && normalizedPath === "/api/relay/desktop/commands") return listDesktopCommands(store, env, headers, query);
   if (method === "POST" && normalizedPath === "/api/relay/desktop/replies") return postDesktopReply(store, env, headers, body);
   if (method === "POST" && normalizedPath === "/api/relay/desktop/reconcile") return postDesktopReconcile(store, env, headers, body);
+  if (method === "POST" && normalizedPath === "/api/relay/desktop/devices/cleanup") return postDesktopDeviceCleanup(store, env, headers, body);
   if (method === "POST" && normalizedPath === "/api/relay/desktop/heartbeat") return postDesktopHeartbeat(store, env, headers, body);
   if (method === "POST" && normalizedPath === "/api/relay/desktop/audit") return postDesktopAudit(store, env, headers, body);
   return response(404, { ok: false, error: "Relay endpoint not found.", safety: safety() });
@@ -395,6 +396,41 @@ async function postDesktopReconcile(store, env, headers, body) {
   });
 }
 
+async function postDesktopDeviceCleanup(store, env, headers, body) {
+  if (!requireDesktop(env, headers)) return response(401, { ok: false, error: "Invalid relay desktop token.", safety: safety() });
+  const state = await readState(store);
+  const olderThanMs = cleanupOlderThanMs(body);
+  const disabled = [];
+  const nowMs = Date.now();
+  for (const device of state.devices) {
+    if (device.disabled || !isTemporaryDevice(device)) continue;
+    const createdAtMs = Date.parse(device.created_at || "");
+    const ageMs = Number.isFinite(createdAtMs) ? nowMs - createdAtMs : Number.POSITIVE_INFINITY;
+    if (ageMs < olderThanMs) continue;
+    device.disabled = true;
+    device.disabled_at = now();
+    device.disabled_reason = "temporary_device_cleanup";
+    disabled.push(publicDevice(device));
+  }
+  if (disabled.length) {
+    audit(state, "desktop_cleanup_temporary_devices", {
+      older_than_ms: olderThanMs,
+      disabled_device_ids: disabled.map((device) => device.device_id)
+    });
+  }
+  await writeState(store, state);
+  return response(201, {
+    ok: true,
+    service: "codex-relay-cloud",
+    command: "desktop_device_cleanup",
+    older_than_ms: olderThanMs,
+    disabled_count: disabled.length,
+    disabled_devices: disabled,
+    active_devices: state.devices.filter((device) => !device.disabled).length,
+    safety: safety()
+  });
+}
+
 async function postDesktopHeartbeat(store, env, headers, body) {
   if (!requireDesktop(env, headers)) return response(401, { ok: false, error: "Invalid relay desktop token.", safety: safety() });
   const state = await readState(store);
@@ -590,6 +626,11 @@ function replaceDevicesForClientInstance(state, clientInstanceHash) {
     replaced.push(device);
   }
   return replaced;
+}
+
+function isTemporaryDevice(device) {
+  const name = cleanText(device?.display_name || "");
+  return /^(installed-\d+|appctl-\d+|localtunnel-\d+|localhostrun-\d+|localhost-run-\d+|public-\d+|public-dns-override-\d+|content-check-\d+|exact-e2e-\d+|progress-e2e-\d+|final-e2e-\d+|netlify-fixed-e2e-\d+|netlify:|test phone$|receipt check$|public receipt check$|public instance check$|public chat continuity|playwright iphone$|tunnel iphone$)/i.test(name);
 }
 
 function requireMobileDevice(state, headers) {
@@ -867,6 +908,12 @@ function staleAfterMsFromBody(body) {
   const raw = Number(body.stale_after_ms ?? body.staleAfterMs ?? 30 * 60 * 1000);
   if (!Number.isFinite(raw)) return 30 * 60 * 1000;
   return Math.max(0, Math.min(Math.round(raw), 7 * 24 * 60 * 60 * 1000));
+}
+
+function cleanupOlderThanMs(body) {
+  const raw = Number(body.older_than_ms ?? body.olderThanMs ?? 10 * 60 * 1000);
+  if (!Number.isFinite(raw)) return 10 * 60 * 1000;
+  return Math.max(0, Math.min(Math.round(raw), 30 * 24 * 60 * 60 * 1000));
 }
 
 function staleClosureReply(command) {

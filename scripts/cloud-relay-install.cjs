@@ -132,29 +132,37 @@ async function e2e(text) {
   const secrets = readJson(secretPath(), null);
   if (!secrets?.pairing_code || !secrets?.desktop_token) throw new Error("Installed relay secrets are missing. Run install first.");
   await waitForHealth(12000);
-  const registered = await postJson("/api/relay/devices/register", {
-    display_name: `installed-${Date.now()}`,
-    pairing_code: secrets.pairing_code
-  });
-  await postJson("/api/relay/mobile/messages", { text }, registered.token);
-  const reply = await waitForWorkerReply(registered.token, 12000);
-  const health = await probeHealth();
-  return {
-    ok: true,
-    service: "codex-relay-cloud-install",
-    command: "e2e",
-    app_url: `${baseUrl}/relay-chat.html`,
-    lan_app_url: lanUrl ? `${lanUrl}/relay-chat.html` : null,
-    sent_text: text,
-    mobile_token_preview: previewSecret(registered.token),
-    worker_reply: {
-      relay_id: reply.relay_id,
-      worker_status: reply.worker_status,
-      text_sha256: reply.text_sha256
-    },
-    health,
-    safety: safety()
-  };
+  let registered = null;
+  let tempDeviceRevoked = false;
+  try {
+    registered = await postJson("/api/relay/devices/register", {
+      display_name: `installed-${Date.now()}`,
+      pairing_code: secrets.pairing_code
+    });
+    await postJson("/api/relay/mobile/messages", { text }, registered.token);
+    const reply = await waitForWorkerReply(registered.token, 12000);
+    tempDeviceRevoked = await revokeMobileToken(registered.token);
+    const health = await probeHealth();
+    return {
+      ok: true,
+      service: "codex-relay-cloud-install",
+      command: "e2e",
+      app_url: `${baseUrl}/relay-chat.html`,
+      lan_app_url: lanUrl ? `${lanUrl}/relay-chat.html` : null,
+      sent_text: text,
+      mobile_token_preview: previewSecret(registered.token),
+      temp_device_revoked: tempDeviceRevoked,
+      worker_reply: {
+        relay_id: reply.relay_id,
+        worker_status: reply.worker_status,
+        text_sha256: reply.text_sha256
+      },
+      health,
+      safety: safety()
+    };
+  } finally {
+    if (registered?.token && !tempDeviceRevoked) await revokeMobileToken(registered.token);
+  }
 }
 
 function copyRuntime() {
@@ -333,6 +341,16 @@ async function postJson(pathname, body, token) {
   const parsed = await response.json().catch(() => ({}));
   if (!response.ok || parsed.ok === false) throw new Error(parsed.error || `POST ${pathname} failed: ${response.status}`);
   return parsed;
+}
+
+async function revokeMobileToken(token) {
+  if (!token) return false;
+  try {
+    await postJson("/api/relay/mobile/device/revoke", {}, token);
+    return true;
+  } catch (_error) {
+    return false;
+  }
 }
 
 function plistPath(label) {

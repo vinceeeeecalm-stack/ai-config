@@ -34,6 +34,7 @@ async function main() {
   if (command === "poll-once") return printJson(await pollOnce());
   if (command === "poll") return pollLoop();
   if (command === "reconcile") return printJson(await reconcileOnce(process.argv[3]));
+  if (command === "cleanup-devices") return printJson(await cleanupTemporaryDevices(process.argv[3]));
   if (command === "e2e") return printJson(await e2e(process.argv.slice(3).join(" ") || "信号 BTC"));
   if (command === "uninstall") return printJson(uninstall());
   throw new Error(`Unknown command: ${command}`);
@@ -225,42 +226,77 @@ async function reconcileOnce(value) {
   };
 }
 
-async function e2e(text) {
+async function cleanupTemporaryDevices(value) {
+  const olderThanMs = parseStaleAfterMs(value, 10 * 60 * 1000);
   const config = readConfig();
-  const registered = await fetchJson(`${config.public_relay_url}/api/relay/devices/register`, {
-    method: "POST",
-    body: {
-      display_name: `netlify-fixed-e2e-${Date.now()}`,
-      pairing_code: config.public_pairing_code
-    }
-  });
-  const posted = await fetchJson(`${config.public_relay_url}/api/relay/mobile/messages`, {
-    method: "POST",
-    token: registered.token,
-    body: { text }
-  });
-
-  let processed = null;
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    processed = await pollOnce();
-    if (processed.processed.some((item) => item.relay_id === posted.message.relay_id)) break;
-    await sleep(1000);
-  }
-
-  const reply = await waitForPublicReply(config, registered.token, posted.message.relay_id, 90000);
+  const localSecrets = readJson(path.join(installDir, "config", "secrets.json"), {});
+  const publicCleanup = await publicPost(config, "/api/relay/desktop/devices/cleanup", { older_than_ms: olderThanMs });
+  const localCleanup = localSecrets.desktop_token
+    ? await fetchJson(`${config.local_relay_url}/api/relay/desktop/devices/cleanup`, {
+      method: "POST",
+      desktopToken: localSecrets.desktop_token,
+      body: { older_than_ms: olderThanMs }
+    })
+    : { ok: false, error: "local desktop token missing" };
   return {
-    ok: true,
+    ok: Boolean(publicCleanup.ok && localCleanup.ok),
     service: "codex-relay-cloud-netlify-bridge",
-    command: "e2e",
-    public_url: `${config.public_relay_url}/relay-chat.html`,
-    sent_text: text,
-    mobile_token_preview: previewSecret(registered.token),
-    public_message_id: posted.message.relay_id,
-    reply_id: reply.relay_id,
-    reply_sha256: reply.text_sha256 || sha256(reply.text || ""),
-    processed,
+    command: "cleanup-devices",
+    older_than_ms: olderThanMs,
+    public_cleanup: publicCleanup,
+    local_cleanup: localCleanup,
     safety: safety()
   };
+}
+
+async function e2e(text) {
+  const config = readConfig();
+  let registered = null;
+  let tempDeviceRevoked = false;
+  try {
+    registered = await fetchJson(`${config.public_relay_url}/api/relay/devices/register`, {
+      method: "POST",
+      body: {
+        display_name: `netlify-fixed-e2e-${Date.now()}`,
+        pairing_code: config.public_pairing_code
+      }
+    });
+    const posted = await fetchJson(`${config.public_relay_url}/api/relay/mobile/messages`, {
+      method: "POST",
+      token: registered.token,
+      body: { text }
+    });
+
+    let processed = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      processed = await pollOnce();
+      if (processed.processed.some((item) => item.relay_id === posted.message.relay_id)) break;
+      await sleep(1000);
+    }
+
+    const reply = await waitForPublicReply(config, registered.token, posted.message.relay_id, 90000);
+    tempDeviceRevoked = await revokeMobileToken(config.public_relay_url, registered.token, { scope: "public_e2e" });
+    const tempCleanup = await cleanupTemporaryDevices(0).catch((error) => ({ ok: false, error: error.message || String(error) }));
+    return {
+      ok: true,
+      service: "codex-relay-cloud-netlify-bridge",
+      command: "e2e",
+      public_url: `${config.public_relay_url}/relay-chat.html`,
+      sent_text: text,
+      mobile_token_preview: previewSecret(registered.token),
+      temp_device_revoked: tempDeviceRevoked,
+      temp_cleanup: cleanupSummary(tempCleanup),
+      public_message_id: posted.message.relay_id,
+      reply_id: reply.relay_id,
+      reply_sha256: reply.text_sha256 || sha256(reply.text || ""),
+      processed,
+      safety: safety()
+    };
+  } finally {
+    if (registered?.token && !tempDeviceRevoked) {
+      await revokeMobileToken(config.public_relay_url, registered.token, { scope: "public_e2e_finally" });
+    }
+  }
 }
 
 function uninstall() {
@@ -291,42 +327,59 @@ async function processViaLocalRelay(config, publicMessage, state) {
       pairing_code: config.local_pairing_code
     }
   });
-  const posted = await fetchJson(`${config.local_relay_url}/api/relay/mobile/messages`, {
-    method: "POST",
-    token: registered.token,
-    body: { text: publicMessage.text || "" }
-  });
-  const reply = await waitForLocalWorkerReply(config, registered.token, posted.message.relay_id, inlineReplyWaitMs);
-  if (!reply || reply.worker_status === "working") {
-    rememberPendingReply(state, {
-      public_relay_id: publicMessage.relay_id,
-      public_device_id: publicMessage.device_id,
-      local_token: registered.token,
-      local_message_id: posted.message.relay_id,
-      last_local_reply_id: reply?.relay_id || null,
-      local_device_id: registered.device?.device_id || null,
-      created_at: now(),
-      text_preview: previewText(publicMessage.text || "", 160)
+  let keepLocalTokenForPending = false;
+  let localDeviceRevoked = false;
+  try {
+    const posted = await fetchJson(`${config.local_relay_url}/api/relay/mobile/messages`, {
+      method: "POST",
+      token: registered.token,
+      body: { text: publicMessage.text || "" }
+    });
+    const reply = await waitForLocalWorkerReply(config, registered.token, posted.message.relay_id, inlineReplyWaitMs);
+    if (!reply || reply.worker_status === "working") {
+      keepLocalTokenForPending = true;
+      rememberPendingReply(state, {
+        public_relay_id: publicMessage.relay_id,
+        public_device_id: publicMessage.device_id,
+        local_token: registered.token,
+        local_message_id: posted.message.relay_id,
+        last_local_reply_id: reply?.relay_id || null,
+        local_device_id: registered.device?.device_id || null,
+        created_at: now(),
+        text_preview: previewText(publicMessage.text || "", 160)
+      });
+      return {
+        local_message_id: posted.message.relay_id,
+        local_reply_id: reply?.relay_id || null,
+        worker_status: "working",
+        reply_text: reply?.text || [
+          "# 本机已接到，正在处理",
+          "电脑端 worker 已收到这条手机消息；较慢的投资分析会在完成后自动追加最终回复。",
+          "如果电脑刚从睡眠恢复，请保持它醒着 1-2 分钟。",
+          "安全: live_orders_enabled=false；不会下单、不会转账。"
+        ].join("\n"),
+        pending: true
+      };
+    }
+    localDeviceRevoked = await revokeMobileToken(config.local_relay_url, registered.token, {
+      scope: "local_bridge_complete",
+      public_relay_id: publicMessage.relay_id
     });
     return {
       local_message_id: posted.message.relay_id,
-      local_reply_id: reply?.relay_id || null,
-      worker_status: "working",
-      reply_text: reply?.text || [
-        "# 本机已接到，正在处理",
-        "电脑端 worker 已收到这条手机消息；较慢的投资分析会在完成后自动追加最终回复。",
-        "如果电脑刚从睡眠恢复，请保持它醒着 1-2 分钟。",
-        "安全: live_orders_enabled=false；不会下单、不会转账。"
-      ].join("\n"),
-      pending: true
+      local_reply_id: reply.relay_id,
+      worker_status: reply.worker_status || "processed",
+      reply_text: reply.text || "# 本地 worker 已处理，但未返回正文\n安全: live_orders_enabled=false",
+      local_device_revoked: localDeviceRevoked
     };
+  } finally {
+    if (registered?.token && !keepLocalTokenForPending && !localDeviceRevoked) {
+      await revokeMobileToken(config.local_relay_url, registered.token, {
+        scope: "local_bridge_finally",
+        public_relay_id: publicMessage.relay_id
+      });
+    }
   }
-  return {
-    local_message_id: posted.message.relay_id,
-    local_reply_id: reply.relay_id,
-    worker_status: reply.worker_status || "processed",
-    reply_text: reply.text || "# 本地 worker 已处理，但未返回正文\n安全: live_orders_enabled=false"
-  };
 }
 
 async function waitForLocalWorkerReply(config, token, messageId, timeoutMs) {
@@ -373,6 +426,10 @@ async function flushPendingReplies(config, state) {
           "安全: live_orders_enabled=false；不会下单、不会转账。"
         ].join("\n")
       }).catch((error) => appendEvent("pending_timeout_reply_failed", { public_relay_id: pending.public_relay_id, reason: error.message || String(error) }));
+      await revokeMobileToken(config.local_relay_url, pending.local_token, {
+        scope: "pending_timeout",
+        public_relay_id: pending.public_relay_id
+      });
       flushed.push({ public_relay_id: pending.public_relay_id, worker_status: "queued_timeout" });
       continue;
     }
@@ -411,6 +468,10 @@ async function flushPendingReplies(config, state) {
       relay_id: pending.public_relay_id,
       device_id: pending.public_device_id
     }, outcome);
+    await revokeMobileToken(config.local_relay_url, pending.local_token, {
+      scope: "pending_complete",
+      public_relay_id: pending.public_relay_id
+    });
     flushed.push({ public_relay_id: pending.public_relay_id, local_reply_id: reply.relay_id, worker_status: outcome.worker_status });
   }
   state.pending_replies = remaining;
@@ -441,6 +502,15 @@ function rememberPendingReply(state, pending) {
   }
 }
 
+function cleanupSummary(result) {
+  return {
+    ok: Boolean(result?.ok),
+    public_disabled: Number(result?.public_cleanup?.disabled_count || 0),
+    local_disabled: Number(result?.local_cleanup?.disabled_count || 0),
+    error: result?.error || null
+  };
+}
+
 function parseStaleAfterMs(value, fallback) {
   if (value === undefined || value === null || value === "") return fallback;
   const normalized = String(value).trim();
@@ -458,6 +528,24 @@ async function postPublicWorkerReply(config, publicMessage, outcome) {
     display_name: "Desktop Codex Worker",
     text: outcome.reply_text
   });
+}
+
+async function revokeMobileToken(baseUrl, token, fields = {}) {
+  if (!token) return false;
+  try {
+    await fetchJson(`${baseUrl}/api/relay/mobile/device/revoke`, {
+      method: "POST",
+      token,
+      body: {}
+    });
+    return true;
+  } catch (error) {
+    appendEvent("temporary_device_revoke_failed", {
+      ...fields,
+      reason: error.message || String(error)
+    });
+    return false;
+  }
 }
 
 async function postPublicHeartbeat(config, fields) {

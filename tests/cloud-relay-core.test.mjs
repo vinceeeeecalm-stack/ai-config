@@ -228,6 +228,96 @@ test("registering the same mobile client instance replaces its old active token"
   assert.ok(state.devices.find((device) => device.device_id === first.body.device.device_id).client_instance_hash);
 });
 
+test("desktop cleanup disables only temporary verification devices", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  await store.writeJson("state.json", {
+    devices: [
+      {
+        device_id: "real-phone",
+        display_name: "Vincent iPhone",
+        token_hash: "real-token",
+        created_at: testTime(1),
+        disabled: false
+      },
+      {
+        device_id: "old-temp",
+        display_name: "netlify-fixed-e2e-123",
+        token_hash: "old-temp-token",
+        created_at: testTime(2),
+        disabled: false
+      },
+      {
+        device_id: "playwright-temp",
+        display_name: "Playwright iPhone",
+        token_hash: "playwright-temp-token",
+        created_at: testTime(3),
+        disabled: false
+      },
+      {
+        device_id: "new-temp",
+        display_name: "installed-999",
+        token_hash: "new-temp-token",
+        created_at: new Date().toISOString(),
+        disabled: false
+      }
+    ],
+    mobile_messages: [],
+    desktop_replies: [],
+    commands: [],
+    audit: []
+  });
+
+  const unauthorized = await call({
+    method: "POST",
+    path: "/api/relay/desktop/devices/cleanup",
+    headers: { authorization: "Bearer wrong" },
+    body: { older_than_ms: 1000 },
+    store,
+    env
+  });
+  assert.equal(unauthorized.status, 401);
+
+  const cleanup = await call({
+    method: "POST",
+    path: "/api/relay/desktop/devices/cleanup",
+    headers: { authorization: "Bearer desk-123" },
+    body: { older_than_ms: 1000 },
+    store,
+    env
+  });
+  assert.equal(cleanup.status, 201);
+  assert.equal(cleanup.body.disabled_count, 2);
+  assert.deepEqual(cleanup.body.disabled_devices.map((device) => device.device_id).sort(), ["old-temp", "playwright-temp"]);
+  assert.equal(cleanup.body.active_devices, 2);
+
+  const firstState = await store.readJson("state.json", {});
+  assert.equal(firstState.devices.find((device) => device.device_id === "real-phone").disabled, false);
+  assert.equal(firstState.devices.find((device) => device.device_id === "old-temp").disabled, true);
+  assert.equal(firstState.devices.find((device) => device.device_id === "playwright-temp").disabled, true);
+  assert.equal(firstState.devices.find((device) => device.device_id === "new-temp").disabled, false);
+  assert.equal(firstState.audit.at(-1).type, "desktop_cleanup_temporary_devices");
+
+  const cleanupAllTemps = await call({
+    method: "POST",
+    path: "/api/relay/desktop/devices/cleanup",
+    headers: { authorization: "Bearer desk-123" },
+    body: { older_than_ms: 0 },
+    store,
+    env
+  });
+  assert.equal(cleanupAllTemps.status, 201);
+  assert.equal(cleanupAllTemps.body.disabled_count, 1);
+
+  const finalState = await store.readJson("state.json", {});
+  assert.equal(finalState.devices.find((device) => device.device_id === "real-phone").disabled, false);
+  assert.equal(finalState.devices.find((device) => device.device_id === "new-temp").disabled, true);
+});
+
 test("legacy desktop poll and direct replies remain compatible", async () => {
   const store = memoryStore();
   const env = {
