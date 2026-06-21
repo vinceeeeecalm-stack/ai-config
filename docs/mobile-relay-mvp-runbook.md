@@ -160,6 +160,8 @@ The cleanup command only matches known verification device names such as `instal
 | `稍后 act-...` | Write an audit-only delay decision. No order. |
 | `忽略 act-...` | Write an audit-only ignore decision. No order. |
 
+The `状态` cloud reply reports device counts as active / total / disabled, so historical revoked test devices do not look like currently usable phones.
+
 ## In-App Self Check
 
 After pairing, tap `唤醒` in the phone app. The app checks three stages:

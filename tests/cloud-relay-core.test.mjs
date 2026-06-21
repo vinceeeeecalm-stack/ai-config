@@ -706,6 +706,20 @@ test("status command returns cloud status and queues worker status check", async
     env
   });
   assert.equal(registered.status, 201);
+  await store.writeJson("state.json", {
+    ...(await store.readJson("state.json", {})),
+    devices: [
+      ...(await store.readJson("state.json", {})).devices,
+      {
+        device_id: "disabled-old",
+        display_name: "installed-old",
+        token_hash: "disabled-token",
+        created_at: testTime(1),
+        disabled_at: testTime(2),
+        disabled: true
+      }
+    ]
+  });
 
   await call({
     method: "POST",
@@ -750,6 +764,7 @@ test("status command returns cloud status and queues worker status check", async
   assert.match(inbox.body.messages[0].text, /# App 状态/);
   assert.match(inbox.body.messages[0].text, /电脑: 在线/);
   assert.match(inbox.body.messages[0].text, /队列:/);
+  assert.match(inbox.body.messages[0].text, /手机设备: 1 台活跃 \/ 2 台总计 \/ 1 台已禁用/);
   assert.doesNotMatch(inbox.body.messages[0].text, /desk-|mob_/);
 });
 

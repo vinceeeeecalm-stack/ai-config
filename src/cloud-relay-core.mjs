@@ -552,6 +552,9 @@ function cloudStatusReplyText(state) {
   const heartbeat = normalizeDesktopHeartbeat(normalized.desktop_heartbeat);
   const desktopOnline = isDesktopHeartbeatFresh(heartbeat);
   const counts = commandCounts(normalized);
+  const activeDevices = normalized.devices.filter((device) => !device.disabled).length;
+  const totalDevices = normalized.devices.length;
+  const disabledDevices = totalDevices - activeDevices;
   const heartbeatAge = heartbeat?.updated_at ? secondsAgo(heartbeat.updated_at) : null;
   return [
     "# App 状态",
@@ -560,7 +563,7 @@ function cloudStatusReplyText(state) {
     heartbeatAge === null ? "最近心跳: 暂无" : `最近心跳: ${heartbeatAge}s 前`,
     `队列: ${counts.queued} 条待处理 / ${counts.total} 条总指令`,
     counts.unresolved ? `未完成回写: ${counts.unresolved} 条（已被电脑消费或正在处理中）` : null,
-    `手机设备: ${normalized.devices.length}`,
+    `手机设备: ${activeDevices} 台活跃 / ${totalDevices} 台总计${disabledDevices ? ` / ${disabledDevices} 台已禁用` : ""}`,
     "你可以发送“诊断”做完整 worker 回写测试，或发送“报告/分析持仓”。",
     "安全: live_orders_enabled=false；不会下单、不会转账"
   ].filter(Boolean).join("\n");
