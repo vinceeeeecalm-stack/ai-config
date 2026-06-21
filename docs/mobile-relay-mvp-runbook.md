@@ -95,7 +95,7 @@ node scripts/cloud-relay-localhostrun-install.cjs repair
 Current verified tunnel URL:
 
 ```text
-https://9267f677ad4797.lhr.life/relay-chat.html
+https://6ae20c26d72a2b.lhr.life/relay-chat.html
 ```
 
 Use the local pairing code with this tunnel, because it is forwarding directly to the local relay:
@@ -123,11 +123,13 @@ Public reset URL:
 https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 ```
 
-The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.5` and mode `公网 Netlify` before you enter the `pair_...` code.
+The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.6` and mode `公网 Netlify` before you enter the `pair_...` code.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 
 Every mobile send includes a `client_message_id`. The relay treats repeated posts from the same phone with the same `client_message_id` as the same message, and the phone UI ignores a rapid duplicate tap of the same text. This prevents network retries or accidental double taps from creating duplicate worker tasks.
+
+If the phone loses network while sending, the app stores the text and `client_message_id` in a capped local outbox. The outbox is retried on focus, visibility resume, browser `online`, and healthy polling. A reset clears this outbox intentionally.
 
 While a message is pending, the phone checks `/api/relay/mobile/message-status` for that exact `relay_id`. The endpoint is scoped to the paired phone token and reports `queued`, `consumed`, `working`, or `completed`, so the app can distinguish cloud receipt, desktop bridge consumption, worker progress, and final reply without exposing desktop or mobile tokens.
 
@@ -213,11 +215,12 @@ cd "/Users/vincentpan/Library/Application Support/CodexRelayCloud"
 node scripts/cloud-relay-doctor.cjs
 node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'
 node /private/tmp/relay-playwright/relay-ui-check.mjs
+node /private/tmp/relay-playwright/relay-outbox-retry-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-local-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-public-check.mjs
 ```
 
-`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`.
+`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`.
 
 Tunnel:
 

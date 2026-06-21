@@ -14,8 +14,8 @@ The current goal is to fix the mobile relay app after a poor phone experience:
 
 | Requirement | Current evidence | Status |
 | --- | --- | --- |
-| Minimal phone UI | Local, LAN, tunnel, and Netlify pages serve the WeChat-like `public/relay-chat.html` shell. The phone page includes version `2026.06.21.5`, `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. | Complete |
-| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `GET /api/relay/mobile/message-status` lets the phone show queued/consumed/working/completed receipt states for its own messages; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, transcript device scoping, receipt lifecycle, and compaction retention. | Complete |
+| Minimal phone UI | Local, LAN, tunnel, and Netlify pages serve the WeChat-like `public/relay-chat.html` shell. The phone page includes version `2026.06.21.6`, `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. | Complete |
+| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; failed sends are kept in a capped local outbox and retried after network recovery; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `GET /api/relay/mobile/message-status` lets the phone show queued/consumed/working/completed receipt states for its own messages; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, transcript device scoping, receipt lifecycle, outbox retry, and compaction retention. | Complete |
 | Local/LAN round trip | `node scripts/cloud-relay-doctor.cjs` passes `local_status`; local queue is `queued_commands=0`, `unresolved_commands=0`; local worker heartbeat is fresh. | Complete |
 | Public Netlify UI and API | Production Netlify deploy is ready. Static `relay-chat.js` hash matches local source, and `/api/relay/status` returns `ok: true`. The old `mobile-relay` function name is now compatibility-wrapped to the current implementation. | Complete |
 | Public queue path | `node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'` processes a real public message through the local worker and returns worker status `ok`; public status shows `queued_commands=0`. `node scripts/cloud-relay-netlify-bridge.cjs reconcile` closes stale consumed pre-fix residue with audit-only history replies. | Complete for queue/recovery |
@@ -43,7 +43,7 @@ npm test: 20/20 pass
 node scripts/cloud-relay-doctor.cjs: 7/7 pass
 local queue: queued_commands=0, unresolved_commands=0
 public queue: queued_commands=0, unresolved_commands=0
-tunnel URL: https://9267f677ad4797.lhr.life/relay-chat.html
+tunnel URL: https://6ae20c26d72a2b.lhr.life/relay-chat.html
 awake helper: launchd_loaded=true, mode=caffeinate -ims
 ```
 
@@ -59,17 +59,18 @@ node /private/tmp/relay-playwright/relay-dedupe-click-check.mjs
 node /private/tmp/relay-playwright/relay-revoke-reset-check.mjs
 node /private/tmp/relay-playwright/relay-public-revoke-reset-check.mjs
 node /private/tmp/relay-playwright/relay-ui-check.mjs
+node /private/tmp/relay-playwright/relay-outbox-retry-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-local-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-public-check.mjs
 ```
 
-The Netlify path returned worker status `ok`. The local and public Playwright transcript checks sent `状态`, waited for cloud and worker replies, refreshed the page, and verified the mobile message plus both replies were restored from `/api/relay/mobile/transcript`. The duplicate-click check double-clicked `状态` and verified one outgoing mobile message, one cloud reply, and one worker reply. The local and public reset revoke checks clicked `重置这台手机`, verified local token removal, and confirmed the old token receives 401. The UI check verified mobile and desktop viewports render version `2026.06.21.5` with no console issues and a worker reply. The local and public receipt checks registered temporary devices, sent `状态`, observed `queued` then `completed`, and confirmed no token-like values are exposed. The doctor run also verified the temporary tunnel was healthy.
+The Netlify path returned worker status `ok`. The local and public Playwright transcript checks sent `状态`, waited for cloud and worker replies, refreshed the page, and verified the mobile message plus both replies were restored from `/api/relay/mobile/transcript`. The duplicate-click check double-clicked `状态` and verified one outgoing mobile message, one cloud reply, and one worker reply. The local and public reset revoke checks clicked `重置这台手机`, verified local token removal, and confirmed the old token receives 401. The UI check verified mobile and desktop viewports render version `2026.06.21.6` with no console issues and a worker reply. The outbox check simulated offline send, confirmed one local queued item, restored the network, and verified the item was sent and removed. The local and public receipt checks registered temporary devices, sent `状态`, observed `queued` then `completed`, and confirmed no token-like values are exposed. The doctor run also verified the temporary tunnel was healthy.
 
 ## Current Entry Points
 
 - Stable Netlify UI/API: `https://codex-bridge-relay.netlify.app/relay-chat.html`
 - Stable Netlify reset URL: `https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1`
-- Current public tunnel UI: `https://9267f677ad4797.lhr.life/relay-chat.html`
+- Current public tunnel UI: `https://6ae20c26d72a2b.lhr.life/relay-chat.html`
 - LAN UI: `http://192.168.0.115:8798/relay-chat.html`
 - Local pairing page: `http://127.0.0.1:8798/pairing`
 - Local/tunnel pairing code: `relay-2ac288ea`

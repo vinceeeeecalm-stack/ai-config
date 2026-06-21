@@ -1,10 +1,13 @@
-const APP_VERSION = "2026.06.21.5";
+const APP_VERSION = "2026.06.21.6";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
   "codexRelayCloudCursor",
-  "codexRelayCloudPending"
+  "codexRelayCloudPending",
+  "codexRelayCloudOutbox"
 ];
+const OUTBOX_KEY = "codexRelayCloudOutbox";
+const MAX_OUTBOX_ITEMS = 20;
 const resetRequested = new URLSearchParams(location.search).has("reset");
 let resetNotice = "";
 let resetRevocationToken = "";
@@ -35,6 +38,9 @@ const state = {
   lastPollAt: 0,
   recentSends: {},
   receiptCheckAt: {},
+  outbox: normalizeOutbox(readJson(OUTBOX_KEY)),
+  outboxFlushTimer: null,
+  outboxFlushing: false,
   relayMode: detectRelayMode()
 };
 
@@ -106,6 +112,7 @@ async function boot() {
   if (state.token) {
     showChat();
     startPolling();
+    scheduleOutboxFlush(600);
   } else {
     showSetup();
   }
@@ -166,14 +173,17 @@ async function registerDevice() {
     state.pending = {};
     state.seen = new Set();
     state.receiptCheckAt = {};
+    state.outbox = [];
     localStorage.setItem("codexRelayCloudToken", state.token);
     localStorage.setItem("codexRelayCloudDevice", JSON.stringify(state.device));
     localStorage.setItem("codexRelayCloudCursor", "0");
     savePending();
+    saveOutbox();
     els.pairingCode.value = "";
     els.registerStatus.textContent = "连接成功。现在可以发送联通测试或报告。";
     showChat();
     startPolling();
+    scheduleOutboxFlush(300);
   } catch (error) {
     els.registerStatus.textContent = friendlyError(error);
   } finally {
@@ -229,6 +239,7 @@ async function sendRelayTextNow(text, options = {}) {
     return duplicate.message || null;
   }
   const clientMessageId = options.clientMessageId || createClientMessageId();
+  const outboxItem = options.skipOutbox ? null : (options.outboxItem || ensureOutboxItem(text, clientMessageId));
   state.recentSends[duplicateKey] = {
     started_at: Date.now(),
     client_message_id: clientMessageId,
@@ -243,6 +254,7 @@ async function sendRelayTextNow(text, options = {}) {
     });
     appendMessage(result.message);
     state.recentSends[duplicateKey].message = result.message;
+    if (outboxItem) removeOutboxItem(outboxItem.outbox_id);
     state.pending[result.message.relay_id] = state.pending[result.message.relay_id] || Date.now();
     savePending();
     els.deliveryStatus.textContent = result.duplicate ? "发送已确认" : "等待桌面 worker";
@@ -251,7 +263,16 @@ async function sendRelayTextNow(text, options = {}) {
     return result.message;
   } catch (error) {
     delete state.recentSends[duplicateKey];
-    els.deliveryStatus.textContent = friendlyError(error);
+    if (outboxItem && shouldKeepOutbox(error)) {
+      markOutboxFailure(outboxItem, error);
+      renderOutboxStatus();
+      scheduleOutboxFlush();
+    } else if (outboxItem) {
+      removeOutboxItem(outboxItem.outbox_id);
+      els.deliveryStatus.textContent = friendlyError(error);
+    } else {
+      els.deliveryStatus.textContent = friendlyError(error);
+    }
     if (options.throwOnError) throw error;
     return null;
   }
@@ -277,7 +298,7 @@ async function runSelfCheck() {
     setCheck("api", "ok", "云端 API 可访问");
     setCheck("device", "ok", state.device?.device_id ? `已配对: ${state.device.device_id}` : "已保存手机凭证");
     setCheck("worker", "checking", "已发送“诊断”，等待本机 worker 回写");
-    const message = await sendRelayText("诊断", { throwOnError: true });
+    const message = await sendRelayText("诊断", { throwOnError: true, skipOutbox: true });
     state.selfCheck.messageId = message?.relay_id || "";
     state.selfCheck.timeout = setTimeout(() => {
       if (!state.selfCheck.active) return;
@@ -340,6 +361,7 @@ async function pollMessages() {
       maybeBackfillPendingReplies();
       refreshPendingReceipts();
     }
+    if (state.outbox.length) scheduleOutboxFlush(500);
   } catch (error) {
     state.pollFailures += 1;
     setRelayState("offline");
@@ -349,6 +371,75 @@ async function pollMessages() {
     }
     else if (state.pollFailures >= 2) els.localStatus.textContent = "重连中";
   }
+}
+
+async function flushOutbox(force = false) {
+  if (!state.token || state.outboxFlushing || !state.outbox.length) return;
+  state.outboxFlushing = true;
+  try {
+    const currentTime = Date.now();
+    for (const item of [...state.outbox]) {
+      if (!force && currentTime < Number(item.next_attempt_at || 0)) continue;
+      await sendRelayText(item.text, {
+        allowDuplicate: true,
+        clientMessageId: item.client_message_id,
+        outboxItem: item
+      });
+    }
+  } finally {
+    state.outboxFlushing = false;
+    renderOutboxStatus();
+  }
+}
+
+function scheduleOutboxFlush(delayMs = 5000) {
+  if (!state.token || !state.outbox.length) return;
+  if (state.outboxFlushTimer) clearTimeout(state.outboxFlushTimer);
+  state.outboxFlushTimer = setTimeout(() => {
+    state.outboxFlushTimer = null;
+    flushOutbox();
+  }, delayMs);
+}
+
+function ensureOutboxItem(text, clientMessageId) {
+  const existing = state.outbox.find((item) => item.client_message_id === clientMessageId);
+  if (existing) return existing;
+  const item = {
+    outbox_id: `outbox-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    text: cleanInlineText(text),
+    client_message_id: clientMessageId,
+    created_at: new Date().toISOString(),
+    attempt_count: 0,
+    last_error: "",
+    next_attempt_at: 0
+  };
+  state.outbox.push(item);
+  if (state.outbox.length > MAX_OUTBOX_ITEMS) state.outbox = state.outbox.slice(-MAX_OUTBOX_ITEMS);
+  saveOutbox();
+  return item;
+}
+
+function markOutboxFailure(item, error) {
+  const target = state.outbox.find((entry) => entry.outbox_id === item.outbox_id);
+  if (!target) return;
+  target.attempt_count = Number(target.attempt_count || 0) + 1;
+  target.last_error = friendlyError(error);
+  target.next_attempt_at = Date.now() + Math.min(60000, 3000 * target.attempt_count);
+  saveOutbox();
+}
+
+function removeOutboxItem(outboxId) {
+  const before = state.outbox.length;
+  state.outbox = state.outbox.filter((item) => item.outbox_id !== outboxId);
+  if (state.outbox.length !== before) saveOutbox();
+}
+
+function renderOutboxStatus() {
+  if (!state.outbox.length) return;
+  const item = state.outbox[0];
+  els.deliveryStatus.textContent = `待发送 ${state.outbox.length} 条`;
+  els.deliveryMeta.textContent = `网络恢复后自动重试：${item.text}`;
+  els.deliveryLatency.textContent = item.attempt_count ? `${item.attempt_count}次` : "--";
 }
 
 async function maybeBackfillPendingReplies(force = false) {
@@ -455,6 +546,10 @@ async function resetDevice(message) {
   state.pending = {};
   state.seen = new Set();
   state.receiptCheckAt = {};
+  state.outbox = [];
+  if (state.outboxFlushTimer) clearTimeout(state.outboxFlushTimer);
+  state.outboxFlushTimer = null;
+  state.outboxFlushing = false;
   clearLocalRelayState();
   await clearBrowserAppCache();
   els.messageList.textContent = "";
@@ -474,7 +569,12 @@ async function api(url, options = {}) {
   if (state.token && !options.skipAuth) headers.authorization = `Bearer ${state.token}`;
   const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok || body.ok === false) throw new Error(body.error || "Relay request failed");
+  if (!response.ok || body.ok === false) {
+    const error = new Error(body.error || "Relay request failed");
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
   return body;
 }
 
@@ -504,6 +604,7 @@ function resumeLiveSync() {
   pollMessages();
   maybeBackfillPendingReplies(true);
   refreshPendingReceipts(true);
+  flushOutbox(true);
 }
 
 function updateDesktopStatus(status) {
@@ -637,6 +738,15 @@ function friendlyError(error) {
   return message;
 }
 
+function shouldKeepOutbox(error) {
+  const status = Number(error?.status || 0);
+  const message = error?.message || String(error);
+  if ([400, 401, 403, 409].includes(status)) return false;
+  if (/mobile token|401|invalid.*token|client_message_id/i.test(message)) return false;
+  if (/text is required/i.test(message)) return false;
+  return true;
+}
+
 function applyRelayModeCopy() {
   const mode = state.relayMode;
   document.documentElement.dataset.relayMode = mode.id;
@@ -729,8 +839,28 @@ function readJson(key) {
   }
 }
 
+function normalizeOutbox(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item) => item && typeof item === "object" && cleanInlineText(item.text) && cleanInlineText(item.client_message_id))
+    .map((item) => ({
+      outbox_id: cleanInlineText(item.outbox_id) || `outbox-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      text: cleanInlineText(item.text),
+      client_message_id: cleanInlineText(item.client_message_id),
+      created_at: cleanInlineText(item.created_at) || new Date().toISOString(),
+      attempt_count: Number(item.attempt_count || 0),
+      last_error: cleanInlineText(item.last_error || ""),
+      next_attempt_at: Number(item.next_attempt_at || 0)
+    }))
+    .slice(-MAX_OUTBOX_ITEMS);
+}
+
 function savePending() {
   localStorage.setItem("codexRelayCloudPending", JSON.stringify(state.pending));
+}
+
+function saveOutbox() {
+  localStorage.setItem(OUTBOX_KEY, JSON.stringify(state.outbox));
 }
 
 function sendDuplicateKey(text) {
