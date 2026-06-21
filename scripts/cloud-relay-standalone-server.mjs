@@ -39,6 +39,11 @@ export function createStandaloneRelayServer(options = {}) {
         sendJson(res, result.status, result.body, req.method === "HEAD");
         return;
       }
+      if (req.method === "GET" && requestUrl.pathname === "/api/relay/app-info") {
+        const result = await withStateQueue(() => publicAppInfo(req, store, env, publicDir));
+        sendJson(res, result.status, result.body, req.method === "HEAD");
+        return;
+      }
       if (requestUrl.pathname.startsWith("/api/relay/")) {
         const body = await readJsonBody(req);
         const result = await withStateQueue(() => handleRelayRequest({
@@ -120,6 +125,36 @@ async function publicRelayInfo(env) {
     stable_url: stableUrl || null,
     temporary_url: temporaryUrl || null,
     urls
+  };
+}
+
+async function publicAppInfo(req, store, env, publicDir) {
+  const status = await handleRelayRequest({
+    method: "GET",
+    path: "/api/relay/status",
+    store,
+    env
+  });
+  const origin = requestOrigin(req);
+  const publicRelay = await publicRelayInfo(env);
+  const appVersions = await appVersionInfo(publicDir, publicRelay, env);
+  return {
+    status: 200,
+    body: {
+      ok: true,
+      service: "codex-relay-app-info",
+      app_url: `${origin}/relay-chat.html`,
+      public_url: publicRelay.primary_url,
+      public_url_source: publicRelay.primary_source,
+      stable_public_url: publicRelay.stable_url,
+      temporary_tunnel_url: publicRelay.temporary_url,
+      public_urls: publicRelay.urls,
+      app_versions: appVersions,
+      ready: status.body.ready,
+      counts: status.body.counts,
+      desktop_online: status.body.desktop_online,
+      safety: safety()
+    }
   };
 }
 

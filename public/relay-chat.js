@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.10";
+const APP_VERSION = "2026.06.21.11";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -37,12 +37,14 @@ const state = {
   lastBackfillAt: 0,
   lastStatus: null,
   lastStatusRefreshAt: 0,
+  lastAppInfoAt: 0,
   lastPollAt: 0,
   recentSends: {},
   receiptCheckAt: {},
   outbox: normalizeOutbox(readJson(OUTBOX_KEY)),
   outboxFlushTimer: null,
   outboxFlushing: false,
+  appInfo: null,
   instanceId: getOrCreateInstanceId(),
   relayMode: detectRelayMode()
 };
@@ -50,6 +52,7 @@ const state = {
 const $ = (selector) => document.querySelector(selector);
 const els = {
   relayState: $("#relayState"),
+  routeAdvice: $("#routeAdvice"),
   apiStatus: $("#apiStatus"),
   workerStatus: $("#workerStatus"),
   localStatus: $("#localStatus"),
@@ -103,6 +106,7 @@ els.quickButtons.forEach((button) => button.addEventListener("click", () => send
 async function boot() {
   applyRelayModeCopy();
   renderVersion();
+  await refreshAppInfo();
   if (resetRequested) {
     await revokeMobileToken(resetRevocationToken);
     await clearBrowserAppCache();
@@ -141,6 +145,7 @@ async function refreshStatus() {
     els.setupNotice.textContent = state.token
       ? statusLine(status)
       : state.relayMode.setupNotice;
+    if (Date.now() - state.lastAppInfoAt > 60000) refreshAppInfo();
   } catch (error) {
     setRelayState("offline");
     els.apiStatus.textContent = "OFFLINE";
@@ -149,6 +154,20 @@ async function refreshStatus() {
     els.queueStatus.textContent = "--";
     els.syncStatus.textContent = "失败";
     els.registerStatus.textContent = friendlyError(error);
+  }
+}
+
+async function refreshAppInfo() {
+  try {
+    const info = await api("/api/relay/app-info", { skipAuth: true });
+    state.appInfo = info;
+    state.lastAppInfoAt = Date.now();
+    renderRouteAdvice(info);
+    renderVersion();
+  } catch (_error) {
+    state.appInfo = null;
+    state.lastAppInfoAt = Date.now();
+    renderRouteAdvice(null);
   }
 }
 
@@ -798,9 +817,49 @@ function applyRelayModeCopy() {
 
 function renderVersion() {
   const mode = state.relayMode;
-  const label = `${APP_VERSION} · ${mode.tag}`;
+  const route = state.appInfo?.app_versions?.recommended_source;
+  const suffix = route ? ` · 推荐${routeLabel(route)}` : "";
+  const label = `${APP_VERSION} · ${mode.tag}${suffix}`;
   els.versionMeta.textContent = `当前页面: ${label}`;
   els.appVersion.textContent = APP_VERSION;
+}
+
+function renderRouteAdvice(info) {
+  if (!els.routeAdvice) return;
+  const versions = info?.app_versions;
+  const localVersion = versions?.local?.version || "";
+  if (!localVersion) {
+    els.routeAdvice.hidden = true;
+    return;
+  }
+  const stableVersion = versions.stable_public?.version || "未检测";
+  const recommended = versions.recommended_source || "lan";
+  const stableCurrent = Boolean(versions.stable_current);
+  let level = "ok";
+  let text = "当前入口可用。";
+
+  if (stableCurrent) {
+    text = `固定公网已是最新版 ${stableVersion}，手机可收藏稳定入口。`;
+  } else if (state.relayMode.id === "public") {
+    level = "warn";
+    text = `固定公网 ${stableVersion}，本机 ${localVersion}；当前推荐用电脑配对页的 LAN/隧道入口。`;
+  } else if (recommended === "temporary") {
+    level = "warn";
+    text = `固定公网 ${stableVersion}，本机 ${localVersion}；当前优先用临时隧道或 LAN。`;
+  } else {
+    level = versions.stable_public?.version && versions.stable_public.version !== localVersion ? "warn" : "ok";
+    text = `当前优先用本机/LAN。本机 ${localVersion}，固定公网 ${stableVersion}。`;
+  }
+
+  els.routeAdvice.textContent = text;
+  els.routeAdvice.dataset.level = level;
+  els.routeAdvice.hidden = false;
+}
+
+function routeLabel(value) {
+  if (value === "stable") return "公网";
+  if (value === "temporary") return "隧道";
+  return "LAN";
 }
 
 function clearLocalRelayState() {
@@ -827,28 +886,37 @@ async function clearBrowserAppCache() {
 }
 
 function detectRelayMode() {
+  const modeOverride = new URLSearchParams(location.search).get("mode");
+  if (modeOverride === "public") return publicRelayMode();
+  if (modeOverride === "local" || modeOverride === "lan" || modeOverride === "tunnel") return localRelayMode();
+
   const hostname = location.hostname.toLowerCase();
   const isLoopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname === "::1";
   const isLanIp = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname);
   const isLanName = hostname.endsWith(".local") || hostname.endsWith(".lan");
-  const isPublic = hostname.endsWith(".netlify.app") || /^https:$/.test(location.protocol);
+  const isNetlify = hostname.endsWith(".netlify.app");
 
-  if (isLoopback || isLanIp || isLanName || !isPublic) {
-    return {
-      id: "lan",
-      tag: "本机 LAN",
-      expectedCodeName: "本机 LAN 配对码",
-      placeholder: "relay-...",
-      helpTitle: "电脑端取本机码",
-      command: "node scripts/cloud-relay-install.cjs pairing",
-      setupNotice: "当前是本机 LAN 入口。手机和电脑需在同一 Wi-Fi，并使用 relay- 开头的本机配对码。",
-      defaultStatus: "连接后可在同一 Wi-Fi 内和本机 Codex 双向沟通。",
-      shortHelp: "请在电脑打开 http://127.0.0.1:8798/pairing，使用同屏显示的 relay- 开头配对码。",
-      longHelp: "手机打开 LAN 地址时，只接受 relay- 开头的本机码；如果你手里是 pair_ 开头，请改用公网 Netlify 页面。",
-      mismatchHelp: "当前页面只接受 relay- 开头的本机码。请在电脑打开 http://127.0.0.1:8798/pairing，扫二维码后输入同屏显示的码。"
-    };
-  }
+  if (isLoopback || isLanIp || isLanName || !isNetlify) return localRelayMode();
+  return publicRelayMode();
+}
 
+function localRelayMode() {
+  return {
+    id: "lan",
+    tag: "本机/隧道",
+    expectedCodeName: "本机配对码",
+    placeholder: "relay-...",
+    helpTitle: "电脑端取本机码",
+    command: "node scripts/cloud-relay-install.cjs pairing",
+    setupNotice: "当前是本机或隧道入口，请使用 relay- 开头的本机配对码。",
+    defaultStatus: "连接后可和本机 Codex 双向沟通。",
+    shortHelp: "请在电脑打开 http://127.0.0.1:8798/pairing，使用同屏显示的 relay- 开头配对码。",
+    longHelp: "LAN 或临时隧道入口只接受 relay- 开头的本机码；如果你手里是 pair_ 开头，请改用公网 Netlify 页面。",
+    mismatchHelp: "当前页面只接受 relay- 开头的本机码。请在电脑打开 http://127.0.0.1:8798/pairing，扫二维码后输入同屏显示的码。"
+  };
+}
+
+function publicRelayMode() {
   return {
     id: "public",
     tag: "公网 Netlify",

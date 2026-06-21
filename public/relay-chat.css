@@ -112,6 +112,20 @@ h1 {
   color: var(--danger);
 }
 
+.route-advice {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f9fbf8;
+  color: #37543f;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.route-advice[data-level="warn"] {
+  background: #fff8e6;
+  color: #75551a;
+}
+
 .setup-panel {
   width: min(420px, calc(100% - 28px));
   align-self: start;

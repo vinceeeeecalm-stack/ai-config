@@ -95,7 +95,7 @@ node scripts/cloud-relay-localhostrun-install.cjs repair
 Current verified tunnel URL:
 
 ```text
-https://2d20efdf8c3202.lhr.life/relay-chat.html
+https://b1d406918c5243.lhr.life/relay-chat.html
 ```
 
 Use the local pairing code with this tunnel, because it is forwarding directly to the local relay:
@@ -113,9 +113,10 @@ If the phone shows `Invalid relay pairing code`, the most common cause is mixing
 | Phone page opened | Code to enter | Code prefix |
 | --- | --- | --- |
 | `http://192.168.0.115:8798/relay-chat.html` or desktop QR | Local pairing code from `http://127.0.0.1:8798/pairing` | `relay-` |
+| `https://*.lhr.life/relay-chat.html` temporary tunnel | Local pairing code from `http://127.0.0.1:8798/pairing` | `relay-` |
 | `https://codex-bridge-relay.netlify.app/relay-chat.html` | Public pairing code from `cloud-relay-netlify-bridge.cjs pairing` | `pair_` |
 
-The local LAN page rejects `pair_...` codes, and the public Netlify page rejects `relay-...` codes. If the phone browser has an old token or cached page, open the reset URL or tap `清除旧登录` / `重置这台手机`, then reopen the exact URL for the mode you want to use.
+The local LAN and temporary tunnel pages reject `pair_...` codes, and the public Netlify page rejects `relay-...` codes. If the phone browser has an old token or cached page, open the reset URL or tap `清除旧登录` / `重置这台手机`, then reopen the exact URL for the mode you want to use.
 
 Public reset URL:
 
@@ -123,7 +124,9 @@ Public reset URL:
 https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 ```
 
-The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the local/LAN/tunnel setup page should show version `2026.06.21.10`; the current stable Netlify deploy can still show version `2026.06.21.8` until account credits allow the next deploy. Make sure the mode matches the code you enter before pairing.
+The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the local/LAN/tunnel setup page should show version `2026.06.21.11`; the current stable Netlify deploy can still show version `2026.06.21.8` until account credits allow the next deploy. Make sure the mode matches the code you enter before pairing.
+
+The local/LAN/tunnel app also reads `/api/relay/app-info`, a safe no-secret endpoint that returns app versions, queue counts, and the recommended route without exposing the local pairing code or desktop token. This lets the phone page warn when the stable public UI is behind the installed local app.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 

@@ -47,11 +47,22 @@ test("standalone cloud relay serves the PWA and relay API", async () => {
     assert.equal(pairing.public_url_source, "stable");
     assert.equal(pairing.stable_public_url, "https://stable-test.netlify.app/relay-chat.html");
     assert.equal(pairing.temporary_tunnel_url, "https://temporary-test.lhr.life/relay-chat.html");
-    assert.equal(pairing.app_versions.local.version, "2026.06.21.10");
+    assert.equal(pairing.app_versions.local.version, "2026.06.21.11");
     assert.equal(pairing.app_versions.stable_public.error, "disabled");
     assert.equal(pairing.app_versions.temporary_tunnel.error, "disabled");
     assert.equal(pairing.app_versions.recommended_source, "lan");
     assert.equal(JSON.stringify(pairing).includes("desk-123"), false);
+
+    const appInfo = await get(`${baseUrl}/api/relay/app-info`);
+    assert.equal(appInfo.ok, true);
+    assert.equal(appInfo.service, "codex-relay-app-info");
+    assert.equal(appInfo.app_versions.local.version, "2026.06.21.11");
+    assert.equal(appInfo.app_versions.recommended_source, "lan");
+    assert.equal(appInfo.stable_public_url, "https://stable-test.netlify.app/relay-chat.html");
+    assert.equal("pairing_code" in appInfo, false);
+    assert.equal("desktop_token_configured" in appInfo, false);
+    assert.equal(JSON.stringify(appInfo).includes("pair-123"), false);
+    assert.equal(JSON.stringify(appInfo).includes("desk-123"), false);
 
     const registered = await post(`${baseUrl}/api/relay/devices/register`, {
       display_name: "test phone",
