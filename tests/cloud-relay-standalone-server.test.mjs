@@ -13,7 +13,9 @@ test("standalone cloud relay serves the PWA and relay API", async () => {
   await fs.utimes(staleTempPath, staleTime, staleTime);
   const localhostrunStatusPath = path.join(tempDir, "localhostrun-status.json");
   await fs.writeFile(localhostrunStatusPath, JSON.stringify({
-    public_url: "https://temporary-test.lhr.life/relay-chat.html"
+    ok: true,
+    public_url: "https://temporary-test.lhr.life/relay-chat.html",
+    health: { ok: true }
   }));
   const server = createStandaloneRelayServer({
     statePath: path.join(tempDir, "state.json"),
@@ -49,15 +51,18 @@ test("standalone cloud relay serves the PWA and relay API", async () => {
     assert.equal(pairing.temporary_tunnel_url, "https://temporary-test.lhr.life/relay-chat.html");
     assert.equal(pairing.app_versions.local.version, "2026.06.21.11");
     assert.equal(pairing.app_versions.stable_public.error, "disabled");
-    assert.equal(pairing.app_versions.temporary_tunnel.error, "disabled");
-    assert.equal(pairing.app_versions.recommended_source, "lan");
+    assert.equal(pairing.app_versions.temporary_tunnel.version, "2026.06.21.11");
+    assert.equal(pairing.app_versions.temporary_tunnel.source, "local_tunnel");
+    assert.equal(pairing.app_versions.temporary_tunnel.inferred, true);
+    assert.equal(pairing.app_versions.recommended_source, "temporary");
     assert.equal(JSON.stringify(pairing).includes("desk-123"), false);
 
     const appInfo = await get(`${baseUrl}/api/relay/app-info`);
     assert.equal(appInfo.ok, true);
     assert.equal(appInfo.service, "codex-relay-app-info");
     assert.equal(appInfo.app_versions.local.version, "2026.06.21.11");
-    assert.equal(appInfo.app_versions.recommended_source, "lan");
+    assert.equal(appInfo.app_versions.temporary_tunnel.version, "2026.06.21.11");
+    assert.equal(appInfo.app_versions.recommended_source, "temporary");
     assert.equal(appInfo.stable_public_url, "https://stable-test.netlify.app/relay-chat.html");
     assert.equal("pairing_code" in appInfo, false);
     assert.equal("desktop_token_configured" in appInfo, false);

@@ -116,6 +116,7 @@ async function publicRelayInfo(env) {
   const stableUrl = relayAppUrl(env.PUBLIC_RELAY_URL);
   const tunnelStatus = await readJsonIfExists(env.LOCALHOSTRUN_STATUS_PATH);
   const temporaryUrl = relayAppUrl(tunnelStatus?.public_url);
+  const temporaryDirectLocal = Boolean(temporaryUrl && tunnelStatus?.ok && tunnelStatus?.health?.ok);
   const urls = [];
   if (stableUrl) urls.push({ kind: "stable", label: "Netlify", url: stableUrl });
   if (temporaryUrl && temporaryUrl !== stableUrl) urls.push({ kind: "temporary", label: "localhost.run", url: temporaryUrl });
@@ -124,6 +125,7 @@ async function publicRelayInfo(env) {
     primary_source: stableUrl ? "stable" : temporaryUrl ? "temporary" : null,
     stable_url: stableUrl || null,
     temporary_url: temporaryUrl || null,
+    temporary_direct_local: temporaryDirectLocal,
     urls
   };
 }
@@ -166,9 +168,11 @@ async function appVersionInfo(publicDir, publicRelay, env) {
     publicRelay.stable_url && checkRemote
       ? appVersionFromUrl(scriptUrlForAppUrl(publicRelay.stable_url), timeoutMs)
       : appVersionUnavailable(publicRelay.stable_url, checkRemote ? "not_configured" : "disabled"),
-    publicRelay.temporary_url && checkRemote
-      ? appVersionFromUrl(scriptUrlForAppUrl(publicRelay.temporary_url), timeoutMs)
-      : appVersionUnavailable(publicRelay.temporary_url, checkRemote ? "not_configured" : "disabled")
+    publicRelay.temporary_url && publicRelay.temporary_direct_local && local.version
+      ? appVersionFromLocalTunnel(publicRelay.temporary_url, local.version)
+      : publicRelay.temporary_url && checkRemote
+        ? appVersionFromUrl(scriptUrlForAppUrl(publicRelay.temporary_url), timeoutMs)
+        : appVersionUnavailable(publicRelay.temporary_url, checkRemote ? "not_configured" : "disabled")
   ]);
   const stableCurrent = Boolean(local.version && stable.version && stable.version === local.version);
   const temporaryCurrent = Boolean(local.version && temporary.version && temporary.version === local.version);
@@ -180,6 +184,16 @@ async function appVersionInfo(publicDir, publicRelay, env) {
     temporary_current: temporaryCurrent,
     recommended_source: stableCurrent ? "stable" : temporaryCurrent ? "temporary" : "lan",
     latest_version: local.version || null
+  };
+}
+
+function appVersionFromLocalTunnel(url, version) {
+  return {
+    ok: true,
+    url: scriptUrlForAppUrl(url),
+    version,
+    source: "local_tunnel",
+    inferred: true
   };
 }
 

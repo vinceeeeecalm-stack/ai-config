@@ -126,7 +126,7 @@ https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 
 The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the local/LAN/tunnel setup page should show version `2026.06.21.11`; the current stable Netlify deploy can still show version `2026.06.21.8` until account credits allow the next deploy. Make sure the mode matches the code you enter before pairing.
 
-The local/LAN/tunnel app also reads `/api/relay/app-info`, a safe no-secret endpoint that returns app versions, queue counts, and the recommended route without exposing the local pairing code or desktop token. This lets the phone page warn when the stable public UI is behind the installed local app.
+The local/LAN/tunnel app also reads `/api/relay/app-info`, a safe no-secret endpoint that returns app versions, queue counts, and the recommended route without exposing the local pairing code or desktop token. This lets the phone page warn when the stable public UI is behind the installed local app. When the installed `localhost.run` tunnel reports healthy, app-info treats it as a direct local tunnel and marks its app version as the installed local version, avoiding false "unknown tunnel version" warnings from slow tunnel asset fetches.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 
