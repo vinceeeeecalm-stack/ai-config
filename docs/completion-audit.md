@@ -14,8 +14,8 @@ The current goal is to fix the mobile relay app after a poor phone experience:
 
 | Requirement | Current evidence | Status |
 | --- | --- | --- |
-| Minimal phone UI | Local, LAN, tunnel, and Netlify pages serve the WeChat-like `public/relay-chat.html` shell. The phone page includes version `2026.06.21.6`, `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. | Complete |
-| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; failed sends are kept in a capped local outbox and retried after network recovery; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `GET /api/relay/mobile/message-status` lets the phone show queued/consumed/working/completed receipt states for its own messages; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, transcript device scoping, receipt lifecycle, outbox retry, and compaction retention. | Complete |
+| Minimal phone UI | Local, LAN, tunnel, and Netlify pages serve the WeChat-like `public/relay-chat.html` shell. The phone page includes version `2026.06.21.7`, `状态`, `唤醒`, `清除旧登录`, top-bar queue/sync indicators, transcript recovery, duplicate-click protection, reset support via `?reset=1`, and cloud token revocation on reset. | Complete |
+| Daily repeated use | Server API requests are serialized in `scripts/cloud-relay-standalone-server.mjs`; the phone UI sends through a client-side queue in `public/relay-chat.js`; mobile posts include `client_message_id` idempotency; failed sends are kept in a capped local outbox and retried after network recovery; same-phone re-pairing sends a stable client instance id and replaces the old active token; `GET /api/relay/mobile/transcript` restores recent bidirectional history after refresh; `GET /api/relay/mobile/message-status` lets the phone show queued/consumed/working/completed receipt states for its own messages; `POST /api/relay/mobile/device/revoke` disables reset device tokens; relay state compaction keeps pending work, active devices, and recent history while bounding old messages/replies/commands/devices; tests include concurrent 6-message preservation, duplicate client message protection, token revoke, same-instance replacement, transcript device scoping, receipt lifecycle, outbox retry, and compaction retention. | Complete |
 | Local/LAN round trip | `node scripts/cloud-relay-doctor.cjs` passes `local_status`; local queue is `queued_commands=0`, `unresolved_commands=0`; local worker heartbeat is fresh. | Complete |
 | Public Netlify UI and API | Production Netlify deploy is ready. Static `relay-chat.js` hash matches local source, and `/api/relay/status` returns `ok: true`. The old `mobile-relay` function name is now compatibility-wrapped to the current implementation. | Complete |
 | Public queue path | `node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'` processes a real public message through the local worker and returns worker status `ok`; public status shows `queued_commands=0`. `node scripts/cloud-relay-netlify-bridge.cjs reconcile` closes stale consumed pre-fix residue with audit-only history replies. | Complete for queue/recovery |
@@ -39,7 +39,7 @@ Observed result:
 
 ```text
 npm run check: pass
-npm test: 20/20 pass
+npm test: 21/21 pass
 node scripts/cloud-relay-doctor.cjs: 7/7 pass
 local queue: queued_commands=0, unresolved_commands=0
 public queue: queued_commands=0, unresolved_commands=0
@@ -59,12 +59,14 @@ node /private/tmp/relay-playwright/relay-dedupe-click-check.mjs
 node /private/tmp/relay-playwright/relay-revoke-reset-check.mjs
 node /private/tmp/relay-playwright/relay-public-revoke-reset-check.mjs
 node /private/tmp/relay-playwright/relay-ui-check.mjs
+node /private/tmp/relay-playwright/relay-instance-replace-check.mjs
+node /private/tmp/relay-playwright/relay-public-instance-replace-check.mjs
 node /private/tmp/relay-playwright/relay-outbox-retry-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-local-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-public-check.mjs
 ```
 
-The Netlify path returned worker status `ok`. The local and public Playwright transcript checks sent `状态`, waited for cloud and worker replies, refreshed the page, and verified the mobile message plus both replies were restored from `/api/relay/mobile/transcript`. The duplicate-click check double-clicked `状态` and verified one outgoing mobile message, one cloud reply, and one worker reply. The local and public reset revoke checks clicked `重置这台手机`, verified local token removal, and confirmed the old token receives 401. The UI check verified mobile and desktop viewports render version `2026.06.21.6` with no console issues and a worker reply. The outbox check simulated offline send, confirmed one local queued item, restored the network, and verified the item was sent and removed. The local and public receipt checks registered temporary devices, sent `状态`, observed `queued` then `completed`, and confirmed no token-like values are exposed. The doctor run also verified the temporary tunnel was healthy.
+The Netlify path returned worker status `ok`. The local and public Playwright transcript checks sent `状态`, waited for cloud and worker replies, refreshed the page, and verified the mobile message plus both replies were restored from `/api/relay/mobile/transcript`. The duplicate-click check double-clicked `状态` and verified one outgoing mobile message, one cloud reply, and one worker reply. The local and public reset revoke checks clicked `重置这台手机`, verified local token removal, and confirmed the old token receives 401. The UI check verified mobile and desktop viewports render version `2026.06.21.7` with no console issues and a worker reply. The instance replacement checks reused the same browser/client instance id locally and through the public API, re-paired, and verified the old token returns 401 while the new token remains valid. The outbox check simulated offline send, confirmed one local queued item, restored the network, and verified the item was sent and removed. The local and public receipt checks registered temporary devices, sent `状态`, observed `queued` then `completed`, and confirmed no token-like values are exposed. The doctor run also verified the temporary tunnel was healthy.
 
 ## Current Entry Points
 

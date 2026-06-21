@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.6";
+const APP_VERSION = "2026.06.21.7";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -7,6 +7,7 @@ const RESET_KEYS = [
   "codexRelayCloudOutbox"
 ];
 const OUTBOX_KEY = "codexRelayCloudOutbox";
+const INSTANCE_KEY = "codexRelayCloudInstanceId";
 const MAX_OUTBOX_ITEMS = 20;
 const resetRequested = new URLSearchParams(location.search).has("reset");
 let resetNotice = "";
@@ -41,6 +42,7 @@ const state = {
   outbox: normalizeOutbox(readJson(OUTBOX_KEY)),
   outboxFlushTimer: null,
   outboxFlushing: false,
+  instanceId: getOrCreateInstanceId(),
   relayMode: detectRelayMode()
 };
 
@@ -164,7 +166,8 @@ async function registerDevice() {
       skipAuth: true,
       body: JSON.stringify({
         display_name: els.displayName.value.trim() || "Mobile",
-        pairing_code: pairingCode
+        pairing_code: pairingCode,
+        client_instance_id: state.instanceId
       })
     });
     state.token = result.token;
@@ -874,4 +877,12 @@ function cleanInlineText(value) {
 function createClientMessageId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return `web-${crypto.randomUUID()}`;
   return `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getOrCreateInstanceId() {
+  const existing = cleanInlineText(localStorage.getItem(INSTANCE_KEY) || "");
+  if (existing) return existing;
+  const value = createClientMessageId().replace(/^web-/, "instance-");
+  localStorage.setItem(INSTANCE_KEY, value);
+  return value;
 }

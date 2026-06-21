@@ -63,17 +63,32 @@ async function registerDevice(store, env, body) {
   }
   const state = await readState(store);
   const token = `mob_${randomHex(24)}`;
+  const clientInstanceId = cleanClientInstanceId(body.client_instance_id || body.clientInstanceId);
+  const clientInstanceHash = clientInstanceId ? sha256(clientInstanceId) : "";
+  const replacedDevices = clientInstanceHash ? replaceDevicesForClientInstance(state, clientInstanceHash) : [];
   const device = {
     device_id: `dev-${Date.now()}-${randomHex(3)}`,
     display_name: cleanName(body.display_name || body.displayName || "Mobile"),
     token_hash: sha256(token),
+    client_instance_hash: clientInstanceHash || null,
     created_at: now(),
     disabled: false
   };
   state.devices.push(device);
-  audit(state, "device_registered", { device_id: device.device_id, display_name: device.display_name });
+  audit(state, "device_registered", {
+    device_id: device.device_id,
+    display_name: device.display_name,
+    replaced_device_ids: replacedDevices.map((item) => item.device_id)
+  });
   await writeState(store, state);
-  return response(201, { ok: true, service: "codex-relay-cloud", device: publicDevice(device), token, safety: safety() });
+  return response(201, {
+    ok: true,
+    service: "codex-relay-cloud",
+    device: publicDevice(device),
+    token,
+    replaced_devices: replacedDevices.map(publicDevice),
+    safety: safety()
+  });
 }
 
 async function revokeMobileDevice(store, _env, headers) {
@@ -564,6 +579,19 @@ function baseCommand(command_id, type, text, context, fields = {}) {
   };
 }
 
+function replaceDevicesForClientInstance(state, clientInstanceHash) {
+  const replaced = [];
+  for (const device of state.devices) {
+    if (device.disabled) continue;
+    if (!device.client_instance_hash || device.client_instance_hash !== clientInstanceHash) continue;
+    device.disabled = true;
+    device.disabled_at = now();
+    device.disabled_reason = "replaced_by_same_client_instance";
+    replaced.push(device);
+  }
+  return replaced;
+}
+
 function requireMobileDevice(state, headers) {
   const token = bearer(headers);
   if (!token) return null;
@@ -941,6 +969,10 @@ function cleanText(value) {
 
 function cleanClientMessageId(value) {
   return String(value || "").replace(/[^A-Za-z0-9._:-]/g, "").trim().slice(0, 120);
+}
+
+function cleanClientInstanceId(value) {
+  return String(value || "").replace(/[^A-Za-z0-9._:-]/g, "").trim().slice(0, 160);
 }
 
 function cleanName(value) {

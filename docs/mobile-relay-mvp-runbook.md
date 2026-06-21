@@ -123,11 +123,13 @@ Public reset URL:
 https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 ```
 
-The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.6` and mode `公网 Netlify` before you enter the `pair_...` code.
+The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.7` and mode `公网 Netlify` before you enter the `pair_...` code.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 
 Every mobile send includes a `client_message_id`. The relay treats repeated posts from the same phone with the same `client_message_id` as the same message, and the phone UI ignores a rapid duplicate tap of the same text. This prevents network retries or accidental double taps from creating duplicate worker tasks.
+
+The browser keeps a stable `codexRelayCloudInstanceId` outside the reset keys. Re-pairing from the same phone replaces the old active token for that phone instance, reducing stale active devices without affecting other phones.
 
 If the phone loses network while sending, the app stores the text and `client_message_id` in a capped local outbox. The outbox is retried on focus, visibility resume, browser `online`, and healthy polling. A reset clears this outbox intentionally.
 
@@ -215,12 +217,14 @@ cd "/Users/vincentpan/Library/Application Support/CodexRelayCloud"
 node scripts/cloud-relay-doctor.cjs
 node scripts/cloud-relay-netlify-bridge.cjs e2e '状态'
 node /private/tmp/relay-playwright/relay-ui-check.mjs
+node /private/tmp/relay-playwright/relay-instance-replace-check.mjs
+node /private/tmp/relay-playwright/relay-public-instance-replace-check.mjs
 node /private/tmp/relay-playwright/relay-outbox-retry-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-local-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-public-check.mjs
 ```
 
-`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`.
+`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The instance replacement checks re-pair from the same browser/client instance locally and through Netlify, then verify the old token becomes 401 while the new token remains valid. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`.
 
 Tunnel:
 

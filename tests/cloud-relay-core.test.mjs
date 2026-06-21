@@ -146,6 +146,88 @@ test("mobile device revoke disables the current mobile token", async () => {
   assert.equal(transcriptAfterRevoke.status, 401);
 });
 
+test("registering the same mobile client instance replaces its old active token", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  const first = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPhone",
+      pairing_code: "pair-123",
+      client_instance_id: "web-instance-001"
+    },
+    store,
+    env
+  });
+  assert.equal(first.status, 201);
+  assert.deepEqual(first.body.replaced_devices, []);
+
+  const second = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPhone",
+      pairing_code: "pair-123",
+      client_instance_id: "web-instance-001"
+    },
+    store,
+    env
+  });
+  assert.equal(second.status, 201);
+  assert.equal(second.body.replaced_devices.length, 1);
+  assert.equal(second.body.replaced_devices[0].device_id, first.body.device.device_id);
+  assert.equal(second.body.replaced_devices[0].disabled, true);
+
+  const oldTokenSend = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${first.body.token}` },
+    body: { text: "状态" },
+    store,
+    env
+  });
+  assert.equal(oldTokenSend.status, 401);
+
+  const newTokenSend = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${second.body.token}` },
+    body: { text: "状态" },
+    store,
+    env
+  });
+  assert.equal(newTokenSend.status, 201);
+
+  const other = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Other Phone",
+      pairing_code: "pair-123",
+      client_instance_id: "web-instance-002"
+    },
+    store,
+    env
+  });
+  assert.equal(other.status, 201);
+  assert.deepEqual(other.body.replaced_devices, []);
+
+  const status = await call({ method: "GET", path: "/api/relay/status", store, env });
+  assert.equal(status.status, 200);
+  assert.equal(status.body.counts.registered_devices, 3);
+  assert.equal(status.body.counts.active_devices, 2);
+  assert.equal(status.body.counts.disabled_devices, 1);
+
+  const state = await store.readJson("state.json", {});
+  assert.ok(state.devices.every((device) => !/web-instance/.test(JSON.stringify(device))));
+  assert.ok(state.devices.find((device) => device.device_id === first.body.device.device_id).client_instance_hash);
+});
+
 test("legacy desktop poll and direct replies remain compatible", async () => {
   const store = memoryStore();
   const env = {
