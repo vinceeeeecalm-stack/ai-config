@@ -228,6 +228,94 @@ test("registering the same mobile client instance replaces its old active token"
   assert.ok(state.devices.find((device) => device.device_id === first.body.device.device_id).client_instance_hash);
 });
 
+test("registering with same display-name replacement disables old same-name tokens only when requested", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  const oldSameName = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPhone",
+      pairing_code: "pair-123"
+    },
+    store,
+    env
+  });
+  assert.equal(oldSameName.status, 201);
+
+  const otherName = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPad",
+      pairing_code: "pair-123"
+    },
+    store,
+    env
+  });
+  assert.equal(otherName.status, 201);
+
+  const newSameNameWithoutReplace = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPhone",
+      pairing_code: "pair-123"
+    },
+    store,
+    env
+  });
+  assert.equal(newSameNameWithoutReplace.status, 201);
+  assert.deepEqual(newSameNameWithoutReplace.body.replaced_devices, []);
+
+  const newSameNameWithReplace = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: {
+      display_name: "Vincent iPhone",
+      pairing_code: "pair-123",
+      replace_same_display_name: true
+    },
+    store,
+    env
+  });
+  assert.equal(newSameNameWithReplace.status, 201);
+  assert.deepEqual(
+    newSameNameWithReplace.body.replaced_devices.map((device) => device.device_id).sort(),
+    [oldSameName.body.device.device_id, newSameNameWithoutReplace.body.device.device_id].sort()
+  );
+
+  const oldTokenSend = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${oldSameName.body.token}` },
+    body: { text: "状态" },
+    store,
+    env
+  });
+  assert.equal(oldTokenSend.status, 401);
+
+  const otherTokenSend = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${otherName.body.token}` },
+    body: { text: "状态" },
+    store,
+    env
+  });
+  assert.equal(otherTokenSend.status, 201);
+
+  const status = await call({ method: "GET", path: "/api/relay/status", store, env });
+  assert.equal(status.status, 200);
+  assert.equal(status.body.counts.registered_devices, 4);
+  assert.equal(status.body.counts.active_devices, 2);
+  assert.equal(status.body.counts.disabled_devices, 2);
+});
+
 test("desktop cleanup disables only temporary verification devices", async () => {
   const store = memoryStore();
   const env = {
@@ -256,6 +344,13 @@ test("desktop cleanup disables only temporary verification devices", async () =>
         display_name: "Playwright iPhone",
         token_hash: "playwright-temp-token",
         created_at: testTime(3),
+        disabled: false
+      },
+      {
+        device_id: "replace-check-temp",
+        display_name: "Replace Check 123",
+        token_hash: "replace-check-temp-token",
+        created_at: testTime(4),
         disabled: false
       },
       {
@@ -291,14 +386,15 @@ test("desktop cleanup disables only temporary verification devices", async () =>
     env
   });
   assert.equal(cleanup.status, 201);
-  assert.equal(cleanup.body.disabled_count, 2);
-  assert.deepEqual(cleanup.body.disabled_devices.map((device) => device.device_id).sort(), ["old-temp", "playwright-temp"]);
+  assert.equal(cleanup.body.disabled_count, 3);
+  assert.deepEqual(cleanup.body.disabled_devices.map((device) => device.device_id).sort(), ["old-temp", "playwright-temp", "replace-check-temp"]);
   assert.equal(cleanup.body.active_devices, 2);
 
   const firstState = await store.readJson("state.json", {});
   assert.equal(firstState.devices.find((device) => device.device_id === "real-phone").disabled, false);
   assert.equal(firstState.devices.find((device) => device.device_id === "old-temp").disabled, true);
   assert.equal(firstState.devices.find((device) => device.device_id === "playwright-temp").disabled, true);
+  assert.equal(firstState.devices.find((device) => device.device_id === "replace-check-temp").disabled, true);
   assert.equal(firstState.devices.find((device) => device.device_id === "new-temp").disabled, false);
   assert.equal(firstState.audit.at(-1).type, "desktop_cleanup_temporary_devices");
 

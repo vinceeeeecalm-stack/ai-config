@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.9";
+const APP_VERSION = "2026.06.21.10";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -168,7 +168,8 @@ async function registerDevice() {
       body: JSON.stringify({
         display_name: els.displayName.value.trim() || "Mobile",
         pairing_code: pairingCode,
-        client_instance_id: state.instanceId
+        client_instance_id: state.instanceId,
+        replace_same_display_name: true
       })
     });
     state.token = result.token;

@@ -66,10 +66,15 @@ async function registerDevice(store, env, body) {
   const token = `mob_${randomHex(24)}`;
   const clientInstanceId = cleanClientInstanceId(body.client_instance_id || body.clientInstanceId);
   const clientInstanceHash = clientInstanceId ? sha256(clientInstanceId) : "";
-  const replacedDevices = clientInstanceHash ? replaceDevicesForClientInstance(state, clientInstanceHash) : [];
+  const displayName = cleanName(body.display_name || body.displayName || "Mobile");
+  const replaceSameDisplayName = body.replace_same_display_name === true || body.replaceSameDisplayName === true;
+  const replacedDevices = [
+    ...(clientInstanceHash ? replaceDevicesForClientInstance(state, clientInstanceHash) : []),
+    ...(replaceSameDisplayName ? replaceDevicesForDisplayName(state, displayName) : [])
+  ];
   const device = {
     device_id: `dev-${Date.now()}-${randomHex(3)}`,
-    display_name: cleanName(body.display_name || body.displayName || "Mobile"),
+    display_name: displayName,
     token_hash: sha256(token),
     client_instance_hash: clientInstanceHash || null,
     created_at: now(),
@@ -631,9 +636,24 @@ function replaceDevicesForClientInstance(state, clientInstanceHash) {
   return replaced;
 }
 
+function replaceDevicesForDisplayName(state, displayName) {
+  const replaced = [];
+  const normalizedName = cleanName(displayName).toLowerCase();
+  if (!normalizedName) return replaced;
+  for (const device of state.devices) {
+    if (device.disabled) continue;
+    if (cleanName(device.display_name || "").toLowerCase() !== normalizedName) continue;
+    device.disabled = true;
+    device.disabled_at = now();
+    device.disabled_reason = "replaced_by_same_display_name";
+    replaced.push(device);
+  }
+  return replaced;
+}
+
 function isTemporaryDevice(device) {
   const name = cleanText(device?.display_name || "");
-  return /^(installed-\d+|appctl-\d+|localtunnel-\d+|localhostrun-\d+|localhost-run-\d+|public-\d+|public-dns-override-\d+|content-check-\d+|exact-e2e-\d+|progress-e2e-\d+|final-e2e-\d+|netlify-fixed-e2e-\d+|netlify:|test phone$|receipt check$|public receipt check$|public instance check$|public chat continuity|playwright iphone$|tunnel iphone$)/i.test(name);
+  return /^(installed-\d+|appctl-\d+|localtunnel-\d+|localhostrun-\d+|localhost-run-\d+|public-\d+|public-dns-override-\d+|content-check-\d+|exact-e2e-\d+|progress-e2e-\d+|final-e2e-\d+|netlify-fixed-e2e-\d+|netlify:|test phone$|receipt check$|public receipt check$|public instance check$|public chat continuity|playwright iphone(?:\s|$)|tunnel iphone$|replace check \d+$|replace other \d+$)/i.test(name);
 }
 
 function requireMobileDevice(state, headers) {
