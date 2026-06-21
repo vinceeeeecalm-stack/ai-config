@@ -95,7 +95,7 @@ node scripts/cloud-relay-localhostrun-install.cjs repair
 Current verified tunnel URL:
 
 ```text
-https://6ae20c26d72a2b.lhr.life/relay-chat.html
+https://99643dcd781372.lhr.life/relay-chat.html
 ```
 
 Use the local pairing code with this tunnel, because it is forwarding directly to the local relay:
@@ -123,7 +123,7 @@ Public reset URL:
 https://codex-bridge-relay.netlify.app/relay-chat.html?reset=1
 ```
 
-The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.7` and mode `公网 Netlify` before you enter the `pair_...` code.
+The reset flow revokes the current cloud mobile token, then removes the saved local token, cursor, pending reply cache, unsent outbox, old service worker, and old PWA caches for this origin. After reset, the setup page should show version `2026.06.21.8` and mode `公网 Netlify` before you enter the `pair_...` code.
 
 When the app opens with an existing token, it calls `/api/relay/mobile/transcript` before live polling. This restores the latest bidirectional messages, including your phone's outgoing text and the cloud/desktop replies, so a refresh or mobile browser restart does not leave the chat blank.
 
@@ -166,6 +166,8 @@ cd "/Users/vincentpan/Library/Application Support/CodexRelayCloud"
 node scripts/cloud-relay-install.cjs status
 node scripts/cloud-relay-netlify-bridge.cjs status
 ```
+
+The phone keeps tracking the diagnostic message after the 30-second warning. If the Mac was waking up slowly and the terminal worker reply arrives later, the self-check panel changes from warning back to pass and records the delayed recovery instead of leaving a stale failure state.
 
 If `/api/relay/status` shows `queued_commands=0` but `unresolved_commands` stays above zero after a pre-fix or interrupted bridge run, the bridge can safely close only stale commands already consumed by desktop polling:
 
@@ -222,9 +224,10 @@ node /private/tmp/relay-playwright/relay-public-instance-replace-check.mjs
 node /private/tmp/relay-playwright/relay-outbox-retry-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-local-check.mjs
 node /private/tmp/relay-playwright/relay-receipt-public-check.mjs
+node /private/tmp/relay-playwright/relay-public-chat-continuity-check.mjs
 ```
 
-`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The instance replacement checks re-pair from the same browser/client instance locally and through Netlify, then verify the old token becomes 401 while the new token remains valid. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`.
+`doctor` checks the local app, desktop pairing page, QR vendor, loopback pairing API, docs, public bridge status, temporary tunnel, and awake helper. The Netlify bridge e2e sends a real `状态` message through the public relay, confirms the local worker consumes it, and verifies the reply returns to the public queue. The UI check pairs a temporary local phone in mobile and desktop viewports, sends `状态`, verifies the worker reply, and saves screenshots. The instance replacement checks re-pair from the same browser/client instance locally and through Netlify, then verify the old token becomes 401 while the new token remains valid. The outbox check simulates an offline send, verifies local storage keeps the message, restores network, and verifies automatic retry clears the outbox. The receipt checks send `状态` through the installed local service and Netlify public service, then verify the message status endpoint reaches `completed`. The public chat continuity check opens the real Netlify phone page, pairs it, sends `状态` and `报告`, waits for terminal worker replies for both, and verifies there are no browser console issues.
 
 Tunnel:
 

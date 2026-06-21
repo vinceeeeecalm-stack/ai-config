@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.7";
+const APP_VERSION = "2026.06.21.8";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -29,6 +29,7 @@ const state = {
   selfCheck: {
     active: false,
     messageId: "",
+    timedOut: false,
     timeout: null
   },
   sendQueue: Promise.resolve(),
@@ -290,6 +291,7 @@ async function runSelfCheck() {
   clearSelfCheckTimeout();
   state.selfCheck.active = true;
   state.selfCheck.messageId = "";
+  state.selfCheck.timedOut = false;
   els.selfCheckButton.disabled = true;
   els.selfCheckSummary.textContent = "正在唤醒链路...";
   setCheck("api", "checking", "正在请求 /api/relay/status");
@@ -306,6 +308,7 @@ async function runSelfCheck() {
     state.selfCheck.timeout = setTimeout(() => {
       if (!state.selfCheck.active) return;
       state.selfCheck.active = false;
+      state.selfCheck.timedOut = true;
       els.selfCheckButton.disabled = false;
       setCheck("worker", "warn", "30 秒内未收到 worker 回写");
       els.selfCheckSummary.textContent = "消息已排队。如果电脑在睡眠或刚开盖，保持醒着后会继续追最终回复。";
@@ -518,6 +521,8 @@ function resolvePending(message) {
   const seconds = Math.max(1, Math.round((Date.now() - started) / 1000));
   const workerReply = Boolean(message.worker_for_command_id || message.worker_status);
   const stillWorking = message.worker_status === "working";
+  const isSelfCheckReply = Boolean(state.selfCheck.messageId && message.in_reply_to === state.selfCheck.messageId);
+  const selfCheckTimedOut = state.selfCheck.timedOut;
   els.deliveryStatus.textContent = workerReply
     ? (stillWorking ? "电脑处理中" : "桌面已回复")
     : "云端已确认";
@@ -530,17 +535,24 @@ function resolvePending(message) {
     delete state.pending[message.in_reply_to];
     savePending();
   }
-  if (workerReply && !stillWorking && state.selfCheck.active && message.in_reply_to === state.selfCheck.messageId) {
+  if (workerReply && !stillWorking && isSelfCheckReply) {
     clearSelfCheckTimeout();
     state.selfCheck.active = false;
+    state.selfCheck.timedOut = false;
+    state.selfCheck.messageId = "";
     els.selfCheckButton.disabled = false;
     setCheck("worker", "ok", `${message.worker_status || "ok"} · ${seconds}s`);
-    els.selfCheckSummary.textContent = "自检通过：手机消息已回到本机 worker，并成功回写到手机。";
+    els.selfCheckSummary.textContent = selfCheckTimedOut
+      ? "延迟回写已收到：电脑恢复后完成了 worker 回写，链路已恢复。"
+      : "自检通过：手机消息已回到本机 worker，并成功回写到手机。";
   }
 }
 
 async function resetDevice(message) {
   clearSelfCheckTimeout();
+  state.selfCheck.active = false;
+  state.selfCheck.messageId = "";
+  state.selfCheck.timedOut = false;
   const tokenToRevoke = state.token;
   await revokeMobileToken(tokenToRevoke);
   state.token = "";
