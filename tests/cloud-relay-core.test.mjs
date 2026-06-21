@@ -581,6 +581,157 @@ test("status command returns cloud status and queues worker status check", async
   assert.doesNotMatch(inbox.body.messages[0].text, /desk-|mob_/);
 });
 
+test("mobile message status reports the desktop lifecycle for the owning device", async () => {
+  const store = memoryStore();
+  const env = {
+    RELAY_PAIRING_CODE: "pair-123",
+    RELAY_DESKTOP_TOKEN: "desk-123"
+  };
+
+  const primary = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: { display_name: "Primary iPhone", pairing_code: "pair-123" },
+    store,
+    env
+  });
+  const secondary = await call({
+    method: "POST",
+    path: "/api/relay/devices/register",
+    body: { display_name: "Other Phone", pairing_code: "pair-123" },
+    store,
+    env
+  });
+  assert.equal(primary.status, 201);
+  assert.equal(secondary.status, 201);
+
+  const sent = await call({
+    method: "POST",
+    path: "/api/relay/mobile/messages",
+    headers: { authorization: `Bearer ${primary.body.token}` },
+    body: { text: "报告" },
+    store,
+    env
+  });
+  assert.equal(sent.status, 201);
+
+  const queued = await call({
+    method: "GET",
+    path: "/api/relay/mobile/message-status",
+    query: { relay_id: sent.body.message.relay_id },
+    headers: { authorization: `Bearer ${primary.body.token}` },
+    store,
+    env
+  });
+  assert.equal(queued.status, 200);
+  assert.equal(queued.body.phase, "queued");
+  assert.equal(queued.body.pending, true);
+  assert.equal(queued.body.cloud_ack, true);
+  assert.equal(queued.body.desktop.consumed, false);
+  assert.equal(queued.body.command.type, "manual_report_request");
+  assert.match(queued.body.latest_reply.text, /报告请求已入云队列/);
+  assert.equal(queued.body.safety.live_orders_enabled, false);
+  assert.doesNotMatch(JSON.stringify(queued.body), /mob_|desk-/);
+
+  const forbidden = await call({
+    method: "GET",
+    path: "/api/relay/mobile/message-status",
+    query: { relay_id: sent.body.message.relay_id },
+    headers: { authorization: `Bearer ${secondary.body.token}` },
+    store,
+    env
+  });
+  assert.equal(forbidden.status, 404);
+
+  const polled = await call({
+    method: "GET",
+    path: "/api/relay/desktop/poll",
+    query: { cursor: "0" },
+    headers: { authorization: "Bearer desk-123" },
+    store,
+    env
+  });
+  assert.equal(polled.status, 200);
+
+  await call({
+    method: "POST",
+    path: "/api/relay/desktop/heartbeat",
+    headers: { authorization: "Bearer desk-123" },
+    body: { bridge: "netlify-local-bridge", status: "online", cursor: 1, pending_count: 0 },
+    store,
+    env
+  });
+
+  const consumed = await call({
+    method: "GET",
+    path: "/api/relay/mobile/message-status",
+    query: { relay_id: sent.body.message.relay_id },
+    headers: { authorization: `Bearer ${primary.body.token}` },
+    store,
+    env
+  });
+  assert.equal(consumed.status, 200);
+  assert.equal(consumed.body.phase, "consumed");
+  assert.equal(consumed.body.desktop.consumed, true);
+  assert.equal(consumed.body.pending, true);
+
+  const command = consumed.body.command;
+  const working = await call({
+    method: "POST",
+    path: "/api/relay/desktop/replies",
+    headers: { authorization: "Bearer desk-123" },
+    body: {
+      command_id: command.command_id,
+      worker_status: "working",
+      text: "本地报告正在处理中"
+    },
+    store,
+    env
+  });
+  assert.equal(working.status, 201);
+
+  const workingStatus = await call({
+    method: "GET",
+    path: "/api/relay/mobile/message-status",
+    query: { relay_id: sent.body.message.relay_id },
+    headers: { authorization: `Bearer ${primary.body.token}` },
+    store,
+    env
+  });
+  assert.equal(workingStatus.status, 200);
+  assert.equal(workingStatus.body.phase, "working");
+  assert.equal(workingStatus.body.latest_reply.worker_status, "working");
+  assert.equal(workingStatus.body.pending, true);
+
+  const completedReply = await call({
+    method: "POST",
+    path: "/api/relay/desktop/replies",
+    headers: { authorization: "Bearer desk-123" },
+    body: {
+      command_id: command.command_id,
+      worker_status: "reported",
+      text: "报告摘要已返回"
+    },
+    store,
+    env
+  });
+  assert.equal(completedReply.status, 201);
+
+  const completed = await call({
+    method: "GET",
+    path: "/api/relay/mobile/message-status",
+    query: { relay_id: sent.body.message.relay_id },
+    headers: { authorization: `Bearer ${primary.body.token}` },
+    store,
+    env
+  });
+  assert.equal(completed.status, 200);
+  assert.equal(completed.body.phase, "completed");
+  assert.equal(completed.body.pending, false);
+  assert.equal(completed.body.terminal_reply.worker_status, "reported");
+  assert.equal(completed.body.terminal_reply.text, "报告摘要已返回");
+});
+
 test("desktop reconcile closes stale consumed commands without closing fresh queue items", async () => {
   const store = memoryStore();
   const env = {

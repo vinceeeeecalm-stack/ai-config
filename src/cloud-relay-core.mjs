@@ -15,6 +15,7 @@ export async function handleRelayRequest({ method, path, query = {}, headers = {
   if (method === "POST" && normalizedPath === "/api/relay/mobile/messages") return postMobileMessage(store, env, headers, body);
   if (method === "GET" && normalizedPath === "/api/relay/mobile/messages") return listMobileMessages(store, env, headers, query);
   if (method === "GET" && normalizedPath === "/api/relay/mobile/transcript") return listMobileTranscript(store, env, headers, query);
+  if (method === "GET" && normalizedPath === "/api/relay/mobile/message-status") return getMobileMessageStatus(store, env, headers, query);
   if (method === "GET" && normalizedPath === "/api/relay/desktop/poll") return listDesktopPoll(store, env, headers, query);
   if (method === "GET" && normalizedPath === "/api/relay/desktop/commands") return listDesktopCommands(store, env, headers, query);
   if (method === "POST" && normalizedPath === "/api/relay/desktop/replies") return postDesktopReply(store, env, headers, body);
@@ -187,6 +188,47 @@ async function listMobileTranscript(store, _env, headers, query) {
     service: "codex-relay-cloud",
     total_visible: transcript.length,
     messages,
+    safety: safety()
+  });
+}
+
+async function getMobileMessageStatus(store, _env, headers, query) {
+  const state = await readState(store);
+  const device = requireMobileDevice(state, headers);
+  if (!device) return response(401, { ok: false, error: "Invalid relay mobile token.", safety: safety() });
+  const relayId = cleanText(query.relay_id || query.relayId || "");
+  if (!relayId) return response(400, { ok: false, error: "relay_id is required.", safety: safety() });
+  const message = state.mobile_messages.find((item) => item.relay_id === relayId && item.device_id === device.device_id);
+  if (!message) return response(404, { ok: false, error: "relay message not found for this device.", safety: safety() });
+
+  const command = state.commands.find((item) => item.relay_id === message.relay_id && item.device_id === device.device_id) || null;
+  const replies = repliesForMessage(state, device, message.relay_id);
+  const terminalReply = findTerminalReplyForMessage(message, state);
+  const workingReply = [...replies].reverse().find((reply) => cleanText(reply.worker_status || "") === "working") || null;
+  const latestReply = replies.at(-1) || null;
+  const consumed = command ? isCommandConsumedByDesktopPoll(command, state) : false;
+  const pending = command ? isCommandPending(command, state) : false;
+
+  return response(200, {
+    ok: true,
+    service: "codex-relay-cloud",
+    relay_id: message.relay_id,
+    phase: messageReceiptPhase({ command, terminalReply, workingReply, consumed }),
+    pending,
+    cloud_ack: true,
+    desktop: {
+      online: isDesktopHeartbeatFresh(normalizeDesktopHeartbeat(state.desktop_heartbeat)),
+      consumed,
+      heartbeat: normalizeDesktopHeartbeat(state.desktop_heartbeat)
+    },
+    command: command ? {
+      command_id: command.command_id,
+      type: command.type,
+      created_at: command.created_at,
+      worker_status: cleanText(command.worker_status || "")
+    } : null,
+    latest_reply: latestReply || null,
+    terminal_reply: terminalReply || null,
     safety: safety()
   });
 }
@@ -714,6 +756,32 @@ function transcriptForDevice(state, device) {
       return left._relay_sequence - right._relay_sequence;
     })
     .map(({ _relay_sequence, ...message }) => message);
+}
+
+function repliesForMessage(state, device, relayId) {
+  return (state.desktop_replies || []).filter((reply) => {
+    if (reply.in_reply_to !== relayId) return false;
+    if (reply.target_device_id && reply.target_device_id !== device.device_id) return false;
+    return true;
+  });
+}
+
+function findTerminalReplyForMessage(message, state) {
+  return [...(state.desktop_replies || [])].reverse().find((reply) => {
+    const status = cleanText(reply?.worker_status || "");
+    if (!status || status === "working") return false;
+    if (reply.in_reply_to !== message.relay_id) return false;
+    if (reply.target_device_id && reply.target_device_id !== message.device_id) return false;
+    return true;
+  }) || null;
+}
+
+function messageReceiptPhase({ command, terminalReply, workingReply, consumed }) {
+  if (terminalReply) return "completed";
+  if (workingReply || cleanText(command?.worker_status || "") === "working") return "working";
+  if (consumed) return "consumed";
+  if (command) return "queued";
+  return "cloud_confirmed";
 }
 
 function isCommandWorking(command, state) {

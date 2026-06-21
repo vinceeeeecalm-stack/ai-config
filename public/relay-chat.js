@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.4";
+const APP_VERSION = "2026.06.21.5";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -34,6 +34,7 @@ const state = {
   lastStatusRefreshAt: 0,
   lastPollAt: 0,
   recentSends: {},
+  receiptCheckAt: {},
   relayMode: detectRelayMode()
 };
 
@@ -164,6 +165,7 @@ async function registerDevice() {
     state.cursor = 0;
     state.pending = {};
     state.seen = new Set();
+    state.receiptCheckAt = {};
     localStorage.setItem("codexRelayCloudToken", state.token);
     localStorage.setItem("codexRelayCloudDevice", JSON.stringify(state.device));
     localStorage.setItem("codexRelayCloudCursor", "0");
@@ -334,7 +336,10 @@ async function pollMessages() {
     updateSyncStatus();
     updatePendingAgeHint();
     if (Date.now() - state.lastStatusRefreshAt > 15000) refreshStatus();
-    if (Object.keys(state.pending).length) maybeBackfillPendingReplies();
+    if (Object.keys(state.pending).length) {
+      maybeBackfillPendingReplies();
+      refreshPendingReceipts();
+    }
   } catch (error) {
     state.pollFailures += 1;
     setRelayState("offline");
@@ -359,6 +364,40 @@ async function maybeBackfillPendingReplies(force = false) {
   } catch (_error) {
     // Normal polling owns user-facing reconnect state.
   }
+}
+
+async function refreshPendingReceipts(force = false) {
+  if (!state.token) return;
+  const relayIds = Object.keys(state.pending);
+  if (!relayIds.length) return;
+  const currentTime = Date.now();
+  for (const relayId of relayIds.slice(0, 4)) {
+    if (!force && currentTime - (state.receiptCheckAt[relayId] || 0) < 5000) continue;
+    state.receiptCheckAt[relayId] = currentTime;
+    try {
+      const receipt = await api(`/api/relay/mobile/message-status?relay_id=${encodeURIComponent(relayId)}`);
+      renderReceipt(receipt);
+    } catch (error) {
+      if (/not found/i.test(error.message)) {
+        delete state.pending[relayId];
+        savePending();
+      }
+    }
+  }
+}
+
+function renderReceipt(receipt) {
+  if (!receipt?.relay_id || !state.pending[receipt.relay_id]) return;
+  const reply = receipt.terminal_reply || (receipt.phase === "working" ? receipt.latest_reply : null);
+  if (reply) appendMessage(reply);
+  const seconds = pendingSeconds(receipt.relay_id);
+  els.deliveryStatus.textContent = receiptPhaseLabel(receipt.phase);
+  els.deliveryMeta.textContent = receiptPhaseDetail(receipt);
+  els.deliveryLatency.textContent = `${seconds}s`;
+  if (receipt.phase === "completed") return;
+  if (receipt.phase === "working") els.localStatus.textContent = "处理中";
+  else if (receipt.phase === "consumed") els.localStatus.textContent = "已接收";
+  else if (receipt.phase === "queued") els.localStatus.textContent = receipt.desktop?.online ? "等待拉取" : "电脑睡眠";
 }
 
 function appendMessage(message) {
@@ -415,6 +454,7 @@ async function resetDevice(message) {
   state.cursor = 0;
   state.pending = {};
   state.seen = new Set();
+  state.receiptCheckAt = {};
   clearLocalRelayState();
   await clearBrowserAppCache();
   els.messageList.textContent = "";
@@ -463,6 +503,7 @@ function resumeLiveSync() {
   refreshStatus();
   pollMessages();
   maybeBackfillPendingReplies(true);
+  refreshPendingReceipts(true);
 }
 
 function updateDesktopStatus(status) {
@@ -521,6 +562,31 @@ function updatePendingAgeHint() {
   els.deliveryStatus.textContent = seconds < 90 ? "仍在等待" : "等待较久";
   els.deliveryMeta.textContent = "消息还在队列或电脑处理中；可点“唤醒”或发“状态”查看。";
   els.deliveryLatency.textContent = `${seconds}s`;
+}
+
+function pendingSeconds(relayId) {
+  const started = Number(state.pending[relayId] || Date.now());
+  return Math.max(1, Math.round((Date.now() - started) / 1000));
+}
+
+function receiptPhaseLabel(phase) {
+  if (phase === "completed") return "桌面已回复";
+  if (phase === "working") return "电脑处理中";
+  if (phase === "consumed") return "电脑已接收";
+  if (phase === "queued") return "云端已收";
+  return "云端已确认";
+}
+
+function receiptPhaseDetail(receipt) {
+  if (receipt.phase === "completed") return receipt.terminal_reply?.text || "worker 已完成回写。";
+  if (receipt.phase === "working") return receipt.latest_reply?.text || "本机 worker 已开始处理。";
+  if (receipt.phase === "consumed") return "电脑 bridge 已取走消息，正在等待本机 worker 终态回写。";
+  if (receipt.phase === "queued") {
+    return receipt.desktop?.online
+      ? "云端已收到，等待电脑 bridge 拉取。"
+      : "云端已收到；电脑可能睡眠或离线，醒来后会继续处理。";
+  }
+  return "云端已确认这条消息。";
 }
 
 function statusLine(status) {
