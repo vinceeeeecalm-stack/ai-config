@@ -22,7 +22,9 @@ import("./cloud-relay-standalone-server.mjs").then(({ createStandaloneRelayServe
     env: {
       RELAY_PAIRING_CODE: process.env.RELAY_PAIRING_CODE,
       RELAY_DESKTOP_TOKEN: process.env.RELAY_DESKTOP_TOKEN,
-      PUBLIC_RELAY_URL: process.env.PUBLIC_RELAY_URL
+      PUBLIC_RELAY_URL: process.env.PUBLIC_RELAY_URL,
+      CHECK_REMOTE_APP_VERSIONS: process.env.CHECK_REMOTE_APP_VERSIONS,
+      VERSION_FETCH_TIMEOUT_MS: process.env.VERSION_FETCH_TIMEOUT_MS
     }
   });
   server.listen(port, "0.0.0.0", () => {

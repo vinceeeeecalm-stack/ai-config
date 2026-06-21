@@ -28,7 +28,7 @@ http://127.0.0.1:8798/pairing
 
 This page shows the LAN app URL, public URL, current local pairing code, and relay status. It only exposes pairing details through the loopback-only endpoint `/api/relay/local/pairing`.
 
-The desktop pairing page also renders a local QR code for the LAN app URL. Scan it from the phone, then enter the pairing code shown next to the QR code.
+The desktop pairing page also renders a local QR code for the LAN app URL. Scan it from the phone, then enter the pairing code shown next to the QR code. It shows the local, stable Netlify, and temporary tunnel app versions so stale public deploys are visible before you pair the phone.
 
 Command-line equivalent:
 

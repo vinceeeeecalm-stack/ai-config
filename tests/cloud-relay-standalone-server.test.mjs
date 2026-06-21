@@ -21,6 +21,7 @@ test("standalone cloud relay serves the PWA and relay API", async () => {
       RELAY_PAIRING_CODE: "pair-123",
       RELAY_DESKTOP_TOKEN: "desk-123",
       PUBLIC_RELAY_URL: "https://stable-test.netlify.app",
+      CHECK_REMOTE_APP_VERSIONS: "0",
       LOCALHOSTRUN_STATUS_PATH: localhostrunStatusPath
     }
   });
@@ -46,6 +47,10 @@ test("standalone cloud relay serves the PWA and relay API", async () => {
     assert.equal(pairing.public_url_source, "stable");
     assert.equal(pairing.stable_public_url, "https://stable-test.netlify.app/relay-chat.html");
     assert.equal(pairing.temporary_tunnel_url, "https://temporary-test.lhr.life/relay-chat.html");
+    assert.equal(pairing.app_versions.local.version, "2026.06.21.10");
+    assert.equal(pairing.app_versions.stable_public.error, "disabled");
+    assert.equal(pairing.app_versions.temporary_tunnel.error, "disabled");
+    assert.equal(pairing.app_versions.recommended_source, "lan");
     assert.equal(JSON.stringify(pairing).includes("desk-123"), false);
 
     const registered = await post(`${baseUrl}/api/relay/devices/register`, {

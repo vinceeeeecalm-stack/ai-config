@@ -16,6 +16,8 @@ export function createStandaloneRelayServer(options = {}) {
     RELAY_PAIRING_CODE: options.env?.RELAY_PAIRING_CODE ?? process.env.RELAY_PAIRING_CODE ?? "",
     RELAY_DESKTOP_TOKEN: options.env?.RELAY_DESKTOP_TOKEN ?? process.env.RELAY_DESKTOP_TOKEN ?? process.env.CLOUD_RELAY_DESKTOP_TOKEN ?? "",
     PUBLIC_RELAY_URL: options.env?.PUBLIC_RELAY_URL ?? process.env.PUBLIC_RELAY_URL ?? "",
+    CHECK_REMOTE_APP_VERSIONS: options.env?.CHECK_REMOTE_APP_VERSIONS ?? process.env.CHECK_REMOTE_APP_VERSIONS ?? "1",
+    VERSION_FETCH_TIMEOUT_MS: options.env?.VERSION_FETCH_TIMEOUT_MS ?? process.env.VERSION_FETCH_TIMEOUT_MS ?? "3000",
     LOCALHOSTRUN_STATUS_PATH: options.env?.LOCALHOSTRUN_STATUS_PATH
       ?? process.env.LOCALHOSTRUN_STATUS_PATH
       ?? path.join(path.dirname(statePath), "localhostrun-status.json")
@@ -33,7 +35,7 @@ export function createStandaloneRelayServer(options = {}) {
     try {
       const requestUrl = new URL(req.url || "/", "http://127.0.0.1");
       if (req.method === "GET" && requestUrl.pathname === "/api/relay/local/pairing") {
-        const result = await withStateQueue(() => localPairingStatus(req, store, env));
+        const result = await withStateQueue(() => localPairingStatus(req, store, env, publicDir));
         sendJson(res, result.status, result.body, req.method === "HEAD");
         return;
       }
@@ -62,7 +64,7 @@ export function createStandaloneRelayServer(options = {}) {
   });
 }
 
-async function localPairingStatus(req, store, env) {
+async function localPairingStatus(req, store, env, publicDir) {
   if (!isLoopbackAddress(req.socket.remoteAddress)) {
     return {
       status: 403,
@@ -81,6 +83,7 @@ async function localPairingStatus(req, store, env) {
   });
   const origin = requestOrigin(req);
   const publicRelay = await publicRelayInfo(env);
+  const appVersions = await appVersionInfo(publicDir, publicRelay, env);
   return {
     status: 200,
     body: {
@@ -94,6 +97,7 @@ async function localPairingStatus(req, store, env) {
       stable_public_url: publicRelay.stable_url,
       temporary_tunnel_url: publicRelay.temporary_url,
       public_urls: publicRelay.urls,
+      app_versions: appVersions,
       pairing_code: env.RELAY_PAIRING_CODE || null,
       desktop_token_configured: Boolean(env.RELAY_DESKTOP_TOKEN),
       ready: status.body.ready,
@@ -117,6 +121,70 @@ async function publicRelayInfo(env) {
     temporary_url: temporaryUrl || null,
     urls
   };
+}
+
+async function appVersionInfo(publicDir, publicRelay, env) {
+  const local = await appVersionFromFile(path.join(publicDir, "relay-chat.js"));
+  const checkRemote = String(env.CHECK_REMOTE_APP_VERSIONS || "1") !== "0";
+  const timeoutMs = Math.max(250, Math.min(5000, Number(env.VERSION_FETCH_TIMEOUT_MS || 1200)));
+  const [stable, temporary] = await Promise.all([
+    publicRelay.stable_url && checkRemote
+      ? appVersionFromUrl(scriptUrlForAppUrl(publicRelay.stable_url), timeoutMs)
+      : appVersionUnavailable(publicRelay.stable_url, checkRemote ? "not_configured" : "disabled"),
+    publicRelay.temporary_url && checkRemote
+      ? appVersionFromUrl(scriptUrlForAppUrl(publicRelay.temporary_url), timeoutMs)
+      : appVersionUnavailable(publicRelay.temporary_url, checkRemote ? "not_configured" : "disabled")
+  ]);
+  const stableCurrent = Boolean(local.version && stable.version && stable.version === local.version);
+  const temporaryCurrent = Boolean(local.version && temporary.version && temporary.version === local.version);
+  return {
+    local,
+    stable_public: stable,
+    temporary_tunnel: temporary,
+    stable_current: stableCurrent,
+    temporary_current: temporaryCurrent,
+    recommended_source: stableCurrent ? "stable" : temporaryCurrent ? "temporary" : "lan",
+    latest_version: local.version || null
+  };
+}
+
+async function appVersionFromFile(filePath) {
+  try {
+    const text = await fs.readFile(filePath, "utf8");
+    return { ok: true, url: null, version: extractAppVersion(text), source: "local" };
+  } catch (error) {
+    return { ok: false, url: null, version: null, source: "local", error: error.message || String(error) };
+  }
+}
+
+async function appVersionFromUrl(url, timeoutMs) {
+  if (!url) return appVersionUnavailable(url, "not_configured");
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    const text = await response.text();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return { ok: true, url, version: extractAppVersion(text), source: "remote" };
+  } catch (error) {
+    return { ok: false, url, version: null, source: "remote", error: error.name === "AbortError" ? `timeout after ${timeoutMs}ms` : error.message || String(error) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function appVersionUnavailable(url, reason) {
+  return { ok: false, url: url ? scriptUrlForAppUrl(url) : null, version: null, source: "remote", error: reason };
+}
+
+function scriptUrlForAppUrl(value) {
+  const base = relayBaseUrl(value);
+  return base ? `${base}/relay-chat.js` : null;
+}
+
+function extractAppVersion(text) {
+  const match = String(text || "").match(/APP_VERSION\s*=\s*["']([^"']+)["']/);
+  return match ? match[1] : null;
 }
 
 async function readJsonIfExists(filePath) {

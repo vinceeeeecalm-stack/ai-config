@@ -11,6 +11,8 @@ const els = {
   publicUrlHelp: $("#publicUrlHelp"),
   tunnelUrl: $("#tunnelUrl"),
   tunnelUrlHelp: $("#tunnelUrlHelp"),
+  versionSummary: $("#versionSummary"),
+  versionHelp: $("#versionHelp"),
   apiStatus: $("#apiStatus"),
   desktopStatus: $("#desktopStatus"),
   deviceCount: $("#deviceCount"),
@@ -31,12 +33,13 @@ async function boot() {
     els.pairingCode.textContent = payload.pairing_code || "--";
     els.publicUrl.textContent = payload.stable_public_url || payload.public_url || "未配置稳定公网入口";
     els.publicUrlHelp.textContent = payload.stable_public_url
-      ? "固定入口，适合手机收藏。"
+      ? publicVersionHelp(payload.app_versions?.stable_public, payload.app_versions?.local)
       : "暂无固定入口，可先用 LAN 或临时隧道。";
     els.tunnelUrl.textContent = payload.temporary_tunnel_url || "未连接临时隧道";
     els.tunnelUrlHelp.textContent = payload.temporary_tunnel_url
-      ? "会在 tunnel 重连后变化，不建议收藏。"
+      ? tunnelVersionHelp(payload.app_versions?.temporary_tunnel, payload.app_versions?.local)
       : "localhost.run tunnel 当前不可用。";
+    renderVersionSummary(payload.app_versions);
     els.apiStatus.textContent = payload.ready?.mobile_registration ? "READY" : "NEEDS CODE";
     els.desktopStatus.textContent = payload.desktop_token_configured ? "READY" : "NO TOKEN";
     els.deviceCount.textContent = String(payload.counts?.registered_devices ?? "--");
@@ -48,6 +51,40 @@ async function boot() {
     els.apiStatus.textContent = "OFFLINE";
     els.desktopStatus.textContent = "--";
   }
+}
+
+function renderVersionSummary(versions) {
+  const local = versionLabel(versions?.local);
+  const stable = versionLabel(versions?.stable_public);
+  const tunnel = versionLabel(versions?.temporary_tunnel);
+  els.versionSummary.textContent = `本机 ${local} / 稳定 ${stable} / 隧道 ${tunnel}`;
+  if (versions?.recommended_source === "stable") {
+    els.versionHelp.textContent = "稳定公网入口已经是当前版本，适合手机收藏。";
+  } else if (versions?.recommended_source === "temporary") {
+    els.versionHelp.textContent = "稳定公网入口不是当前版本；要用最新版，先用 LAN 或临时隧道。";
+  } else {
+    els.versionHelp.textContent = "本机/LAN 是当前版本；公网入口可能未发布或检测失败。";
+  }
+}
+
+function publicVersionHelp(remote, local) {
+  if (remote?.version && local?.version && remote.version !== local.version) {
+    return `固定入口，但当前为 ${remote.version}，落后本机 ${local.version}。`;
+  }
+  if (remote?.version) return `固定入口，版本 ${remote.version}。`;
+  return "固定入口，版本未能确认。";
+}
+
+function tunnelVersionHelp(remote, local) {
+  if (remote?.version && local?.version && remote.version === local.version) {
+    return `临时入口，当前版本 ${remote.version}。`;
+  }
+  if (remote?.version) return `临时入口，版本 ${remote.version}。`;
+  return "会随 tunnel 重连变化，只适合临时排障。";
+}
+
+function versionLabel(value) {
+  return value?.version || "--";
 }
 
 function renderQr(value) {

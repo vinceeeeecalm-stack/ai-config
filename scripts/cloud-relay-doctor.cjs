@@ -93,11 +93,15 @@ async function checkPairingApi(checks) {
     const pairing = await fetchJson(`${localBaseUrl}/api/relay/local/pairing`);
     const raw = JSON.stringify(pairing);
     return {
-      ok: Boolean(pairing.ok && pairing.pairing_code && pairing.lan_app_urls?.length && pairing.desktop_token_configured && !raw.includes("desk_")),
+      ok: Boolean(pairing.ok && pairing.pairing_code && pairing.lan_app_urls?.length && pairing.desktop_token_configured && pairing.app_versions?.local?.version && !raw.includes("desk_")),
       evidence: {
         app_url: pairing.app_url,
         first_lan_url: pairing.lan_app_urls?.[0] || null,
         public_url: pairing.public_url || null,
+        local_app_version: pairing.app_versions?.local?.version || null,
+        stable_public_app_version: pairing.app_versions?.stable_public?.version || null,
+        temporary_tunnel_app_version: pairing.app_versions?.temporary_tunnel?.version || null,
+        recommended_source: pairing.app_versions?.recommended_source || null,
         pairing_code_configured: Boolean(pairing.pairing_code),
         desktop_token_configured: Boolean(pairing.desktop_token_configured),
         leaks_desktop_token_prefix: raw.includes("desk_")
