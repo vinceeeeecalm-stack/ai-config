@@ -34,6 +34,7 @@ async function main() {
   if (runE2e) {
     await checkLocalE2e(checks);
     await checkPublicE2e(checks);
+    await checkPublicContinuity(checks);
   }
 
   const hardFailures = checks.filter((item) => item.required && item.status !== "pass");
@@ -208,6 +209,24 @@ async function checkPublicE2e(checks) {
         sent_text: output.sent_text,
         public_url: output.public_url,
         worker_status: output.processed?.processed?.[0]?.worker_status || null,
+        live_orders_enabled: output.safety?.live_orders_enabled
+      }
+    };
+  });
+}
+
+async function checkPublicContinuity(checks) {
+  await record(checks, "public_phone_to_local_worker_continuity", false, async () => {
+    const output = runNodeScript("cloud-relay-netlify-bridge.cjs", ["continuity"]);
+    const ok = Boolean(output.ok && output.sent_count === output.completed_count && output.completed_count >= 5);
+    return {
+      ok,
+      warning: !ok,
+      evidence: {
+        public_url: output.public_url,
+        sent_count: output.sent_count,
+        completed_count: output.completed_count,
+        final_phases: (output.results || []).map((item) => item.final_phase),
         live_orders_enabled: output.safety?.live_orders_enabled
       }
     };

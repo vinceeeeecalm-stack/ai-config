@@ -1,4 +1,4 @@
-const APP_VERSION = "2026.06.21.8";
+const APP_VERSION = "2026.06.21.9";
 const RESET_KEYS = [
   "codexRelayCloudToken",
   "codexRelayCloudDevice",
@@ -491,7 +491,14 @@ function renderReceipt(receipt) {
   els.deliveryStatus.textContent = receiptPhaseLabel(receipt.phase);
   els.deliveryMeta.textContent = receiptPhaseDetail(receipt);
   els.deliveryLatency.textContent = `${seconds}s`;
-  if (receipt.phase === "completed") return;
+  if (receipt.phase === "completed") {
+    delete state.pending[receipt.relay_id];
+    delete state.receiptCheckAt[receipt.relay_id];
+    savePending();
+    els.localStatus.textContent = "已回写";
+    resolveSelfCheckReceipt(receipt, seconds);
+    return;
+  }
   if (receipt.phase === "working") els.localStatus.textContent = "处理中";
   else if (receipt.phase === "consumed") els.localStatus.textContent = "已接收";
   else if (receipt.phase === "queued") els.localStatus.textContent = receipt.desktop?.online ? "等待拉取" : "电脑睡眠";
@@ -546,6 +553,20 @@ function resolvePending(message) {
       ? "延迟回写已收到：电脑恢复后完成了 worker 回写，链路已恢复。"
       : "自检通过：手机消息已回到本机 worker，并成功回写到手机。";
   }
+}
+
+function resolveSelfCheckReceipt(receipt, seconds) {
+  if (!state.selfCheck.messageId || receipt.relay_id !== state.selfCheck.messageId) return;
+  const selfCheckTimedOut = state.selfCheck.timedOut;
+  clearSelfCheckTimeout();
+  state.selfCheck.active = false;
+  state.selfCheck.timedOut = false;
+  state.selfCheck.messageId = "";
+  els.selfCheckButton.disabled = false;
+  setCheck("worker", "ok", `${receipt.terminal_reply?.worker_status || "ok"} · ${seconds}s`);
+  els.selfCheckSummary.textContent = selfCheckTimedOut
+    ? "延迟回写已收到：电脑恢复后完成了 worker 回写，链路已恢复。"
+    : "自检通过：手机消息已回到本机 worker，并成功回写到手机。";
 }
 
 async function resetDevice(message) {
