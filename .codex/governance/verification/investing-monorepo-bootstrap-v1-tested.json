@@ -1,21 +1,21 @@
 {
   "schema_version": "VerificationResultV1",
-  "id": "verify-investing-monorepo-bootstrap-v1-tested-327455e3",
+  "id": "verify-investing-monorepo-bootstrap-v1-tested-c4d17225",
   "goal_id": "investing-monorepo-bootstrap-v1",
   "level": "TESTED",
-  "source_digest": "6d7e225f134f1a8708629ef32c7c247f98430288b6f286a91a3d3b9730afd58e",
+  "source_digest": "bdc91a95b357c5338b5b987476051cb321be8e5841ac320e30c2c7124456d1ca",
   "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
-  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb810-c4fb-7010-b88d-18468cf6e29b",
   "result": "PASS",
   "checks": [
     {
       "command": "python3 scripts/verify-monorepo-policy.py",
       "exit_code": 0,
-      "duration_ms": 207,
-      "stdout_sha256": "cacac2d8a61d9289eefc9e4374ff63e3c4b4db95f9910a9d77d207bbe43a79d3",
+      "duration_ms": 226,
+      "stdout_sha256": "13c2636d49449e9c07a388d53fbf2c5c236c27d80e4522e755e5010342bd220f",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "findings": [],
-  "created_at": "2026-07-31T12:05:14.387606Z"
+  "created_at": "2026-07-31T12:19:27.719115Z"
 }
