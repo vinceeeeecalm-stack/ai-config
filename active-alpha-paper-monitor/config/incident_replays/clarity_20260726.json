@@ -1,0 +1,70 @@
+{
+  "cutoff_at": "2026-07-26T15:40:00Z",
+  "bill_id": "H.R. 3633",
+  "bill_name": "CLARITY Act",
+  "aliases": [
+    "Digital Asset Market Clarity Act"
+  ],
+  "official_actions": [
+    {
+      "stage": "floor_passed",
+      "chamber": "house",
+      "occurred_at": "2025-07-17T19:30:00Z",
+      "checked_at": "2026-07-26T15:30:00Z",
+      "source_tier": "official_clerk",
+      "source_url": "https://clerk.house.gov/Votes/2025199"
+    },
+    {
+      "stage": "committee_advanced",
+      "chamber": "senate",
+      "occurred_at": "2026-05-14T16:00:00Z",
+      "checked_at": "2026-07-26T15:31:00Z",
+      "source_tier": "official_committee",
+      "source_url": "https://www.banking.senate.gov/newsroom/majority/chairman-scott-senate-banking-committee-advance-clarity-act-in-historic-bipartisan-vote"
+    }
+  ],
+  "official_schedule_checks": [
+    {
+      "chamber": "house",
+      "checked_at": "2026-07-26T15:32:00Z",
+      "source_tier": "official_floor",
+      "source_url": "https://repcloakroom.house.gov/",
+      "published_items": [
+        "Monday July 27: House in Pro Forma at 9:30 AM"
+      ]
+    },
+    {
+      "chamber": "senate",
+      "checked_at": "2026-07-26T15:33:00Z",
+      "source_tier": "official_floor",
+      "source_url": "https://www.radiotv.senate.gov/",
+      "published_items": [
+        "5:30 PM cloture vote on the Clayton nomination"
+      ]
+    }
+  ],
+  "secondary_claims": [
+    {
+      "claim": "The CLARITY Act will be voted on Monday July 27.",
+      "source_tier": "secondary_or_social",
+      "status": "unconfirmed"
+    }
+  ],
+  "affected_assets": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "COIN",
+    "HOOD",
+    "CRCL"
+  ],
+  "transmission_logic": [
+    "FACT: House passed its version in 2025.",
+    "FACT: Senate Banking advanced the bill 15-9 on 2026-05-14.",
+    "FACT: the published July 27 floor schedules do not list a CLARITY vote.",
+    "DERIVED: market-structure progress affects exchanges, brokers, stablecoins and liquid crypto beta.",
+    "JUDGMENT: negotiations remain material, but the exact Monday timing is not confirmed."
+  ],
+  "market_confirmation_status": "partial_large_cap_risk_on_without_broad_impulse",
+  "baseline_mentioned_event": false
+}

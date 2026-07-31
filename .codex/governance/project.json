@@ -1,0 +1,17 @@
+{
+  "schema_version": "ProjectGovernanceV1",
+  "project_id": "investing-monorepo",
+  "name": "统一投资系统仓库",
+  "canonical_root": "/Users/vincentpan/Documents/investing",
+  "default_risk": "high",
+  "test_commands": [
+    "python3 scripts/verify-monorepo-policy.py"
+  ],
+  "runtime_checks": [
+    "python3 scripts/verify-monorepo-policy.py"
+  ],
+  "command_timeout_seconds": 900,
+  "digest_excludes": [],
+  "business_ready_requires_external_inputs": false,
+  "created_at": "2026-07-31T11:59:42.678388Z"
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "agent_id": "prior_thesis_challenge_agent",
+    "asset_scope": ["portfolio", "SOL", "ADA", "NIGHT", "SOXL"],
+    "sources_used": [
+      {
+        "name": "manual_prior_reports",
+        "url_or_provider": "local_reports",
+        "fresh_at": "2026-05-29T13:33:42Z",
+        "status": "ok",
+        "coverage": "prior_thesis_and_recommendations"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "portfolio",
+        "signal_type": "risk",
+        "direction": "mixed",
+        "summary": "Prior SOL/ADA DCA thesis remains usable, but unresolved recommendation outcomes prevent stronger conviction.",
+        "time_window": "5y-10y"
+      }
+    ],
+    "confidence_pct": 68,
+    "data_quality": "verified",
+    "missing_data": ["resolved recommendation outcomes"],
+    "failed_gates": ["insufficient_outcome_history"],
+    "recommended_max_action": "conditional_action",
+    "what_would_change_my_mind": ["Resolved outcomes show repeated DCA timing failure."]
+  },
+  {
+    "agent_id": "portfolio_state_agent",
+    "asset_scope": ["portfolio", "ETH/lcETH", "SOL", "ADA", "US equities"],
+    "sources_used": [
+      {
+        "name": "portfolio_comparison_snapshot",
+        "url_or_provider": "local_snapshot",
+        "fresh_at": "2026-05-29T13:27:55Z",
+        "status": "ok",
+        "coverage": "holdings_weights_cash"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "ETH/lcETH",
+        "signal_type": "risk",
+        "direction": "bearish",
+        "summary": "ETH/lcETH remains above 50% of portfolio and should receive no new DCA.",
+        "time_window": "5y-10y"
+      }
+    ],
+    "confidence_pct": 78,
+    "data_quality": "degraded",
+    "missing_data": ["broker-confirmed US equity cash", "lcETH redemption details"],
+    "failed_gates": ["us_equity_cash_not_broker_verified", "staking_valuation_degraded"],
+    "recommended_max_action": "conditional_action",
+    "what_would_change_my_mind": ["Broker export verifies cash and lcETH provider confirms redemption terms."]
+  },
+  {
+    "agent_id": "macro_regime_agent",
+    "asset_scope": ["macro", "crypto", "us_equity"],
+    "sources_used": [
+      {
+        "name": "macro_panel",
+        "url_or_provider": "manual_research",
+        "fresh_at": "2026-05-29T13:33:42Z",
+        "status": "fallback",
+        "coverage": "rates_dxy_vix_fund_flows"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "risk_assets",
+        "signal_type": "macro",
+        "direction": "mixed",
+        "summary": "Macro does not justify all-in DCA; keep split-more pacing.",
+        "time_window": "1d-30d"
+      }
+    ],
+    "confidence_pct": 55,
+    "data_quality": "degraded",
+    "missing_data": ["fresh DXY/VIX/yields dashboard"],
+    "failed_gates": ["macro_panel_partial"],
+    "recommended_max_action": "conditional_action",
+    "what_would_change_my_mind": ["ETF/fund flows and liquidity conditions turn clearly risk-on."]
+  },
+  {
+    "agent_id": "crypto_market_agent",
+    "asset_scope": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "ADAUSDT", "NIGHTUSDT"],
+    "sources_used": [
+      {
+        "name": "current_crypto_multisource",
+        "url_or_provider": "Binance_CoinGecko_DeFiLlama",
+        "fresh_at": "2026-05-29T13:29:53Z",
+        "status": "ok",
+        "coverage": "price_volume_funding_open_interest"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "SOLUSDT",
+        "signal_type": "trend",
+        "direction": "neutral",
+        "summary": "SOL long-term DCA remains acceptable, but short-term alpha score is weak.",
+        "time_window": "1d-7d"
+      }
+    ],
+    "confidence_pct": 74,
+    "data_quality": "verified",
+    "missing_data": ["full order-book depth embedded in context"],
+    "failed_gates": [],
+    "recommended_max_action": "paper_only",
+    "what_would_change_my_mind": ["SOL volume/relative strength and verified catalyst improve together."]
+  },
+  {
+    "agent_id": "onchain_defi_agent",
+    "asset_scope": ["SOL", "ADA", "ETH", "NIGHT"],
+    "sources_used": [
+      {
+        "name": "defillama_chains",
+        "url_or_provider": "DeFiLlama",
+        "fresh_at": "2026-05-29T13:29:53Z",
+        "status": "ok",
+        "coverage": "chain_tvl_context"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "NIGHT",
+        "signal_type": "risk",
+        "direction": "mixed",
+        "summary": "NIGHT needs asset-specific float, unlock and ecosystem verification before any new add.",
+        "time_window": "30d"
+      }
+    ],
+    "confidence_pct": 50,
+    "data_quality": "degraded",
+    "missing_data": ["asset-level TVL/fees/revenue", "NIGHT unlock/float details"],
+    "failed_gates": ["asset_micro_onchain_incomplete"],
+    "recommended_max_action": "conditional_action",
+    "what_would_change_my_mind": ["Verified asset-level onchain data improves SOL/ADA/NIGHT thesis."]
+  },
+  {
+    "agent_id": "social_news_agent",
+    "asset_scope": ["BTC", "ETH", "SOL", "ADA", "NIGHT", "COIN", "CRCL"],
+    "sources_used": [
+      {
+        "name": "social_key_person_intel",
+        "url_or_provider": "active-alpha-social-monitor",
+        "fresh_at": "2026-05-29T13:33:42Z",
+        "status": "fallback",
+        "coverage": "official_social_news_context"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "crypto_social",
+        "signal_type": "catalyst",
+        "direction": "neutral",
+        "summary": "No verified single social catalyst can justify increasing real-money size.",
+        "time_window": "1d-7d"
+      }
+    ],
+    "confidence_pct": 45,
+    "data_quality": "degraded",
+    "missing_data": ["fresh verified key-person handoff"],
+    "failed_gates": ["social_context_partial"],
+    "recommended_max_action": "watch",
+    "what_would_change_my_mind": ["Official source plus price/volume confirmation supports a catalyst."]
+  },
+  {
+    "agent_id": "us_equity_alpha_agent",
+    "asset_scope": ["SOXL", "CRCL", "COIN", "dynamic_us_candidates"],
+    "sources_used": [
+      {
+        "name": "us_open_dynamic_scanner",
+        "url_or_provider": "Yahoo/local_scanner",
+        "fresh_at": "2026-05-29T13:31:05Z",
+        "status": "fallback",
+        "coverage": "market_movers_relative_strength"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "SOXL",
+        "signal_type": "tactical_alpha",
+        "direction": "mixed",
+        "summary": "No US candidate passed double-80; SOXL remains conditional tactical relay only.",
+        "time_window": "1d-10d"
+      }
+    ],
+    "confidence_pct": 58,
+    "data_quality": "degraded",
+    "missing_data": ["complete screener coverage", "US equity walk-forward base-rate"],
+    "failed_gates": ["double_80_not_met"],
+    "recommended_max_action": "watch",
+    "what_would_change_my_mind": ["Candidate reaches >=80 forecast probability and >=80 execution readiness."]
+  },
+  {
+    "agent_id": "backtest_validation_agent",
+    "asset_scope": ["recommendations", "paper_trades", "us_tactical", "crypto_tactical"],
+    "sources_used": [
+      {
+        "name": "recommendation_history",
+        "url_or_provider": "local_ledger",
+        "fresh_at": "2026-05-29T13:35:55Z",
+        "status": "ok",
+        "coverage": "outcome_tracking"
+      }
+    ],
+    "signals": [
+      {
+        "asset": "recommendation_history",
+        "signal_type": "validation",
+        "direction": "mixed",
+        "summary": "Recommendation ledger exists, but all new records are pending and cannot calibrate probability yet.",
+        "time_window": "monthly"
+      }
+    ],
+    "confidence_pct": 52,
+    "data_quality": "degraded",
+    "missing_data": ["resolved outcome sample", "probability bucket calibration"],
+    "failed_gates": ["insufficient_resolved_sample_size"],
+    "recommended_max_action": "paper_only",
+    "what_would_change_my_mind": ["At least 20 comparable recommendations resolve with calibrated hit rate."]
+  }
+]

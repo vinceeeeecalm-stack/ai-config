@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "recommendation-execution-calendar-v3-history-event-current-decision",
+  "timezone": "Asia/Shanghai",
+  "applies_to": [
+    "us_tactical",
+    "crypto_tactical",
+    "dca",
+    "long_term_add",
+    "formal_watch",
+    "no_deploy_candidate"
+  ],
+  "required_fields": [
+    "symbol",
+    "generated_at",
+    "decision_price",
+    "price_as_of",
+    "price_source",
+    "data_age_minutes",
+    "data_freshness_status",
+    "entry_window_start",
+    "entry_window_end",
+    "allowed_session",
+    "entry_trigger",
+    "no_entry_if_not_triggered",
+    "current_direct_decision",
+    "current_state_already_evaluated",
+    "primary_action_is_future_trigger",
+    "decision_price_ceiling",
+    "decision_valid_until",
+    "current_state_vector",
+    "historical_cycle_conditioning",
+    "macro_event_conditioning",
+    "derivatives_and_flow",
+    "buy_now_vs_wait",
+    "expected_holding_days",
+    "max_holding_days",
+    "target_1_price_or_scenario",
+    "target_1_evaluation_window",
+    "target_2_price_or_scenario",
+    "target_2_evaluation_window",
+    "stop_or_invalid",
+    "time_stop",
+    "event_exit_date",
+    "event_handling_plan",
+    "latest_exit_or_review_date",
+    "post_exit_state",
+    "auto_relay_forbidden",
+    "cash_rail_source",
+    "current_deployable_cash_usd",
+    "settlement_constraint",
+    "action_allowed",
+    "execution_action",
+    "observation_action",
+    "observation_trigger",
+    "impulse_monitoring_required",
+    "impulse_check_deadline",
+    "candidate_coverage_matrix",
+    "baseline_frozen",
+    "historical_baseline_mutation_forbidden"
+    ,"baseline_snapshot_sha256"
+    ,"live_orders_enabled"
+    ,"private_api_used"
+    ,"human_confirmation_required"
+  ],
+  "allowed_session_values": [
+    "us_regular_session_only",
+    "crypto_24x7_closed_bar_only",
+    "review_only_no_trade"
+  ],
+  "freshness_status_values": [
+    "verified_realtime",
+    "verified_recent_close",
+    "verified_delayed",
+    "degraded",
+    "stale",
+    "missing"
+  ],
+  "execution_action_values": [
+    "execute_now",
+    "conditional_action",
+    "paper_only",
+    "watch",
+    "no_deploy"
+  ],
+  "current_direct_decision_values": [
+    "enter_now",
+    "small_entry_now",
+    "do_not_enter_now"
+  ],
+  "observation_action_values": [
+    "no_observation",
+    "watch",
+    "paper_only",
+    "conditional_action",
+    "risk_alert"
+  ],
+  "coverage_status_values": [
+    "verified_current",
+    "degraded",
+    "missing",
+    "not_applicable"
+  ],
+  "candidate_coverage_required_roles": [
+    "market",
+    "official_event",
+    "social_news",
+    "asset_specific_risk"
+  ],
+  "impulse_check_deadline_sentinel": "not_required_no_active_impulse_setup",
+  "event_exit_date_sentinel": "none_scheduled_verified_at_generation",
+  "post_exit_state_required": "cash_pending_manual_reallocation",
+  "auto_relay_forbidden_required": true,
+  "missing_field_max_action": "no_deploy",
+  "execute_now_requires_positive_settled_cash": true,
+  "notes": "This schema is an execution-calendar, historical/event-conditioning and signal-continuity gate, not an order schema. current_direct_decision is the theoretical decision at the frozen price; execution_action is the real-money ceiling. Future triggers cannot replace the current direct decision. no_deploy never means stop observing. Gate output never authorizes a live trade; execute_now is capped at conditional_action until separate research, probability, portfolio and human-confirmation gates pass."
+}

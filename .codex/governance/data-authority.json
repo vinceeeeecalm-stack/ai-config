@@ -1,0 +1,37 @@
+{
+  "schema_version": "DataAuthorityV1",
+  "authorities": [
+    {
+      "field_group": "maintainable_source_and_contracts",
+      "authority": "统一仓库中已评审的 Skill、脚本、配置、Schema、测试与维护文档",
+      "writer": "持有治理锁的唯一写入任务",
+      "freshness_seconds": 0,
+      "fallback": "锁冲突时只生成提案，不直接修改",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "runtime_market_cache_and_reports",
+      "authority": "Git 外的运行目录与独立哈希/备份清单",
+      "writer": "受控自动化或运行服务",
+      "freshness_seconds": 0,
+      "fallback": "不得回填进 Git 历史",
+      "formal_use_allowed": false
+    },
+    {
+      "field_group": "account_ledgers_and_private_state",
+      "authority": "各业务链声明的用户确认账户与专用持久化层",
+      "writer": "对应账户适配器或人工确认流程",
+      "freshness_seconds": 86400,
+      "fallback": "历史、Demo 和估算数据只作参考",
+      "formal_use_allowed": false
+    },
+    {
+      "field_group": "mobile_console_history",
+      "authority": "mobile-investment-console Git bundle 与统一仓库中的继承提交历史",
+      "writer": "统一仓库集成负责人",
+      "freshness_seconds": 0,
+      "fallback": "迁移前工作区副本用于恢复，不作为并行写入源",
+      "formal_use_allowed": true
+    }
+  ]
+}

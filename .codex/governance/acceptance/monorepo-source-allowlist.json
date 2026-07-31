@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "monorepo-source-allowlist",
+  "title": "统一仓库只跟踪可维护源码与合同",
+  "level": "TESTED",
+  "preconditions": ["根目录 .gitignore 使用默认拒绝策略"],
+  "steps": ["枚举暂存与已跟踪文件", "匹配禁止目录、语义属于账户/paper 状态的文档和文件类型", "检查秘密形态", "核对五个账户/状态文件均在 Git 外哈希清单中"],
+  "expected": ["运行数据库、缓存、报告、账本、paper 状态、账户交接文档和临时产物为零", "环境文件与私密状态为零", "五个账户/状态文件保留在磁盘且全部进入 Git 外哈希清单", "源码、Skill、配置、Schema、确定性夹具、测试和维护文档可被跟踪"],
+  "evidence": ["仓库策略验证脚本", "已跟踪路径清单摘要", "Git 外文件 SHA-256 清单"]
+}

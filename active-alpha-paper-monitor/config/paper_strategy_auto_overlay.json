@@ -1,0 +1,354 @@
+{
+  "strategy_version": "paper-auto-v20260710-220305",
+  "created_at": "2026-06-27T20:28:25+08:00",
+  "updated_at": "2026-07-10T22:03:05+08:00",
+  "scope": "paper_only_auto_strategy_overlay",
+  "auto_learning_enabled": true,
+  "auto_apply_scope": "paper_only",
+  "live_orders_enabled": false,
+  "private_api_used": false,
+  "allow_real_orders": false,
+  "default_decision": "allow",
+  "risk_rules": {
+    "max_open_positions": 1,
+    "default_notional_usd": 25,
+    "max_symbol_open_notional_usd": 25,
+    "paper_only": true
+  },
+  "entry_mode_rules": {
+    "info_exploratory_probe": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Exploratory entry modes have enough resolved samples to show weak or negative net return. They should not keep consuming paper capacity without stronger current-signal and liquidity evidence.",
+      "requires_retest": true,
+      "min_forward_samples": 3,
+      "source_change_id": "pc-tighten_exploratory_probe_gate-101d5619f3",
+      "candidate_rules": []
+    },
+    "crash_rebound_probe": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    },
+    "current signal near miss 1d": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    },
+    "current_signal_near_miss_probe": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    },
+    "liquid_momentum_breakout": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    },
+    "liquid_momentum_probe": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    },
+    "top_blocked_retest_quality_scout": {
+      "status": "cooldown",
+      "paper_status": "paper_applied",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "candidate_rules": []
+    }
+  },
+  "strategy_family_rules": {
+    "1h momentum": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_applied",
+      "reason": "The weakest strategy family by realized PnL is dragging the closed-trade distribution and needs a paper-only quality gate before further sampling.",
+      "requires_retest": true,
+      "min_forward_samples": 5,
+      "source_change_id": "pc-attribution-review_negative_strategy_family-f2cc8ccf32",
+      "candidate_rules": [
+        "route weak family through recovery optimizer or retest lab first",
+        "cap new exposure at smallest paper scout size",
+        "require positive forward evidence before larger sizing"
+      ]
+    },
+    "momentum": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Momentum or breakout-style paper entries are failing to continue after entry, which points to weak confirmation or late chase risk.",
+      "requires_retest": true,
+      "min_forward_samples": 10,
+      "source_change_id": "pc-attribution-tighten_momentum_confirmation-85e89d919b",
+      "candidate_rules": [
+        "require 5m/15m volume expansion to persist after trigger",
+        "require spread/depth and taker-buy support to stay healthy",
+        "downgrade late extended breakouts to watch unless retest confirms"
+      ]
+    }
+  },
+  "interval_rules": {
+    "15m": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Some intervals are producing negative realized net return. The system should avoid adding exposure from these intervals unless the setup is a strict quality scout or independent retest.",
+      "requires_retest": true,
+      "min_forward_samples": 3,
+      "source_change_id": "pc-interval_quality_filter-5a0e655640"
+    },
+    "1d": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Some intervals are producing negative realized net return. The system should avoid adding exposure from these intervals unless the setup is a strict quality scout or independent retest.",
+      "requires_retest": true,
+      "min_forward_samples": 3,
+      "source_change_id": "pc-interval_quality_filter-5a0e655640"
+    },
+    "1h": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Some intervals are producing negative realized net return. The system should avoid adding exposure from these intervals unless the setup is a strict quality scout or independent retest.",
+      "requires_retest": true,
+      "min_forward_samples": 3,
+      "source_change_id": "pc-interval_quality_filter-5a0e655640"
+    },
+    "UNKNOWN": {
+      "status": "paper_ab_testing",
+      "paper_status": "paper_ab_testing",
+      "reason": "Some intervals are producing negative realized net return. The system should avoid adding exposure from these intervals unless the setup is a strict quality scout or independent retest.",
+      "requires_retest": true,
+      "min_forward_samples": 3,
+      "source_change_id": "pc-interval_quality_filter-5a0e655640"
+    }
+  },
+  "exit_rules": {
+    "profit_protection": {
+      "status": "paper_ab_testing",
+      "arm_after_mfe_pct": 2.0,
+      "trailing_floor_pct": 0.25,
+      "source": "default_overlay",
+      "paper_status": "paper_applied",
+      "reason": "Recent losing paper trades reached at least +2% floating profit but closed negative, so the exit layer is giving back recoverable gains.",
+      "source_change_id": "pc-attribution-tighten_profit_protection-340c28983f"
+    }
+  },
+  "rollback_rules": {
+    "min_forward_samples": 5,
+    "recent_win_rate_floor_pct": 30,
+    "recent_net_pnl_must_be_positive": true,
+    "max_drawdown_worsen_multiple": 1.5,
+    "friction_cost_to_gross_edge_ceiling_pct": 40
+  },
+  "change_log": [
+    {
+      "change_id": "pc-attribution-review_negative_entry_mode-142a1a3b76",
+      "status": "paper_applied",
+      "change_type": "review_negative_entry_mode",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Review weak entry mode info_exploratory_probe",
+      "reason": "The weakest entry mode by realized PnL is still active in attribution evidence and should not receive larger paper size without a forward retest.",
+      "affected_entry_modes": [
+        "info_exploratory_probe"
+      ],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "paper_trade_attribution_report",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-attribution-review_negative_strategy_family-f2cc8ccf32",
+      "status": "paper_applied",
+      "change_type": "review_negative_strategy_family",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Review weak strategy family 1h momentum",
+      "reason": "The weakest strategy family by realized PnL is dragging the closed-trade distribution and needs a paper-only quality gate before further sampling.",
+      "affected_entry_modes": [],
+      "affected_strategy_families": [
+        "1h momentum"
+      ],
+      "affected_intervals": [],
+      "source": "paper_trade_attribution_report",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-attribution-tighten_momentum_confirmation-85e89d919b",
+      "status": "paper_ab_testing",
+      "change_type": "tighten_momentum_confirmation",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Require stronger follow-through before momentum entries",
+      "reason": "Momentum or breakout-style paper entries are failing to continue after entry, which points to weak confirmation or late chase risk.",
+      "affected_entry_modes": [],
+      "affected_strategy_families": [
+        "momentum"
+      ],
+      "affected_intervals": [],
+      "source": "paper_trade_attribution_report",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-attribution-tighten_profit_protection-340c28983f",
+      "status": "paper_ab_testing",
+      "change_type": "tighten_profit_protection",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Tighten profit protection after early unrealized gains",
+      "reason": "Recent losing paper trades reached at least +2% floating profit but closed negative, so the exit layer is giving back recoverable gains.",
+      "affected_entry_modes": [],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "paper_trade_attribution_report",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-interval_quality_filter-5a0e655640",
+      "status": "paper_ab_testing",
+      "change_type": "interval_quality_filter",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Restrict weak intervals until they recover",
+      "reason": "Some intervals are producing negative realized net return. The system should avoid adding exposure from these intervals unless the setup is a strict quality scout or independent retest.",
+      "affected_entry_modes": [],
+      "affected_strategy_families": [],
+      "affected_intervals": [
+        "15m",
+        "1d",
+        "1h",
+        "UNKNOWN"
+      ],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-monthly_target_recovery_posture-f5204e39d3",
+      "status": "auto_apply_no_overlay_mapping",
+      "change_type": "monthly_target_recovery_posture",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Keep sizing conservative until quality recovers",
+      "reason": "The paper ledger is below the monthly compounding target, so increasing size would amplify a strategy with unproven or negative expectancy.",
+      "affected_entry_modes": [],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-retire_failed_sampling_paths-007a45756a",
+      "status": "paper_applied",
+      "change_type": "retire_failed_sampling_paths",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Retire deeply negative paper sampling paths",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "affected_entry_modes": [
+        "crash_rebound_probe",
+        "current signal near miss 1d",
+        "current_signal_near_miss_probe",
+        "liquid_momentum_breakout",
+        "liquid_momentum_probe"
+      ],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-tighten_exploratory_probe_gate-d4c5379a1a",
+      "status": "paper_ab_testing",
+      "change_type": "tighten_exploratory_probe_gate",
+      "applied_at": "2026-06-27T21:51:01+08:00",
+      "scope": "paper_only",
+      "title": "Tighten exploratory probe eligibility",
+      "reason": "Exploratory entry modes have enough resolved samples to show weak or negative net return. They should not keep consuming paper capacity without stronger current-signal and liquidity evidence.",
+      "affected_entry_modes": [
+        "info_exploratory_probe"
+      ],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-retire_failed_sampling_paths-b4ec746f0d",
+      "status": "paper_applied",
+      "change_type": "retire_failed_sampling_paths",
+      "applied_at": "2026-06-30T08:23:24+08:00",
+      "scope": "paper_only",
+      "title": "Retire deeply negative paper sampling paths",
+      "reason": "Resolved paper samples show low hit rate and negative realized net return; continuing these paths would add low-quality samples and pull the monthly target further behind.",
+      "affected_entry_modes": [
+        "crash_rebound_probe",
+        "current signal near miss 1d",
+        "current_signal_near_miss_probe",
+        "liquid_momentum_breakout",
+        "liquid_momentum_probe",
+        "top_blocked_retest_quality_scout"
+      ],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    {
+      "change_id": "pc-tighten_exploratory_probe_gate-101d5619f3",
+      "status": "paper_ab_testing",
+      "change_type": "tighten_exploratory_probe_gate",
+      "applied_at": "2026-07-10T22:03:05+08:00",
+      "scope": "paper_only",
+      "title": "Tighten exploratory probe eligibility",
+      "reason": "Exploratory entry modes have enough resolved samples to show weak or negative net return. They should not keep consuming paper capacity without stronger current-signal and liquidity evidence.",
+      "affected_entry_modes": [
+        "info_exploratory_probe"
+      ],
+      "affected_strategy_families": [],
+      "affected_intervals": [],
+      "source": "validation_sample_auditor",
+      "previous_operator_status": "auto_apply_paper_only",
+      "live_orders_enabled": false,
+      "private_api_used": false
+    }
+  ],
+  "operator_note": "Paper-only overlay. It may alter simulated entries and tags only; it cannot enable real trading."
+}

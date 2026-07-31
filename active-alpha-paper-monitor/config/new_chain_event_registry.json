@@ -1,0 +1,56 @@
+{
+  "schema_version": "new-chain-event-registry-v1",
+  "defaults": {
+    "ecosystem_watch_hours": 72,
+    "min_cross_source_contract_confirmations": 2,
+    "min_liquidity_usd": 500000,
+    "min_volume_1h_usd": 100000,
+    "min_volume_24h_usd": 1000000,
+    "min_unique_traders_1h": 100,
+    "max_buy_or_sell_tax_pct": 5,
+    "max_top10_non_lp_holder_pct": 35,
+    "max_deployer_holder_pct": 5,
+    "live_orders_enabled": false
+  },
+  "official_source_families": [
+    "broker_and_exchange_newsrooms",
+    "chain_and_protocol_blogs",
+    "official_chain_documentation",
+    "canonical_dex_and_bridge_announcements",
+    "launchpad_and_wallet_support_announcements",
+    "chain_explorer_and_rpc_metadata"
+  ],
+  "events": [
+    {
+      "event_id": "robinhood-chain-mainnet-20260701",
+      "entity": "Robinhood",
+      "chain_name": "Robinhood Chain",
+      "status": "mainnet_live",
+      "announced_at": "2026-06-02T00:00:00-04:00",
+      "mainnet_live_at": "2026-07-01T14:00:00-04:00",
+      "watch_until": "2026-08-01T23:59:59-04:00",
+      "chain_id": 4663,
+      "dexscreener_chain_id": "robinhood",
+      "geckoterminal_network": "robinhood",
+      "official_sources": [
+        "https://robinhood.com/us/en/newsroom/robinhood-presents-the-world-is-flat/",
+        "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+        "https://docs.robinhood.com/chain/connecting/",
+        "https://robinhood.com/us/en/support/articles/robinhood-chain-mainnet/"
+      ],
+      "day_one_infrastructure": [
+        "Uniswap",
+        "Pleiades",
+        "Alchemy",
+        "BitGo",
+        "Chainlink"
+      ],
+      "narrative_aliases": [
+        "Robinhood",
+        "Robinhood Chain",
+        "Cash Cat"
+      ],
+      "verified": true
+    }
+  ]
+}

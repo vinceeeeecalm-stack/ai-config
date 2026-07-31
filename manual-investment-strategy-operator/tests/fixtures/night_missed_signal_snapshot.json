@@ -1,0 +1,59 @@
+{
+  "symbol": "NIGHT",
+  "prior_watch_or_recommendation_present": false,
+  "evidence_snapshot": {
+    "snapshot_id": "night-incident-20260719",
+    "generated_at": "2026-07-19T23:30:00+08:00",
+    "cutoff_at": "2026-07-19T23:30:00+08:00",
+    "records": [
+      {
+        "evidence_id": "night-previous-price",
+        "category": "spot",
+        "symbol": "NIGHT",
+        "metric": "previous_price",
+        "value": 0.04,
+        "unit": "USDT",
+        "as_of": "2026-07-18T23:30:00+08:00",
+        "source": "frozen_public_market_snapshot",
+        "source_role": "primary",
+        "max_age_seconds": 172800
+      },
+      {
+        "evidence_id": "night-current-price",
+        "category": "spot",
+        "symbol": "NIGHT",
+        "metric": "current_price",
+        "value": 0.048,
+        "unit": "USDT",
+        "as_of": "2026-07-19T23:29:00+08:00",
+        "source": "frozen_public_market_snapshot",
+        "source_role": "primary",
+        "max_age_seconds": 300
+      },
+      {
+        "evidence_id": "night-volume-ratio",
+        "category": "volume",
+        "symbol": "NIGHT",
+        "metric": "volume_ratio_24h",
+        "value": 2.1,
+        "unit": "ratio",
+        "as_of": "2026-07-19T23:29:00+08:00",
+        "source": "frozen_public_market_snapshot",
+        "source_role": "primary",
+        "max_age_seconds": 900
+      },
+      {
+        "evidence_id": "night-catalyst-count",
+        "category": "news",
+        "symbol": "NIGHT",
+        "metric": "verified_catalyst_count_24h",
+        "value": 1,
+        "unit": "count",
+        "as_of": "2026-07-19T22:00:00+08:00",
+        "source": "frozen_verified_announcement_index",
+        "source_role": "primary",
+        "max_age_seconds": 86400
+      }
+    ]
+  }
+}

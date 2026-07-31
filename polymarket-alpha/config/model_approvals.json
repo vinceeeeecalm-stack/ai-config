@@ -1,0 +1,8 @@
+{
+  "schema_version": "polymarket-model-approvals-v1",
+  "approved_model_versions": [],
+  "approval_policy": "manual_explicit_approval_required_after_oos_and_source_review",
+  "paper_only": true,
+  "live_orders_enabled": false,
+  "private_api_used": false
+}

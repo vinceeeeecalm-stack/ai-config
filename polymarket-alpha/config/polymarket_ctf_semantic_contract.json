@@ -1,0 +1,76 @@
+{
+  "schema_version": "polymarket-ctf-semantic-contract-v1",
+  "validated_at": "2026-07-12T04:10:00+00:00",
+  "status": "official_general_semantics_validated",
+  "official_sources": [
+    {
+      "title": "Polymarket CTF Overview",
+      "url": "https://docs.polymarket.com/trading/ctf/overview"
+    },
+    {
+      "title": "Polymarket Split Tokens",
+      "url": "https://docs.polymarket.com/trading/ctf/split"
+    },
+    {
+      "title": "Polymarket Merge Tokens",
+      "url": "https://docs.polymarket.com/trading/ctf/merge"
+    },
+    {
+      "title": "Polymarket Inventory Management",
+      "url": "https://docs.polymarket.com/market-makers/inventory"
+    }
+  ],
+  "binary_partition": [1, 2],
+  "parent_collection_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "split_contract": {
+    "atomic": true,
+    "collateral_units_per_complete_set": 1.0,
+    "yes_units_per_complete_set": 1.0,
+    "no_units_per_complete_set": 1.0,
+    "requires_prepared_condition": true,
+    "requires_collateral_approval": true
+  },
+  "merge_contract": {
+    "atomic": true,
+    "yes_units_burned_per_complete_set": 1.0,
+    "no_units_burned_per_complete_set": 1.0,
+    "collateral_units_returned_per_complete_set": 1.0,
+    "requires_prepared_condition": true
+  },
+  "market_routes": {
+    "standard": {
+      "collateral_adapter": "0xAdA100Db00Ca00073811820692005400218FcE1f"
+    },
+    "negative_risk": {
+      "collateral_adapter": "0xadA2005600Dec949baf300f4C6120000bDB6eAab"
+    }
+  },
+  "read_only_condition_proof": {
+    "chain_id": 137,
+    "conditional_tokens_contract": "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
+    "method_signature": "getOutcomeSlotCount(bytes32)",
+    "method_selector": "0xd42dc0c2",
+    "required_outcome_slot_count": 2,
+    "minimum_consistent_public_rpc_sources": 2,
+    "public_rpc_sources": [
+      "https://polygon.publicnode.com",
+      "https://polygon.api.onfinality.io/public"
+    ],
+    "rpc_source_registry": "https://docs.polygon.technology/pos/reference/rpc-endpoints",
+    "conditional_tokens_source": "https://github.com/gnosis/conditional-tokens-contracts/blob/master/contracts/ConditionalTokens.sol"
+  },
+  "paper_promotion_requirements": {
+    "per_market_prepared_condition_read_only_proof": true,
+    "correct_adapter_route_from_market_metadata": true,
+    "fresh_complete_depth_for_both_sale_legs": true,
+    "fees_slippage_and_operation_reserve_included": true,
+    "split_confirmation_before_leg_sales_simulated": true,
+    "main_gate_net_edge_per_pair_usd": 0.04,
+    "forward_leg_risk_validation": true
+  },
+  "general_semantics_validated": true,
+  "per_market_execution_validated": false,
+  "paper_entry_eligible": false,
+  "live_orders_enabled": false,
+  "private_api_used": false
+}

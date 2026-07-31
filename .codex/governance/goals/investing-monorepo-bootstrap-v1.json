@@ -1,0 +1,36 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "investing-monorepo-bootstrap-v1",
+  "title": "建立可审计的统一投资源码仓库",
+  "business_outcome": "让活跃投资 Skill、自动化源码和移动端产品共享一个可追溯版本边界，同时把运行状态与隐私数据留在 Git 外。",
+  "scope": [
+    "保留移动端 Git 历史与当前工作区改动",
+    "建立 /Users/vincentpan/Documents/investing 独立仓库",
+    "纳入活跃 Skill、配置、脚本、测试与维护文档",
+    "建立默认拒绝的 Git allowlist",
+    "初始化闭环治理资产和单写入锁"
+  ],
+  "non_goals": [
+    "不迁移 runtime、市场缓存、报告、账本、paper 状态、临时产物或私密数据",
+    "不修改投资策略逻辑",
+    "不启动或重启任何自动化",
+    "不批量迁移历史归档项目"
+  ],
+  "constraints": [
+    "迁移前必须有可验证 Git bundle 和工作区副本",
+    "不删除原始数据或运行产物",
+    "自动化锁冲突时只能生成提案",
+    "移动端原 main 提交必须保留为新分支祖先"
+  ],
+  "acceptance_scenario_ids": [
+    "monorepo-history-preserved",
+    "monorepo-source-allowlist",
+    "monorepo-single-root"
+  ],
+  "required_level": "TESTED",
+  "risk": "high",
+  "supersedes_id": null,
+  "frozen_at": "2026-07-31T12:00:35.244337Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "584121945b19aaed97d7d51b1fe66dd73095e4df0872717a56e928f6f9d0435c"
+}

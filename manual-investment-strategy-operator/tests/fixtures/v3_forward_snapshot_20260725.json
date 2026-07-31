@@ -1,0 +1,55 @@
+{
+  "snapshot_id": "forward-snapshot-20260725-v3",
+  "generated_at": "2026-07-25T08:30:00+08:00",
+  "cutoff_at": "2026-07-25T08:30:00+08:00",
+  "records": [
+    {
+      "evidence_id": "forward-sol-price",
+      "category": "spot",
+      "symbol": "SOL",
+      "metric": "price",
+      "value": 188.25,
+      "unit": "USDT",
+      "as_of": "2026-07-25T08:29:00+08:00",
+      "source": "frozen_contract_forward_test",
+      "source_role": "primary",
+      "max_age_seconds": 300
+    },
+    {
+      "evidence_id": "forward-eth-price",
+      "category": "spot",
+      "symbol": "ETH",
+      "metric": "price",
+      "value": 3925.5,
+      "unit": "USDT",
+      "as_of": "2026-07-25T08:29:00+08:00",
+      "source": "frozen_contract_forward_test",
+      "source_role": "primary",
+      "max_age_seconds": 300
+    },
+    {
+      "evidence_id": "forward-mu-price",
+      "category": "spot",
+      "symbol": "MU",
+      "metric": "price",
+      "value": 135.4,
+      "unit": "USD",
+      "as_of": "2026-07-25T04:00:00+08:00",
+      "source": "frozen_contract_forward_test",
+      "source_role": "primary",
+      "max_age_seconds": 21600
+    },
+    {
+      "evidence_id": "forward-apld-price",
+      "category": "spot",
+      "symbol": "APLD",
+      "metric": "price",
+      "value": 27.19,
+      "unit": "USD",
+      "as_of": "2026-07-25T04:00:00+08:00",
+      "source": "frozen_contract_forward_test",
+      "source_role": "primary",
+      "max_age_seconds": 21600
+    }
+  ]
+}

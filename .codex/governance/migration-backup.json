@@ -1,0 +1,16 @@
+{
+  "schema_version": "MigrationBackupEvidenceV1",
+  "id": "mobile-investment-console-pre-monorepo-20260731",
+  "source_root": "/Users/vincentpan/Documents/investing/mobile-investment-console",
+  "original_head": "1d169c15b8e3c23b56f0ec8336195863f1dbcb33",
+  "bundle_path": "/Users/vincentpan/Documents/Codex/2026-07-31/neng/work/investing-migration-backup/mobile-investment-console.bundle",
+  "bundle_sha256": "af88fd27ac88334e024ee4920dd094f85250f8122a2bf23765016c834ba37787",
+  "workspace_snapshot_path": "/Users/vincentpan/Documents/Codex/2026-07-31/neng/work/investing-migration-backup/mobile-investment-console-workspace",
+  "workspace_snapshot_manifest_sha256": "7af5d2c518494541d9df946f98c5111f79b17676a0d764dbc485aeea3347674f",
+  "nested_git_backup_path": "/Users/vincentpan/Documents/Codex/2026-07-31/neng/work/investing-migration-backup/mobile-investment-console-nested-git",
+  "bundle_verified_complete": true,
+  "excluded_file_inventory_path": "/Users/vincentpan/Documents/Codex/2026-07-31/neng/work/investing-migration-backup/investing-excluded-files.sha256",
+  "excluded_file_inventory_sha256": "20748c1081259204a4d05f93b349d32ba22e7aab199e9b88dca660499d07c06b",
+  "excluded_file_count": 12926,
+  "required_account_state_files_covered": 5
+}

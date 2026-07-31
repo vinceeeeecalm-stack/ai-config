@@ -1,0 +1,94 @@
+{
+  "schema_version": "sports-100usd-paper-policy-v4",
+  "effective_date_bjt": "2026-07-18",
+  "account_id": "polymarket_sports_100usd_20260716",
+  "decision_priority": [
+    "calibrated_win_probability",
+    "executable_net_edge",
+    "data_and_execution_confidence"
+  ],
+  "lanes": {
+    "high_confidence": {
+      "minimum_calibrated_p_exec": 0.8,
+      "minimum_research_probability_lower_bound": 0.8,
+      "minimum_net_ev_cents": 3.0,
+      "normal_stake_usd": 5.0,
+      "maximum_stake_usd": 7.0,
+      "description": "胜率优先次级训练赛道；研究概率下限与P_exec均须至少80%，摩擦后净优势至少3¢。主入场仍要求5¢。"
+    },
+    "value": {
+      "minimum_calibrated_p_exec": 0.6,
+      "maximum_calibrated_p_exec_exclusive": 0.8,
+      "minimum_net_ev_cents": 5.0,
+      "normal_stake_usd": [5.0, 10.0],
+      "maximum_stake_usd": 10.0,
+      "description": "未达到80%但存在明显价格错配的价值赛道。"
+    },
+    "exploration_micro": {
+      "enabled": true,
+      "pilot_only": true,
+      "minimum_calibrated_p_exec": 0.7,
+      "minimum_research_probability_lower_bound": 0.65,
+      "maximum_probability_interval_width": 0.1,
+      "minimum_net_ev_cents": -4.0,
+      "maximum_ask_cents": 90.0,
+      "stake_usd": 1.0,
+      "maximum_entries_per_bjt_day": 2,
+      "maximum_daily_stake_usd": 2.0,
+      "maximum_concurrent_positions": 1,
+      "cumulative_loss_stop_usd": 6.0,
+      "review_after_closed_entries": 20,
+      "counts_as_formal_recommendation": false,
+      "description": "用户要求提高paper样本频次的独立微仓试验；允许最多4¢模型负边际，但必须完成独立概率与执行证据，且与正式推荐统计隔离。"
+    }
+  },
+  "required_gates": [
+    "contract",
+    "sources",
+    "probability",
+    "price",
+    "liquidity",
+    "execution"
+  ],
+  "max_concurrent_independent_events": 2,
+  "absolute_max_stake_usd": 15.0,
+  "daily_loss_stop_usd": 20.0,
+  "drawdown_freeze_pct": 30.0,
+  "scheduler": {
+    "default_active_broad_scan_count": 1,
+    "default_broad_scan_interval_minutes": 60,
+    "adaptive_candidate_interval_minutes": [20, 30],
+    "adaptive_monitor_requires_candidate_id": true,
+    "adaptive_monitor_must_auto_expire": true,
+    "adaptive_monitor_max_concurrent": 2,
+    "all_automations_must_not_be_enabled_together": true
+  },
+  "live_source_stability_gate": {
+    "material_conflict_cooldown_seconds": 300,
+    "consistent_snapshots_required": 2,
+    "minimum_snapshot_spacing_seconds": 60,
+    "maximum_snapshot_age_seconds": 120
+  },
+  "daily_postmortem": {
+    "required": true,
+    "default_run_time_bjt": "12:45",
+    "audit_previous_bjt_day": true,
+    "carry_forward_unknown_results": true,
+    "separate_recommendation_watch_pass_and_trade_metrics": true
+  },
+  "watch_registration": {
+    "canonical_record_required": true,
+    "required_probability_for_watch_metrics": true,
+    "incomplete_label": "MARKET_ALERT_PROBABILITY_INCOMPLETE",
+    "non_material_missing_fields_may_use_uncertainty_discount_and_m1": true
+  },
+  "separate_metrics": {
+    "high_confidence": ["direction_hit_rate", "brier", "roi", "clv"],
+    "value": ["direction_hit_rate", "brier", "net_ev_at_entry", "roi", "clv"],
+    "exploration_micro": ["entry_count", "direction_hit_rate", "brier", "net_ev_at_entry", "roi", "clv", "cumulative_experiment_cost"]
+  },
+  "paper_only": true,
+  "live_orders_enabled": false,
+  "private_api_used": false,
+  "real_money_execution_authorized": false
+}
