@@ -11,3 +11,5 @@
 {"schema_version":"GovernanceEventV1","event_type":"level_verified","created_at":"2026-07-31T12:16:42.711475Z","thread_id":"019fb5a2-45d4-7f10-ae62-07d8390a4ca8","goal_id":"investing-monorepo-bootstrap-v1","level":"CODED","blocked":false}
 {"schema_version":"GovernanceEventV1","event_type":"level_verified","created_at":"2026-07-31T12:16:43.060351Z","thread_id":"019fb5a2-45d4-7f10-ae62-07d8390a4ca8","goal_id":"investing-monorepo-bootstrap-v1","level":"TESTED","blocked":false}
 {"schema_version":"GovernanceEventV1","event_type":"level_verified","created_at":"2026-07-31T12:19:27.720244Z","thread_id":"019fb5a2-45d4-7f10-ae62-07d8390a4ca8","goal_id":"investing-monorepo-bootstrap-v1","level":"TESTED","blocked":false}
+{"schema_version":"GovernanceEventV1","event_type":"release_evidence_created","created_at":"2026-07-31T12:19:41.027540Z","thread_id":"019fb5a2-45d4-7f10-ae62-07d8390a4ca8","release_id":"investing-monorepo-baseline-20260731","level":"TESTED"}
+{"schema_version":"GovernanceEventV1","event_type":"change_closed","created_at":"2026-07-31T12:19:41.112498Z","thread_id":"019fb5a2-45d4-7f10-ae62-07d8390a4ca8","goal_id":"investing-monorepo-bootstrap-v1"}
