@@ -1,0 +1,27 @@
+{
+  "as_of": "2030-01-02T00:00:00+00:00",
+  "cash_rails": {
+    "crypto_usdt_available": 0.0,
+    "us_equity_cash_usd": 0.0
+  },
+  "fixture_notice": "Synthetic deterministic test data. Not an account export or user portfolio.",
+  "holdings": {
+    "ENA": {
+      "quantity": 0.0,
+      "reason": "synthetic current override"
+    },
+    "NIGHT": {
+      "quantity": 0.0,
+      "reason": "synthetic current override"
+    },
+    "SOXL": {
+      "quantity": 0.0,
+      "reason": "synthetic current override"
+    },
+    "USDT": {
+      "quantity": 0.0,
+      "reason": "synthetic current override"
+    }
+  },
+  "schema_version": "SyntheticCurrentOverridesFixtureV1"
+}

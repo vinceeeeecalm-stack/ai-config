@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "github-clean-checkout-safety-gate-v3",
+  "title": "GitHub main clean checkout contains and runs the public repository safety gate",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "A detached clean worktree is created from the verified GitHub origin/main commit"
+  ],
+  "steps": [
+    "Confirm scripts/scan-public-repo.py is tracked in origin/main",
+    "Run the scanner against the clean worktree and all reachable history"
+  ],
+  "expected": [
+    "The scanner is present and executable from a clean checkout",
+    "Secret findings equal zero",
+    "Privacy findings equal zero"
+  ],
+  "evidence": [
+    "clean-checkout scanner output",
+    "GitHub main tree"
+  ]
+}

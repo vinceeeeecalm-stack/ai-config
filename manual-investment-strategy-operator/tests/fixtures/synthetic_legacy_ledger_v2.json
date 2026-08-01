@@ -1,0 +1,35 @@
+{
+  "as_of": "2030-01-01T00:00:00+00:00",
+  "cash_rails": {
+    "crypto_rail": {
+      "cash_or_stablecoin_value": 222.0
+    },
+    "us_equity_rail": {
+      "cash_usd": 111.0
+    }
+  },
+  "fixture_notice": "Synthetic deterministic test data. Not an account export or user portfolio.",
+  "holdings": [
+    {
+      "last_verified_at": "2030-01-01T00:00:00+00:00",
+      "quantity": 2.0,
+      "symbol": "NIGHT"
+    },
+    {
+      "last_verified_at": "2030-01-01T00:00:00+00:00",
+      "quantity": 3.0,
+      "symbol": "ENA"
+    },
+    {
+      "last_verified_at": "2030-01-01T00:00:00+00:00",
+      "quantity": 333.0,
+      "symbol": "USDT"
+    },
+    {
+      "last_verified_at": "2030-01-01T00:00:00+00:00",
+      "quantity": 7.0,
+      "symbol": "SOXL"
+    }
+  ],
+  "schema_version": "SyntheticLegacyLedgerFixtureV1"
+}
