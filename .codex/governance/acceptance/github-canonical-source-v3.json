@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "github-canonical-source-v3",
+  "title": "GitHub main 成为可恢复的唯一源码权威",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["bundle、工作区快照和哈希清单已生成", "远端 main 历史已保留"],
+  "steps": ["设置 origin", "在 codex 分支提交并推送", "创建 PR", "满足门控后合并 main", "核验本地与远端提交"],
+  "expected": ["不 force-push", "main 包含验证后的项目源码与 README", "运行和私密数据未跟踪", "恢复证据可用"],
+  "evidence": ["bundle 与清单", "Git/PR/main 证据"]
+}

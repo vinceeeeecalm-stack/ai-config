@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-profit-outcome-status-separation-v2-20260801",
+  "project_id": "investing-monorepo",
+  "goal_id": "profit-outcome-status-separation-v2",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4",
+  "build_version": "6c151ae5d3eb1a9ba13b32ba72afcfb03184e6a85045a3131e4920e598f9a765",
+  "runtime_version": "profit-outcome-status-separation-v2",
+  "database_version": "runtime-json-v2",
+  "last_verification_id": "verify-profit-outcome-status-separation-v2-runtime_verified-0a6935e2",
+  "independent_verification_id": "verify-profit-outcome-status-separation-v2-independent-third-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T14:02:54.920335Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

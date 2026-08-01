@@ -1,0 +1,21 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-manual-tactical-composite-evidence-v2-tested-301a25bf",
+  "goal_id": "manual-tactical-composite-evidence-v2",
+  "level": "TESTED",
+  "source_digest": "1396ef1e019d239339f8d085abf4b92eb603261e8d969636f36137f209918e4d",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 214,
+      "stdout_sha256": "de34288134a7c24dba8196b4f0d45293fbe4ee48d57aeb4517c737bc7bcd149e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-07-31T13:41:42.271422Z"
+}

@@ -1,0 +1,8 @@
+node_modules/
+.netlify/
+data/
+state/
+logs/
+*.log
+*.tmp
+.DS_Store

@@ -1,0 +1,31 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-universal-investment-core-github-canonical-v3-20260801",
+  "project_id": "investing-monorepo",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": true,
+  "blockers": [
+    "GitHub canonical publication blocked: GitHub CLI gh is not installed, so commit/push/PR/main merge cannot be safely completed under the required publication workflow."
+  ],
+  "git": {
+    "available": true,
+    "commit": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "a52f0e7fc1970341a90fe9d4649953188ae8b29282167023b17ac9cf89829191",
+  "build_version": "a52f0e7fc197",
+  "runtime_version": "universal-investment-core-v3",
+  "database_version": null,
+  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime_verified-f4fb0844",
+  "independent_verification_id": null,
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T14:40:35.935686Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

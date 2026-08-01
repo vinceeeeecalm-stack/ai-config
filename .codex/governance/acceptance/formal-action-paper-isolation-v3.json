@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "formal-action-paper-isolation-v3",
+  "title": "正式动作与 Paper/回测严格隔离",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["存在 historical_walkforward 或 forward_paper 证据", "live_orders_enabled=false"],
+  "steps": ["生成正式用户决策", "检查动作枚举和利润分母"],
+  "expected": ["current_action 仅 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE", "不出现 PAPER_ONLY", "Paper 不进入真钱回执、真钱 ROI 或 BUSINESS_READY"],
+  "evidence": ["负向合同测试", "影子运行结果"]
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": "new-chain-incident-replay-v1",
+  "incident_id": "cashcat-robinhood-chain-202607",
+  "counterfactual_predictability_claimed": false,
+  "snapshots": [
+    {
+      "snapshot_id": "cashcat-20260602-event",
+      "cutoff_at": "2026-06-02T23:59:00-04:00",
+      "event": {
+        "event_id": "robinhood-world-is-flat-20260701",
+        "entity": "Robinhood",
+        "chain_name": null,
+        "status": "announced",
+        "announced_at": "2026-06-02T00:00:00-04:00",
+        "mainnet_live_at": null,
+        "chain_id": null,
+        "official_sources": [
+          "https://robinhood.com/us/en/newsroom/robinhood-presents-the-world-is-flat/"
+        ],
+        "verified": true
+      },
+      "assets": [],
+      "expected_stage": "event_watch"
+    },
+    {
+      "snapshot_id": "cashcat-20260701-mainnet",
+      "cutoff_at": "2026-07-01T23:59:00-04:00",
+      "event": {
+        "event_id": "robinhood-chain-mainnet-20260701",
+        "entity": "Robinhood",
+        "chain_name": "Robinhood Chain",
+        "status": "mainnet_live",
+        "announced_at": "2026-06-02T00:00:00-04:00",
+        "mainnet_live_at": "2026-07-01T14:00:00-04:00",
+        "chain_id": 4663,
+        "official_sources": [
+          "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+          "https://docs.robinhood.com/chain/connecting/"
+        ],
+        "verified": true
+      },
+      "assets": [],
+      "expected_stage": "ecosystem_watch"
+    },
+    {
+      "snapshot_id": "cashcat-20260709-public-evidence",
+      "cutoff_at": "2026-07-09T14:17:00Z",
+      "event": {
+        "event_id": "robinhood-chain-mainnet-20260701",
+        "entity": "Robinhood",
+        "chain_name": "Robinhood Chain",
+        "status": "mainnet_live",
+        "announced_at": "2026-06-02T00:00:00-04:00",
+        "mainnet_live_at": "2026-07-01T14:00:00-04:00",
+        "chain_id": 4663,
+        "official_sources": [
+          "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+          "https://docs.robinhood.com/chain/connecting/"
+        ],
+        "verified": true
+      },
+      "assets": [
+        {
+          "symbol": "CASHCAT",
+          "name": "Cash Cat",
+          "contract_address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+          "pair_address": "0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+          "dex": "Uniswap",
+          "affiliation_status": "unaffiliated_narrative_asset",
+          "narrative_links": [
+            "Robinhood used Cash Cat as an early identity before rebranding."
+          ],
+          "source_urls": [
+            "https://www.coindesk.com/tech/2026/07/09/cashcat-trader-turns-usd800-into-over-usd1-million-on-robinhood-s-brand-new-blockchain",
+            "https://dexscreener.com/robinhood/0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+            "https://cashcat.store/"
+          ],
+          "liquidity_usd": 6600000,
+          "market_cap_usd": 105000000,
+          "volume_24h_usd": 58000000,
+          "unique_traders_24h": 6800,
+          "price_change_48h_note": "several hundred percent reported by CoinDesk",
+          "security": {
+            "contract_verified_source_count": 1,
+            "honeypot_status": "missing",
+            "buy_tax_pct": null,
+            "sell_tax_pct": null,
+            "owner_privileges": "missing",
+            "lp_status": "missing",
+            "top10_non_lp_holder_pct": null,
+            "deployer_holder_pct": null
+          }
+        }
+      ],
+      "expected_stage": "asset_watch",
+      "expected_max_action": "watch",
+      "hindsight_return_must_not_be_probability": true
+    }
+  ]
+}

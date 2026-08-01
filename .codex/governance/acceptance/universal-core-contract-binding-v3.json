@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "universal-core-contract-binding-v3",
+  "title": "统一投资内核与四个公共合同版本绑定",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["存在同一时点 EvidenceSnapshot", "存在至少两个候选"],
+  "steps": ["生成 UniversalInvestmentCaseV1 与 RegressionEvidenceV1", "运行硬门和确定性排序", "生成 LiveInvestmentDecisionV1 与 InvestmentOutcomeStatusV2"],
+  "expected": ["research_top1 唯一", "所有输出绑定同一 snapshot_id、strategy_version、config_digest、source_digest", "相同输入产生相同排名与动作"],
+  "evidence": ["合同单元测试", "确定性重放包"]
+}

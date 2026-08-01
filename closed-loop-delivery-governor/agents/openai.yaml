@@ -1,0 +1,4 @@
+interface:
+  display_name: "闭环交付治理"
+  short_description: "为产品、数据链和自动化提供冻结目标、验收硬门与发布证据"
+  default_prompt: "Use $closed-loop-delivery-governor to govern this material workflow change through frozen acceptance, runtime verification, and release evidence."

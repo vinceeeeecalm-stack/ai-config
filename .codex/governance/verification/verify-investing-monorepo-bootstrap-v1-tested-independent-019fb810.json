@@ -1,0 +1,33 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-investing-monorepo-bootstrap-v1-tested-independent-019fb810",
+  "goal_id": "investing-monorepo-bootstrap-v1",
+  "level": "TESTED",
+  "source_digest": "6d7e225f134f1a8708629ef32c7c247f98430288b6f286a91a3d3b9730afd58e",
+  "verifier_thread_id": "019fb810-c4fb-7010-b88d-18468cf6e29b",
+  "result": "FAIL",
+  "checks": [
+    {"id": "source_digest", "result": "PASS", "evidence_sha256": "4fe6551379fbda7a75629d00f175273de25e48f6b05c29b4723b268a5eaa30b5"},
+    {"id": "history_and_backup", "result": "PASS", "evidence_sha256": "91a7b0bf0a9df8b395ccab17fdd7edffc36cba3a9575f6d858be03054a096831"},
+    {"id": "monorepo_policy_script", "result": "PASS", "evidence_sha256": "1b07589187e4f6825b54d8ea0d2d39dac318428f1f07297aa05ab8496d7887cb"},
+    {"id": "excluded_state_preservation", "result": "FAIL", "evidence_sha256": "5b590d61b1f3a94704e29540b564f16c240adc2a3b1d0d2ce85f0041216ca5ec"},
+    {"id": "tracked_private_state_semantics", "result": "FAIL", "evidence_sha256": "58792caf1f67ba44b0ba1d4bab705d5429933e3b71bdcb43b7064784d93f4db0"}
+  ],
+  "findings": [
+    {
+      "id": "private-state-tracked-in-migration",
+      "severity": "P1",
+      "expected": "新迁移提交不得跟踪 private state、账户状态、paper 状态或报告型运行内容。",
+      "actual": "HEAD 新增并跟踪两个 MAIN_INVESTMENT_SESSION_HANDOFF 文档；两者包含当前账户持仓、现金状态及 paper trade 状态章节。",
+      "paths": ["MAIN_INVESTMENT_SESSION_HANDOFF.md", "MAIN_INVESTMENT_SESSION_HANDOFF_2026-07-27.md"]
+    },
+    {
+      "id": "excluded-inventory-omits-five-state-files",
+      "severity": "P1",
+      "expected": "Git 外运行/数据清单应覆盖五个明确保留的账户与状态文件。",
+      "actual": "原清单摘要与行数正确，但未包含五个指定账户/状态文件。",
+      "inventory_sha256": "ea12058dad5df1fe3ef31d67e46a12cf2582c08f6daac43be77fd9ece5a6a38e"
+    }
+  ],
+  "created_at": "2026-07-31T12:13:14Z"
+}

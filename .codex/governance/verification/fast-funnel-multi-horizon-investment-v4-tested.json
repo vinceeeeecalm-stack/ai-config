@@ -1,0 +1,35 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-fast-funnel-multi-horizon-investment-v4-tested-6624d701",
+  "goal_id": "fast-funnel-multi-horizon-investment-v4",
+  "level": "TESTED",
+  "source_digest": "7c1a77c66351303d07936e65991e5a3cac92cf2ce49a028fa7a8c983d4a95f12",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 298,
+      "stdout_sha256": "de34288134a7c24dba8196b4f0d45293fbe4ee48d57aeb4517c737bc7bcd149e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_ms": 287,
+      "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
+      "stderr_sha256": "ccfa4365184d24cb92482af797e8af8941d90e3484df7553242cc4c3ca9a5871"
+    },
+    {
+      "command": "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts",
+      "exit_code": 0,
+      "duration_ms": 61,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T04:03:14.633842Z"
+}

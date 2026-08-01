@@ -1,0 +1,30 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-complete-current-recommendation",
+  "title": "唯一短线标的以完整当前决策卡交付",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "用户要求从美股、ETF、杠杆 ETF 与加密货币中只选一个一至七日标的",
+    "市场处于可取得实时或近实时价格与成交反馈的时段"
+  ],
+  "steps": [
+    "Active 按动态市场扫描生成统一快照并完成真实研究委员会复核",
+    "Manual 独立核对财报、预期、经营数据、市场反馈、历史路径、衍生品与下行风险",
+    "冻结当前价格后明确 research_decision、current_direct_decision 与 execution_decision",
+    "生成完整候选卡、执行日历、三情景、概率来源、资金和失效条件",
+    "运行历史、下行、日历、单一候选与决策合同门控"
+  ],
+  "expected": [
+    "用户首先看到一个明确的现在买、现在小仓买或现在不买结论",
+    "未来触发不得替代当前直接决策",
+    "现金为零不得抹掉理论研究决策，但真实执行金额必须为零",
+    "只暴露一个主标的且包含完整入场、目标、止损、期限、仓位和三情景",
+    "若没有标的通过门控，必须明确无交易并保留最接近标的的拒绝原因"
+  ],
+  "evidence": [
+    "EvidenceSnapshotV2 与 ActiveHandoffV3",
+    "六个以上真实研究角色的结构化输出或明确降级记录",
+    "通过验证器的 RecommendationV2 与候选卡",
+    "带时间戳的当前行情、官方财报、预期、历史和风险证据"
+  ]
+}

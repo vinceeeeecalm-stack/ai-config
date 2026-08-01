@@ -1,0 +1,128 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-fast-funnel-multi-horizon-investment-v4-business-ready-independent-019fb981-7c1a77c6",
+  "goal_id": "fast-funnel-multi-horizon-investment-v4",
+  "level": "BUSINESS_READY",
+  "source_digest": "7c1a77c66351303d07936e65991e5a3cac92cf2ce49a028fa7a8c983d4a95f12",
+  "verifier_thread_id": "019fb981-0cf8-76f0-8b08-da7c9fc431c4",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "source-digest-exact-match",
+      "result": "PASS",
+      "evidence_sha256": "7c1a77c66351303d07936e65991e5a3cac92cf2ce49a028fa7a8c983d4a95f12"
+    },
+    {
+      "id": "frozen-goal-acceptance-set",
+      "result": "PASS",
+      "evidence_sha256": "3e77f6621a10401f5c57ba5bc29f06d377058678cb7ca01e35f518447abbcdc8"
+    },
+    {
+      "id": "same-digest-runtime-bundle",
+      "result": "PASS",
+      "evidence_sha256": "469203c27ec8ce414f78a145648f5b85b5498f99e7ea789d61b890d372db4102"
+    },
+    {
+      "id": "configured-test-commands",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "configured-runtime-commands-fresh-rerun",
+      "result": "PASS",
+      "evidence_sha256": "1542dc2295765cff6ea73ddf4105dcaa3e409cb432096177f4a310818a408a8a"
+    },
+    {
+      "id": "fast-funnel-probability-no-deadlock",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "fast-funnel-top3-risk-scope",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "fast-funnel-30-crypto-performance",
+      "result": "PASS",
+      "evidence_sha256": "72d8576e53700a001c0ca46f97fb80cf6264972785de036fe362151e3a727e70"
+    },
+    {
+      "id": "fast-funnel-ineligible-assets-excluded",
+      "result": "PASS",
+      "evidence_sha256": "867051fb46661871c35074a0d8ed4465e6633ecb566abbb8a577098c7d4bff89"
+    },
+    {
+      "id": "fast-funnel-source-failure-resilience",
+      "result": "PASS",
+      "evidence_sha256": "e95b7ac92c492b6668e0216c027d8ea9da1c52a31b0fe101deb28a487bb2bd72"
+    },
+    {
+      "id": "decision-zero-cash-research-preserved",
+      "result": "PASS",
+      "evidence_sha256": "cb5f4f138f490a9790275abf991d603456caf55b6ff3372d9207784f9c123b04"
+    },
+    {
+      "id": "decision-realtime-price-authority",
+      "result": "PASS",
+      "evidence_sha256": "e95b7ac92c492b6668e0216c027d8ea9da1c52a31b0fe101deb28a487bb2bd72"
+    },
+    {
+      "id": "intraday-scalp-same-day-exit",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "leveraged-etf-underlying-required",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "gap-report-null-safe",
+      "result": "PASS",
+      "evidence_sha256": "e95b7ac92c492b6668e0216c027d8ea9da1c52a31b0fe101deb28a487bb2bd72"
+    },
+    {
+      "id": "committee-degraded-discovery-preserved",
+      "result": "PASS",
+      "evidence_sha256": "bbe4879d1a29157a7db2030455f92f5e1ed1580da9536f1e409b7b2826d2b47d"
+    },
+    {
+      "id": "longterm-dynamic-next-dollar-ranking",
+      "result": "PASS",
+      "evidence_sha256": "f401c2e222fe934b68995a3e73e81f8d7fc836dfc10f520fd1603ac526bceec0"
+    },
+    {
+      "id": "longterm-risk-off-cash-winner",
+      "result": "PASS",
+      "evidence_sha256": "e95b7ac92c492b6668e0216c027d8ea9da1c52a31b0fe101deb28a487bb2bd72"
+    },
+    {
+      "id": "safety-live-orders-disabled",
+      "result": "PASS",
+      "evidence_sha256": "e177ac87da15e01cafd03d66df9085d79fbc0bae3046271a7fb3e186fa68d52e"
+    },
+    {
+      "id": "fast-funnel-us-equity-live-performance",
+      "result": "PASS",
+      "evidence_sha256": "fee2be6159ced9be540cddf282264472f0e03c3b3ed82dca189e9a4b9d2763e8"
+    },
+    {
+      "id": "fast-funnel-fixed-replay-risk-regimes",
+      "result": "PASS",
+      "evidence_sha256": "e95b7ac92c492b6668e0216c027d8ea9da1c52a31b0fe101deb28a487bb2bd72"
+    },
+    {
+      "id": "installed-manual-skill-parity",
+      "result": "PASS",
+      "evidence_sha256": "ca188e4b5984474805e3604b75c8c3d8cb27d8930d5bcd2e429969d814a9b37a"
+    },
+    {
+      "id": "no-open-p0-p1-deviations",
+      "result": "PASS",
+      "evidence_sha256": "1542dc2295765cff6ea73ddf4105dcaa3e409cb432096177f4a310818a408a8a"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T04:04:51.185345Z"
+}

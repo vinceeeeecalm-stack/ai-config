@@ -1,0 +1,49 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "universal-investment-core-github-canonical-v3",
+  "title": "通用投资分析内核收口与 GitHub 权威仓库落地",
+  "business_outcome": "以可归因盈利概率为北极星，让用户只通过 manual-investment-strategy-operator 获得跨 Crypto/美股、短期 1–7 日/长期复利的人工真钱判断，并让 GitHub main 成为无秘密、可恢复、可验证的唯一源码权威。",
+  "scope": [
+    "建立目标期限到真实盈亏归因的统一确定性投资内核",
+    "实现 Crypto、美股、1–7 日和长期四类适配逻辑",
+    "新增 UniversalInvestmentCaseV1、RegressionEvidenceV1、LiveInvestmentDecisionV1 和 InvestmentOutcomeStatusV2",
+    "正式用户动作仅允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE，Paper/回测仅作内部回归证据",
+    "绑定 snapshot_id、strategy_version、config_digest 和 source_digest",
+    "运行 Crypto ENTER、Crypto NO_TRADE、美股 WAIT、长期 DATA_DEGRADED 四个影子任务和故障恢复",
+    "在备份、秘密与隐私扫描后将 vinceeeeecalm-stack/ai-config 的 main 建成权威源码",
+    "从 GitHub 权威源码同步全局 Manual、Active 和治理 Skills 并校验内容哈希"
+  ],
+  "non_goals": [
+    "不自动真实下单、充值、卖出、换仓、质押或索取交易密钥",
+    "不把 Paper/回测盈亏计入真钱 ROI 或 BUSINESS_READY",
+    "不承诺收益或放宽价值、催化、EV、流动性、风险与实时硬门",
+    "不删除旧账本、治理、发布、Git 历史或用户未提交修改",
+    "不迁移历史归档项目或修改无关自动化与体育账本"
+  ],
+  "constraints": [
+    "同一工作树仅当前 CODEX_THREAD_ID 写入",
+    "必须先保留当前 V2 发布证据且不得原地改写",
+    "现金为零不改变市场判断，只令账户执行 NO_DEPLOY_CASH 且金额为零",
+    "回归证据为正但实时证据过期时必须 NO_TRADE 或重新扫描",
+    "相同快照、策略和配置必须产生确定性相同排名",
+    "公开 GitHub 待推送内容的 secrets/privacy 命中必须为零",
+    "Git 操作前必须生成 bundle、工作区快照和 SHA-256 清单",
+    "不 force-push；保留远端 main 初始化历史；高风险结果须异线程只读复验"
+  ],
+  "acceptance_scenario_ids": [
+    "universal-core-contract-binding-v3",
+    "formal-action-paper-isolation-v3",
+    "cross-asset-horizon-adapters-v3",
+    "investment-outcome-four-axis-v3",
+    "investment-shadow-forward-recovery-v3",
+    "github-canonical-source-v3",
+    "public-repo-secret-privacy-zero-v3",
+    "global-skill-authority-mirror-v3"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "profit-outcome-status-separation-v2",
+  "frozen_at": "2026-08-01T14:04:38.928725Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "6d22b362b587ee13da372f5f1c8ab9b4df8c58a4eaa18f161c6ef2cb0a2dd9ad"
+}

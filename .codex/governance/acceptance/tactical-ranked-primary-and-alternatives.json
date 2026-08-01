@@ -1,0 +1,27 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-ranked-primary-and-alternatives",
+  "title": "战术报告输出一个主推荐和最多两个高质量备选",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "同一 EvidenceSnapshotV2 已完成美股、ETF、杠杆 ETF 与 crypto 的动态扫描",
+    "候选已完成历史样本外、流动性、摩擦、事件和下行风险检查"
+  ],
+  "steps": [
+    "运行 intraday_scalp、tactical_1_7d 或 event_trade_1_3w 报告",
+    "检查 ranked_recommendations、primary_candidate 和 alternatives",
+    "重新使用相同快照运行一次"
+  ],
+  "expected": [
+    "报告明确标识 rank=1 的最高优先级主推荐",
+    "只有通过最低研究质量门的候选才可作为 rank=2 或 rank=3 备选，最多两个",
+    "每个备选说明相对主推荐在胜率、保守 EV、回报空间、回撤、流动性或催化上的落后原因",
+    "相同快照、配置和策略版本产生相同排名",
+    "研究排名不因现金为零消失，真实执行金额仍由独立资金与风险门决定"
+  ],
+  "evidence": [
+    "candidate contract validator output",
+    "deterministic ranked recommendation fixture",
+    "manual dispatch smoke output"
+  ]
+}

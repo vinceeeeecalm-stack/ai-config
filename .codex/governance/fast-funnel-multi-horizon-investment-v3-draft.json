@@ -1,0 +1,47 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "fast-funnel-multi-horizon-investment-v3",
+  "title": "完整绑定跨市场快速漏斗、固定回放与美股开盘实时证据",
+  "business_outcome": "在保留动态候选、概率分层、日内模式、长期下一美元排名和完整 Top1 卡的基础上，以同一源码摘要明确证明固定 risk-on、risk-off、高开跳空行为，并在美股正常开盘中通过实时只读验证后达到 BUSINESS_READY",
+  "scope": [
+    "保留 fast-funnel-multi-horizon-investment-v2 的十五项验收行为",
+    "把固定 risk-on、risk-off 和高开跳空回放作为独立可追溯验收场景",
+    "把同一源码摘要的美股常规开盘 open_live 只读运行作为 BUSINESS_READY 必需证据",
+    "保持美股和加密快速漏斗的十五秒、四十五秒、一百二十秒和一百八十秒阶段预算",
+    "保持完整 Top1 决策卡、账户与研究隔离以及明确缺失证据降级"
+  ],
+  "non_goals": [
+    "自动真实下单、撤单、转账、融资、卖空、期权、期货或永续",
+    "承诺月度百分之五十收益或把扫描分数伪装成校准概率",
+    "用周末、盘前、盘后或旧源码摘要的行情替代同一摘要的正常开盘证据"
+  ],
+  "constraints": [
+    "只使用公开或授权只读数据且 live_orders_enabled 始终为 false",
+    "发现阶段不运行概率、委员会、账户现金或完整融资审计",
+    "网络源失败只能局部降级，不能清空其他成功来源候选",
+    "开盘实时证据必须来自 market_session.state=open_live 且报价不超过六十秒",
+    "高风险 BUSINESS_READY 必须由不同 CODEX_THREAD_ID 对同一摘要只读复验"
+  ],
+  "acceptance_scenario_ids": [
+    "fast-funnel-probability-no-deadlock",
+    "fast-funnel-top3-risk-scope",
+    "fast-funnel-30-crypto-performance",
+    "fast-funnel-ineligible-assets-excluded",
+    "fast-funnel-source-failure-resilience",
+    "decision-zero-cash-research-preserved",
+    "decision-realtime-price-authority",
+    "intraday-scalp-same-day-exit",
+    "leveraged-etf-underlying-required",
+    "gap-report-null-safe",
+    "committee-degraded-discovery-preserved",
+    "longterm-dynamic-next-dollar-ranking",
+    "longterm-risk-off-cash-winner",
+    "safety-live-orders-disabled",
+    "fast-funnel-us-equity-live-performance",
+    "fast-funnel-fixed-replay-risk-regimes",
+    "fast-funnel-us-equity-open-live-proof"
+  ],
+  "required_level": "BUSINESS_READY",
+  "risk": "high",
+  "supersedes_id": "fast-funnel-multi-horizon-investment-v2"
+}

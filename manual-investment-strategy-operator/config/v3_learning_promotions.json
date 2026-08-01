@@ -1,0 +1,164 @@
+{
+  "schema_version": "controlled-learning-promotions-v2",
+  "promotion_policy": {
+    "deterministic_schema_safety_or_data_bug": "may_promote_after_reproduction_and_test",
+    "analytical_heuristic": "requires_three_independent_forward_incidents_or_documented_holdout_test"
+  },
+  "promotions": [
+    {
+      "promotion_id": "v3-portfolio-precedence-001",
+      "omission": "Legacy cash and holdings could reappear after newer user overrides.",
+      "root_cause": "Quantity, cash, cost and history were merged at record level without field provenance.",
+      "general_rule": "Resolve each PortfolioStateV2 field by fixed source precedence and retain rejected conflicts.",
+      "affected_components": [
+        "v3_portfolio_state.py",
+        "portfolio_comparison_snapshot.py"
+      ],
+      "validation_result": "Real-fixture regression proves NIGHT/ENA/USDT/SOXL/US-equity cash remain zero and stale values are retained only as conflicts."
+    },
+    {
+      "promotion_id": "v3-false-green-001",
+      "omission": "Outer smoke could pass when an inner calendar/history status used a prefixed failure such as failed_calendar_gate.",
+      "root_cause": "The aggregator matched only three exact status strings.",
+      "general_rule": "Release aggregation treats failed_, blocked_ and error_ prefixes as failures; the V3 negative dispatch must exit nonzero.",
+      "affected_components": [
+        "sync_installed_skill.py",
+        "v3_manual_dispatch.py"
+      ],
+      "validation_result": "Negative smoke returns code 1 and outer V3 smoke verifies the failed inner audit."
+    },
+    {
+      "promotion_id": "v3-structured-review-time-001",
+      "omission": "A calendar year in prose could be parsed as a duration and delay review by 2026 days.",
+      "root_cause": "Natural-language time_window was used as a V2 due-date source.",
+      "general_rule": "Recommendation V2 due dates use explicit structured ISO fields only.",
+      "affected_components": [
+        "recommendation_history.py",
+        "migrate_recommendation_history_v1.py"
+      ],
+      "validation_result": "Regression tests reject prose dates and the read-only migration classifies records without rewriting them."
+    },
+    {
+      "promotion_id": "v3-impulse-coverage-001",
+      "omission": "A material NIGHT price/volume/catalyst impulse was absent from the retained candidate audit.",
+      "root_cause": "Rejected dynamic-scan candidates and their evidence were not always retained.",
+      "general_rule": "Freeze top 24-hour price/volume impulses plus verified catalyst count, including rejected candidates and rejection reasons.",
+      "affected_components": [
+        "v3_incident_replay.py",
+        "active-alpha-paper-monitor handoff contract"
+      ],
+      "validation_result": "Frozen NIGHT incident replay identifies a coverage gap without claiming hindsight predictability."
+    },
+    {
+      "promotion_id": "v3-no-candidate-placeholder-001",
+      "omission": "A no-qualified-candidate result could still be represented by a formal tactical record with invented 50% probability and mechanical targets.",
+      "root_cause": "The outer package allowed an empty result but did not define a separate nearest-rejected-candidate contract.",
+      "general_rule": "Use rejected_candidates for nearest misses and forbid probability, scenario, target, stop and event-date placeholders.",
+      "affected_components": [
+        "v3_manual_dispatch.py",
+        "V3_DECISION_CONTRACT.md"
+      ],
+      "validation_result": "Forward earnings test reproduced the ambiguity; a negative unit test now blocks fake trade placeholders."
+    },
+    {
+      "promotion_id": "v3-new-chain-cross-venue-discovery-001",
+      "omission": "Robinhood Chain and CASHCAT were absent from the opportunity audit even after a verified public-mainnet launch and DEX liquidity appeared.",
+      "root_cause": "The effective crypto universe began with Binance USDT pairs and the official-entity registry had no event-to-new-chain-to-DEX-asset relay.",
+      "general_rule": "A verified permissionless-chain launch creates a time-bounded ecosystem watch and cross-venue DEX discovery; DEX-only assets remain observable without a CEX pair and require explicit event-to-asset derivation, affiliation, security and capacity evidence.",
+      "affected_components": [
+        "active-alpha-paper-monitor/SKILL.md",
+        "NEW_CHAIN_EVENT_TO_ASSET_DISCOVERY_POLICY.md",
+        "new_chain_opportunity_radar.py",
+        "new_chain_event_registry.json",
+        "V3_ACTIVE_HANDOFF_CONTRACT.md",
+        "DYNAMIC_SCAN_POOL_POLICY.md",
+        "IMPULSE_CAPTURE_ENGINE_POLICY.md",
+        "V3_DECISION_CONTRACT.md",
+        "CANDIDATE_DEEP_DIVE_POLICY.md",
+        "HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md",
+        "v3_decision_contracts.py"
+      ],
+      "validation_result": "PASS on 2026-07-25: CASHCAT frozen replay discovered the DEX-only asset without hindsight probability; qualified synthetic fixture remained paper_only; missing-security and missing-derivation contract tests blocked execution; 77 unittests, three quick_validate checks, full manifest sync, negative smoke and formal smoke passed. Live Robinhood Chain scan verified 50 pools across GeckoTerminal and DexScreener and found CASHCAT while correctly capping it at WATCH.",
+      "rollback_plan": "Disable the new-chain registry event and remove only the new cross-venue relay fields; retain immutable incident evidence."
+    },
+    {
+      "promotion_id": "v3-us-crypto-legislative-radar-001",
+      "omission": "The 2026-07-26 morning and evening crypto reports did not mention the active CLARITY Act negotiation or investigate a circulating July 27 vote claim.",
+      "root_cause": "The workflow treated regulation as generic news, had no chamber-aware bill state machine, did not require official House/Senate floor schedules, and had no weekend-to-Monday lookahead gate.",
+      "general_rule": "Track material US crypto legislation by chamber and procedural stage; on weekends look ahead 72 hours; verify vote timing against official floor schedules; retain secondary timing claims as unconfirmed and map verified events to affected assets before market-signal analysis.",
+      "affected_components": [
+        "active-alpha-paper-monitor/SKILL.md",
+        "US_CRYPTO_LEGISLATIVE_EVENT_RADAR_POLICY.md",
+        "us_crypto_legislative_event_radar.py",
+        "ACTIVE_ALPHA_SIGNAL_POLICY.md",
+        "DYNAMIC_SCAN_POOL_POLICY.md",
+        "DAILY_DUAL_WINDOW_EXECUTION_AND_LEARNING_POLICY.md",
+        "daily_dual_window_router.py",
+        "v3_data_source_registry.json"
+      ],
+      "evidence_count": "deterministic_process_defect_reproduced_once",
+      "validation_result": "PASS on 2026-07-27: frozen CLARITY replay blocked the false Monday-vote claim, preserved Senate committee stage and retained the event as WATCH; 90 unittests, three quick_validate checks, full manifest sync, negative smoke and formal smoke passed.",
+      "rollback_plan": "Remove the radar requirement and source category while retaining the immutable CLARITY replay and omission audit."
+    },
+    {
+      "promotion_id": "v3-legislative-explicit-absence-001",
+      "omission": "An official schedule record with bill_present=false could still be classified as a scheduled floor vote when its explanatory text said that H.R. 3633 or the CLARITY Act was not listed.",
+      "root_cause": "item_mentions_bill honored only an explicit true value; an explicit false value fell through to substring matching, which ignored negation and created a deterministic false-green.",
+      "general_rule": "When an official schedule collector provides bill_present, that boolean is authoritative. Text matching is permitted only when the structured field is absent.",
+      "affected_components": [
+        "us_crypto_legislative_event_radar.py",
+        "test_us_crypto_legislative_event_radar.py"
+      ],
+      "affected_files": [
+        "active-alpha-paper-monitor/scripts/us_crypto_legislative_event_radar.py",
+        "manual-investment-strategy-operator/tests/test_us_crypto_legislative_event_radar.py",
+        "manual-investment-strategy-operator/config/v3_learning_promotions.json",
+        "manual-investment-strategy-operator/reports/CONTROLLED_SKILL_LEARNING_LOG.md"
+      ],
+      "evidence_count": "immediate_deterministic_false_green_reproduced_in_2026_07_27_evening_run",
+      "validation_result": "PASS on 2026-07-27: a negative-text fixture with bill_present=false remains not_on_published_floor_schedule and blocks the Monday-vote claim; 5 targeted tests, radar self-test, 91 full unittests, three quick_validate checks, manifest sync, negative smoke and formal smoke passed.",
+      "rollback_plan": "Revert only the explicit-boolean precedence and its regression test if upstream collectors cannot reliably populate bill_present; retain chamber separation, official schedule checks, unconfirmed-claim labeling, WATCH ceiling and immutable audit evidence."
+    },
+    {
+      "promotion_id": "v3-portfolio-comparison-confirmed-state-001",
+      "omission": "The portfolio comparison helper kept the 43-share CRCL override after a newer confirmed account state reported 1 share and zero cash.",
+      "root_cause": "portfolio_comparison_snapshot.py called the canonical resolver without passing the user-confirmed account-state ledger.",
+      "general_rule": "Every portfolio valuation helper must pass the confirmed account-state ledger into PortfolioStateV2 before applying prices or computing totals.",
+      "affected_components": [
+        "portfolio_comparison_snapshot.py",
+        "test_portfolio_comparison_confirmed_state.py",
+        "v3_learning_promotions.json"
+      ],
+      "affected_files": [
+        "manual-investment-strategy-operator/scripts/portfolio_comparison_snapshot.py",
+        "manual-investment-strategy-operator/tests/test_portfolio_comparison_confirmed_state.py",
+        "manual-investment-strategy-operator/config/v3_learning_promotions.json"
+      ],
+      "evidence_count": "immediate_deterministic_data_precedence_defect_reproduced_in_2026_07_29_evening_run",
+      "validation_result": "PASS on 2026-07-29: targeted CRCL precedence regression and live read-only snapshot selected the confirmed 1-share state with zero cash; 109 workspace tests, 109 installed tests, exact 251-file manifest sync, calendar self-test, negative dispatch smoke and formal dispatch smoke passed. The legacy standalone quick_validate.py entry points were unavailable.",
+      "rollback_plan": "Remove only the user_confirmed_states_path wiring and its regression test if the runtime ledger becomes unavailable; retain the canonical PortfolioStateV2 precedence rules and this incident record."
+    },
+    {
+      "promotion_id": "v3-calendar-frozen-decision-price-001",
+      "omission": "The execution-calendar gate accepted formal records whose decision_price was null even though the morning baseline must freeze the exact decision price.",
+      "root_cause": "The calendar schema required price_as_of and price_source but omitted decision_price, so baseline hashing and validation could produce a false green without a numeric price.",
+      "general_rule": "Every formal recommendation calendar record must include a positive numeric decision_price and include it in the immutable baseline hash.",
+      "affected_components": [
+        "recommendation_execution_calendar_schema.json",
+        "recommendation_execution_calendar_gate.py",
+        "test_recommendation_execution_calendar_gate.py",
+        "v3_learning_promotions.json"
+      ],
+      "affected_files": [
+        "manual-investment-strategy-operator/config/recommendation_execution_calendar_schema.json",
+        "manual-investment-strategy-operator/scripts/recommendation_execution_calendar_gate.py",
+        "manual-investment-strategy-operator/tests/test_recommendation_execution_calendar_gate.py",
+        "manual-investment-strategy-operator/config/v3_learning_promotions.json",
+        "manual-investment-strategy-operator/reports/CONTROLLED_SKILL_LEARNING_LOG.md"
+      ],
+      "evidence_count": "immediate_deterministic_false_green_reproduced_in_2026_07_30_morning_run",
+      "validation_result": "PASS on 2026-07-30: the current four null-price cards are blocked, calendar self-test passes, 117 workspace tests and 117 installed tests pass, exact 254-file manifest sync passes, and negative/formal V3 smoke behaves correctly. The three legacy quick_validate.py entry points are absent.",
+      "rollback_plan": "Revert only the decision_price required field, numeric validator, baseline-hash field and regression test if a future long-term non-price recommendation contract explicitly replaces the calendar gate; retain this incident evidence and NO_DEPLOY outcome."
+    }
+  ]
+}

@@ -1,0 +1,2786 @@
+{
+  "skill_name": "manual-investment-strategy-operator",
+  "version": "manual-v3.0-fast-funnel-multi-horizon",
+  "role": "manual_portfolio_decision_and_report",
+  "universal_investment_core": {
+    "enabled": true,
+    "authoritative_engine": "scripts/universal_investment_core.py",
+    "authoritative_status_schema": "InvestmentOutcomeStatusV2",
+    "public_contracts": ["UniversalInvestmentCaseV1", "RegressionEvidenceV1", "LiveInvestmentDecisionV1", "InvestmentOutcomeStatusV2"],
+    "binding_fields": ["snapshot_id", "strategy_version", "config_digest", "source_digest"],
+    "asset_adapters": ["crypto", "us_equity"],
+    "horizon_adapters": ["tactical_1_7d", "longterm"],
+    "formal_user_actions": ["ENTER_NOW", "WAIT_FOR_ENTRY", "NO_TRADE"],
+    "paper_or_walkforward_user_action_forbidden": true,
+    "zero_cash_preserves_market_judgment": true,
+    "zero_cash_account_execution": "NO_DEPLOY_CASH",
+    "v2_compatibility_cycles_remaining": 1,
+    "live_orders_enabled": false
+  },
+  "profit_oriented_dual_sleeve": {
+    "enabled": true,
+    "objective_contract": "config/profit_objective_v1.json",
+    "policy": "references/PROFIT_ORIENTED_DUAL_SLEEVE_LOOP.md",
+    "deterministic_engine": "scripts/profit_oriented_dual_sleeve.py",
+    "short_sleeve": "crypto_tactical_1_7d",
+    "short_monthly_target_roi_pct": 100.0,
+    "short_emergency_pause_drawdown_pct": -15.0,
+    "long_primary_path": "5_year_10x",
+    "long_fallback_path": "10_year_10x",
+    "unique_top1_required": true,
+    "money_weighted_roi_required": true,
+    "short_to_long_independent_reunderwrite_required": true,
+    "max_core_profit_rule_changes_per_14_days": 1,
+    "authoritative_status_schema": "BusinessOutcomeStatusV2",
+    "required_status_axes": ["delivery_status", "execution_readiness", "short_profit_status.paper", "short_profit_status.live", "long_path_status", "business_outcome_status", "all_blockers", "unique_blocker", "unique_next_step"],
+    "paper_tactical_1_7d": {
+      "enabled": true,
+      "initial_capital_usd": 500.0,
+      "evidence_mode": "paper",
+      "legacy_unknown_horizon_imported": false,
+      "business_ready_eligible": false,
+      "live_orders_enabled": false
+    },
+    "current_market_evidence_gate": {
+      "max_quote_age_seconds": 60,
+      "min_public_price_sources": 2,
+      "max_cross_source_spread_pct": 1.0,
+      "max_source_latency_seconds": 12,
+      "max_scan_duration_seconds": 120,
+      "failure_status": "NO_FRESH_DECISION",
+      "expired_plan_reuse_forbidden": true
+    },
+    "legacy_longterm_authority": {
+      "status": "DATA_DEGRADED",
+      "decision_scope": "RESEARCH_ONLY",
+      "formal_path_metrics_allowed": false,
+      "human_confirmed_must_not_be_inferred": true
+    },
+    "live_orders_enabled": false,
+    "human_confirmation_required": true
+  },
+  "intraday_scalp": {
+    "enabled": true,
+    "same_day_no_overnight": true,
+    "quote_max_age_seconds": 60,
+    "default_decision_validity_seconds": 300,
+    "required_closed_bars": ["1m", "5m"],
+    "required_market_fields": ["vwap", "opening_range", "relative_volume", "spread", "depth", "market_anchor"],
+    "required_plan_fields": ["entry_trigger", "cancel_if", "price_stop", "target_1", "target_2", "latest_close_at"],
+    "position_size_basis": "maximum_loss_budget",
+    "leveraged_etf_underlying_confirmation_required": true,
+    "binary_event_and_thin_book_forbidden": true,
+    "live_orders_enabled": false
+  },
+  "ranked_tactical_recommendation": {
+    "enabled": true,
+    "short_term_business_goal": "tactical_sleeve_monthly_roi_100pct_attack_goal",
+    "applies_to": ["confirmed_tactical_capital", "confirmed_idle_cash_in_same_rail"],
+    "does_not_apply_to": ["whole_portfolio", "protected_long_term_holdings", "unconfirmed_cash", "longterm_dca_principal"],
+    "primary_candidate_count": 1,
+    "qualified_alternative_max": 2,
+    "history_first_validation": true,
+    "future_paper_is_parallel_calibration_not_initial_blocker": true,
+    "alternative_min_sample_size": 30,
+    "alternative_positive_conservative_ev_required": true,
+    "alternative_min_reward_risk_ratio": 2.0,
+    "alternative_min_profit_factor_exclusive": 1.0,
+    "same_snapshot_same_strategy_same_config_deterministic": true,
+    "ranking_order": ["conservative_expected_value", "target_compatible_expected_return", "win_rate_interval", "profit_factor", "max_drawdown", "liquidity", "catalyst_quality", "entry_quality"],
+    "ranking_penalties": ["drawdown", "parameter_instability", "poor_liquidity", "switching_from_valid_incumbent"],
+    "primary_full_deep_dive_required": true,
+    "alternatives_require_new_deep_dive_before_manual_execution": true,
+    "weak_slots_must_be_omitted": true,
+    "live_orders_enabled": false
+  },
+  "longterm_next_dollar_ranking": {
+    "enabled": true,
+    "script": "scripts/longterm_next_dollar_ranker.py",
+    "investment_goals": ["capital_preservation", "compound_15_25", "aggressive_10x"],
+    "candidate_pool": ["current_holdings", "us_companies", "regular_etfs", "crypto", "new_qualified_assets", "cash"],
+    "rerank_every_run": true,
+    "fixed_asset_roles_forbidden": true,
+    "required_dimensions": ["fundamental_or_network", "moat_and_value_capture", "balance_sheet_or_supply", "valuation", "five_year_scenarios", "ten_year_scenarios", "survival", "drawdown", "correlation", "marginal_contribution"],
+    "winner_count": 1,
+    "runner_up_rejection_max": 2,
+    "zero_cash_preserves_research_winner": true,
+    "live_orders_enabled": false
+  },
+  "manual_dispatch_timebox_policy": {
+    "enabled": true,
+    "purpose": "keep ordinary user-triggered reports finite; deep research can continue only as a separately requested workflow",
+    "ordinary_dispatch_target_minutes": 20,
+    "ordinary_dispatch_hard_stop_minutes": 30,
+    "status_update_after_minutes": 10,
+    "subagent_wait_budget_seconds": 300,
+    "market_data_prefetch_budget_seconds": 180,
+    "report_and_audit_budget_seconds": 300,
+    "after_hard_stop_action": "stop_and_report_status_with_degraded_panels",
+    "social_news_missing_behavior": "block_execute_now_only; do_not_block_readable_report_or_dca_watch",
+    "forbid_waiting_for_future_market_time_inside_current_turn": true,
+    "deep_research_requires_explicit_user_request": true,
+    "terms_note": "ordinary_dispatch 是普通手动报告；hard_stop 是本轮必须收口的上限，不代表目标停止学习"
+  },
+  "realtime_price_dynamic_analysis_gate": {
+    "enabled": true,
+    "required_for_current_actions": true,
+    "reference": "references/REALTIME_PRICE_DYNAMIC_ANALYSIS_POLICY.md",
+    "purpose": "certify real-time or near-real-time prices before current actions, trigger deeper dynamic analysis when data is insufficient, and arbitrate recommendations by short-term and long-term goals",
+    "required_output_panels": [
+      "realtime_price_certification_panel",
+      "dynamic_analysis_trigger_panel",
+      "objective_oriented_arbiter_panel"
+    ],
+    "current_action_scopes": [
+      "buy",
+      "sell",
+      "dca",
+      "re_entry",
+      "limit_order",
+      "entry_exit_price"
+    ],
+    "us_equity_source_cascade": [
+      "broker_or_authorized_realtime_source_if_available",
+      "twelvedata_quote",
+      "finnhub_quote",
+      "yahoo_quote_or_chart",
+      "alpha_vantage_global_quote_for_regular_session_or_delay_confirmation",
+      "stooq_regular_session_ohlcv_fallback",
+      "user_stated_price_scenario_only"
+    ],
+    "crypto_source_cascade": [
+      "binance_spot_ticker_and_depth",
+      "coinmarketcap_or_coingecko",
+      "other_exchange_or_project_source",
+      "defillama_or_official_explorer_context"
+    ],
+    "certification_statuses": [
+      "verified",
+      "realtime_single_source",
+      "user_stated_only",
+      "stale",
+      "missing",
+      "disputed"
+    ],
+    "certification_rules": {
+      "verified": "two_or_more_current_sources_or_realtime_source_plus_consistent_fallback",
+      "realtime_single_source": "one_current_source_with_timestamp_and_liquidity; max action conditional_action",
+      "user_stated_only": "scenario_input_only; cannot support main-size chase",
+      "stale_or_missing": "no_current_action_due_to_missing_latest_data",
+      "disputed": "watch_or_no_deploy_until_resolved"
+    },
+    "dynamic_analysis_triggers": {
+      "us_tactical_cash_idle_gt_one_trading_day": [
+        "../active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py",
+        "us_equity_candidate_deep_dive"
+      ],
+      "us_candidate_fast_rally_or_fast_pullback": [
+        "candidate_deep_dive_gate",
+        "short_mid_trend_thesis_gate"
+      ],
+      "us_candidate_news_or_unusual_volume": [
+        "social_news_catalyst_verification",
+        "../active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py"
+      ],
+      "crypto_24h_drawdown_gt_3pct_or_extreme_fear": [
+        "../active-alpha-paper-monitor/scripts/run_multisource_alpha_snapshot.py",
+        "crypto_dca_investment_intensity_panel"
+      ],
+      "night_sol_ada_reentry_or_dca_decision": [
+        "binance_depth_check",
+        "coinmarketcap_or_coingecko_cross_check",
+        "asset_micro_thesis_matrix"
+      ],
+      "crypto_project_or_key_person_event": [
+        "../active-alpha-paper-monitor/scripts/social_key_person_monitor.py",
+        "crypto_key_person_intelligence_panel"
+      ],
+      "same_report_us_tactical_and_crypto_dca": [
+        "scripts/macro_regime_snapshot.py",
+        "objective_oriented_arbiter_panel"
+      ],
+      "old_thesis_challenged_or_multi_candidate_disagreement": [
+        "scripts/research_panel_runner.py",
+        "research_committee_gate"
+      ]
+    },
+    "objective_oriented_arbiter": {
+      "us_tactical_goal": "maximize_reviewable_monthly_tactical_return_without_chasing_when_current_price_is_uncertified",
+      "crypto_dca_goal": "improve_5y_10y_10x_probability_with_dynamic_dca_intensity_and_staking_time_in_market",
+      "us_longterm_goal": "protect_or_add_only_when_long_term_thesis_and_valuation_support_it",
+      "must_output": [
+        "what_to_do_now",
+        "what_to_wait_for",
+        "what_not_to_do",
+        "cash_wait_deadline",
+        "max_allowed_action"
+      ]
+    },
+    "action_limits": {
+      "no_verified_or_realtime_single_source_price": "no_current_action",
+      "single_realtime_source_only": "conditional_action",
+      "missing_macro_or_micro_but_core_price_liquidity_ok": "conditional_action_or_watch",
+      "stooq_or_alpha_vantage_only_for_intraday": "watch_or_trigger_formula_only",
+      "user_stated_premarket_price_only": "scenario_input_only_no_main_size_chase"
+    },
+    "plain_language_required": true,
+    "live_orders_enabled": false,
+    "mutates_real_portfolio": false
+  },
+  "tactical_drawdown_sentinel_gate": {
+    "enabled": true,
+    "required_before_us_equity_candidates": true,
+    "reference": "references/TACTICAL_DRAWDOWN_SENTINEL_POLICY.md",
+    "purpose": "force every manual US equity report to inspect existing tactical holdings for cost-basis drawdown, recent-high drawdown, relative underperformance, volume breakdown, and news/filing risks before recommending new trades",
+    "applies_to": [
+      "deployable_tactical_position",
+      "current_us_equity_tactical_holdings",
+      "conditional_liquidity_holdings_when_used_for_rotation"
+    ],
+    "excluded_by_default": [
+      "protected_long_term_holdings"
+    ],
+    "cost_basis_rules": {
+      "prefer_broker_verified_cost": true,
+      "allow_user_stated_cost_when_broker_cost_missing": true,
+      "missing_cost_basis_does_not_skip_alerts": true,
+      "cost_basis_missing_max_action": "trim_review_or_watch"
+    },
+    "thresholds": {
+      "yellow_cost_drawdown_pct": -8,
+      "orange_cost_drawdown_pct": -12,
+      "red_cost_drawdown_pct": -18,
+      "red_recent_high_drawdown_pct": -25,
+      "relative_underperformance_yellow_pp": -6,
+      "relative_underperformance_orange_pp": -10,
+      "volume_spike_yellow_multiple": 1.5,
+      "volume_spike_red_multiple": 2.0
+    },
+    "high_beta_single_name_thresholds": {
+      "tags": [
+        "AI_infrastructure",
+        "data_center",
+        "crypto_equity",
+        "small_mid_cap_high_beta"
+      ],
+      "yellow_cost_drawdown_pct": -7,
+      "orange_cost_drawdown_pct": -11,
+      "red_cost_drawdown_pct": -16
+    },
+    "required_outputs": [
+      "open_tactical_position_risk_sentinel_panel",
+      "symbol",
+      "quantity",
+      "cost_basis",
+      "cost_basis_status",
+      "current_price",
+      "unrealized_pnl_pct",
+      "recent_high_drawdown_pct",
+      "relative_performance_vs_benchmark",
+      "support_lost",
+      "volume_spike",
+      "news_risk_flags",
+      "risk_level",
+      "required_action",
+      "next_review_deadline",
+      "what_would_change_my_mind"
+    ],
+    "blocking_effects": {
+      "yellow": "no_add_review_required",
+      "orange": "trim_or_stop_plan_required",
+      "red": "block_new_add_exit_or_repair_plan_required",
+      "black": "no_new_action_exit_or_manual_repair_only"
+    },
+    "news_and_filing_checks_when_triggered": [
+      "company_press_releases",
+      "sec_8k_10q_s3_atm_or_convertible_filings",
+      "earnings_guidance",
+      "analyst_revisions",
+      "financing_debt_capex_customer_concentration",
+      "sector_and_peer_relative_performance"
+    ],
+    "plain_language_required": true,
+    "live_orders_enabled": false,
+    "mutates_real_portfolio": false
+  },
+  "pre_entry_downside_and_capital_risk_gate": {
+    "enabled": true,
+    "required_before_us_equity_main_action": true,
+    "reference": "references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md",
+    "script": "scripts/pre_entry_downside_gate.py",
+    "purpose": "estimate adverse path, event gap, financing, dilution, valuation and target-before-stop risk before a US tactical recommendation can become a main action",
+    "required_candidate_fields": [
+      "symbol",
+      "security_type",
+      "target_before_stop_probability_pct",
+      "stop_before_target_probability_pct",
+      "reward_risk_ratio",
+      "expected_mae_pct_5d",
+      "expected_mae_pct_10d",
+      "expected_mae_pct_20d",
+      "stress_gap_pct",
+      "binary_event_calendar",
+      "financing_and_dilution_snapshot",
+      "capital_funding_gap_status",
+      "contract_quality_snapshot",
+      "valuation_expectation_risk",
+      "price_extension_state",
+      "position_size_from_stress_loss",
+      "what_would_change_my_mind"
+    ],
+    "thresholds": {
+      "minimum_reward_risk_full_size": 2.0,
+      "minimum_reward_risk_no_deploy": 1.5,
+      "binary_event_full_size_block_days": 5,
+      "extended_20d_return_pct": 30,
+      "extended_60d_return_pct": 50,
+      "near_52w_high_pct": 10,
+      "severe_share_count_growth_yoy_pct": 10,
+      "severe_stock_comp_pct_of_revenue": 10,
+      "severe_capital_flags_to_block": 2,
+      "positive_news_failures_to_block_add": 2
+    },
+    "leveraged_etf_rules": {
+      "daily_reset_warning_required": true,
+      "underlying_index_confirmation_required": true,
+      "default_review_days": 3,
+      "daily_recertification_after_days": 5,
+      "absolute_max_holding_days": 10,
+      "gap_through_stop_scenario_required": true
+    },
+    "missing_required_fields_max_action": "watch",
+    "multiple_severe_capital_flags_action": "block_new_add",
+    "stop_invalidation_lock": {
+      "breached_stop_must_be_marked_invalidated": true,
+      "moving_stop_farther_to_preserve_old_trade_forbidden": true,
+      "continuation_requires_new_thesis_new_id_and_human_confirmation": true
+    },
+    "incident_backfill_required_when_real_trade_has_no_recommendation_record": true,
+    "live_orders_enabled": false,
+    "mutates_real_portfolio": false
+  },
+  "market_risk_intuition_panel": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/MARKET_RISK_INTUITION_PANEL_POLICY.md",
+    "purpose": "translate market data into front-loaded risk warnings and intuitive market-state explanations before technical recommendations",
+    "required_outputs": [
+      "risk_warning_card",
+      "market_intuition_map",
+      "current_primary_risk_source",
+      "portfolio_position_most_at_risk",
+      "what_this_means_for_you",
+      "signals_that_require_trim_or_exit",
+      "signals_that_are_noise_only",
+      "max_allowed_action_plain_chinese"
+    ],
+    "risk_source_labels": [
+      "market_beta",
+      "sector_beta",
+      "single_name_fundamental",
+      "financing_dilution_debt",
+      "execution_delivery",
+      "liquidity_volume",
+      "sentiment_positioning",
+      "data_quality"
+    ],
+    "plain_language_required": true,
+    "must_precede_candidate_tables": true,
+    "must_connect_to_current_holdings_and_cost_basis": true,
+    "live_orders_enabled": false,
+    "mutates_real_portfolio": false
+  },
+  "macro_micro_sufficiency_gate": {
+    "enabled": true,
+    "required_before_full_manual_report": true,
+    "reference": "references/MANUAL_DISPATCH_MARKET_SENTIMENT_POLICY.md#macromicro-sufficiency-gate",
+    "purpose": "prevent daily manual action reports from being generated when only shallow price data is available and macro/micro coverage is insufficient",
+    "required_outputs": [
+      "macro_coverage_status",
+      "us_micro_coverage_status",
+      "crypto_micro_coverage_status",
+      "portfolio_cash_coverage_status",
+      "sufficiency_decision",
+      "max_allowed_action",
+      "missing_items_that_matter"
+    ],
+    "allowed_sufficiency_decisions": [
+      "full_report_allowed",
+      "action_report_allowed",
+      "status_only",
+      "no_current_action_due_to_missing_latest_data"
+    ],
+    "minimum_us_tactical_inputs": [
+      "current_or_user_stated_premarket_price_with_label",
+      "latest_regular_session_ohlcv",
+      "qqq_smh_or_relevant_sector_state",
+      "candidate_volume_or_catalyst",
+      "us_equity_cash_or_tactical_sleeve_state"
+    ],
+    "minimum_crypto_dca_inputs": [
+      "fresh_spot_price_and_24h_stats",
+      "spread_or_order_book",
+      "market_sentiment",
+      "portfolio_holdings_and_usdt_available",
+      "project_onchain_staking_unlock_missing_data_summary"
+    ],
+    "decision_rules": {
+      "full_report_allowed": "macro_micro_market_liquidity_portfolio_cash_and_goal_mapping_are_sufficient",
+      "action_report_allowed": "core_market_and_key_micro_data_are_fresh_but_macro_or_supplemental_sources_have_gaps; max action conditional_action",
+      "status_only": "report state and triggers only; no new buy or sell amounts",
+      "no_current_action_due_to_missing_latest_data": "current price, liquidity, volume or cash rail is missing and no current action prices may be issued"
+    },
+    "user_stated_premarket_price_rule": "may be used as scenario input but cannot alone justify main-size chase; label as user_stated_premarket_price until independently verified",
+    "if_7d_30d_or_onchain_missing_but_24h_price_orderbook_cash_verified": "max action action_report_allowed and reduce size or use limit orders; full_near_term_deploy blocked",
+    "plain_language_required": true
+  },
+  "progressive_learning_confidence_policy": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/PROGRESSIVE_LEARNING_CONFIDENCE_POLICY.md",
+    "purpose": "separate judgment-only, wide-interval and calibrated samples while learning from resolved outcomes without a universal probability gate",
+    "success_semantics": {
+      "goal_mechanism_ready": "fresh data, report, recommendation records, paper review calendar, outcome review, attribution and next-evidence backlog are all functioning",
+      "goal_complete": "actual financial target is achieved and tactical live readiness is proven; never inferred from a single iteration",
+      "current_iteration_acceptance": "mechanism readiness and progressive learning loop are sufficient; financial target proof remains future evidence"
+    },
+    "sample_ladder": [
+      {
+        "stage": "judgment_only",
+        "sample_size_max": 9,
+        "allowed_actions": [
+          "watch",
+          "paper_only"
+        ]
+      },
+      {
+        "stage": "wide_interval",
+        "sample_size_min": 10,
+        "sample_size_max": 29,
+        "allowed_actions": [
+          "watch",
+          "paper_only",
+          "small_entry_now"
+        ],
+        "entry_requires": "positive_conservative_ev_reward_risk_gte_2_complete_signal_max_account_risk_0_25pct"
+      },
+      {
+        "stage": "calibrated",
+        "sample_size_min": 30,
+        "allowed_actions": [
+          "paper_only",
+          "small_entry_now",
+          "enter_now"
+        ],
+        "entry_requires": "untouched_holdout_no_lookahead_positive_conservative_lower_bound_ev_reward_risk_gte_2_complete_signal_max_account_risk_0_5pct"
+      }
+    ],
+    "learning_milestones": {
+      "cold_start_resolved_lt": 10,
+      "early_calibration_resolved_min": 10,
+      "usable_calibration_resolved_min": 20,
+      "usable_calibration_min_windows": 3,
+      "validated_ramp_resolved_min": 50
+    },
+    "universal_probability_or_readiness_score_threshold_forbidden": true,
+    "learning_recommendations_must_be_written_to_history": true
+  },
+  "stage_acceptance_and_compounding_policy": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/STAGE_ACCEPTANCE_AND_COMPOUNDING_POLICY.md",
+    "script": "scripts/stage_acceptance_audit.py",
+    "purpose": "separate temporary system-stage completion from final financial goal completion, using audited report readiness plus a 60% paper/history learning floor",
+    "stage_completion_semantics": {
+      "stage_system_complete": "audited reports, structured recommendation records, paper/history learning evidence, and next-iteration loop are functioning",
+      "temporarily_complete": "current build milestone can be considered complete, while the goal stays active for future market dispatches",
+      "goal_complete": "real portfolio has achieved the 5y/10y 10x objective; never inferred from stage completion"
+    },
+    "acceptance_thresholds": {
+      "min_closed_paper_trades": 10,
+      "min_paper_win_rate_pct": 60,
+      "require_report_integrity_ok": true,
+      "require_objective_coverage_ok": true,
+      "require_recommendation_history_records": true,
+      "require_learning_loop": true,
+      "live_orders_must_be_disabled": true
+    },
+    "compounding_reference": {
+      "five_year_10x_monthly_required_pct": 3.91,
+      "five_year_10x_quarterly_required_pct": 12.2,
+      "ten_year_10x_monthly_required_pct": 1.94,
+      "ten_year_10x_quarterly_required_pct": 5.93,
+      "floor_semantics": "These are minimum compounding floors, not ceilings. Recommendations should seek opportunities above the relevant floor while avoiding drawdowns that break compounding.",
+      "note": "Monthly DCA changes exact account math, but each dispatch should improve positive expected value, avoid large drawdowns, record outcomes, and keep compounding."
+    },
+    "does_not_enable_execute_now": true,
+    "validated_80pct_remains_future_promotion_target": true
+  },
+  "progressive_learning_iteration_audit": {
+    "enabled": true,
+    "required_after_manual_dispatch": true,
+    "script": "scripts/progressive_learning_iteration_audit.py",
+    "purpose": "quantify whether each dispatch is improving the evidence loop from 60% reviewable samples toward 80%+ validated decisions",
+    "does_not_prove_goal_complete": true,
+    "live_orders_enabled": false,
+    "mutates_ledger": false,
+    "required_metrics": [
+      "paper_closed_samples",
+      "recommendation_resolved_samples",
+      "evidence_verified_research_roles",
+      "next_learning_queue",
+      "max_allowed_action"
+    ]
+  },
+  "readability_and_terms_policy": {
+    "enabled": true,
+    "plain_chinese_first": true,
+    "inline_note_on_first_jargon_use": true,
+    "terms_note_section_required": true,
+    "explain_practical_meaning_after_complex_panels": true,
+    "action_list_must_use_direct_language": true,
+    "must_distinguish_probability_from_readiness_score": true,
+    "minimum_terms_to_trigger_glossary": 3,
+    "required_terms_policy_reference": "references/REPORT_READABILITY_AND_TERMS_POLICY.md",
+    "audit_warning_explainer_script": "scripts/audit_warning_explainer.py",
+    "audit_warning_plain_language_required": true
+  },
+  "schema_baseline_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/SCHEMA_BASELINE_EXECUTION_POLICY.md",
+    "script": "scripts/schema_baseline_auditor.py",
+    "position_in_workflow": "before_position_gate",
+    "purpose": "confirm whether SQL files exist and identify the authoritative schema/ledger baseline for each manual dispatch",
+    "missing_sql_files_are_not_blocking_when_schema_and_json_ledgers_are_verified": true,
+    "required_baseline_files": [
+      "unified-longterm-alpha-investor/references/PORTFOLIO_LEDGER_SCHEMA.md",
+      "unified-longterm-alpha-investor/references/API_PRICED_LEDGER_POLICY.md",
+      "unified-longterm-alpha-investor/config/portfolio_ledger.json",
+      "manual-investment-strategy-operator/recommendations/recommendation_history.json",
+      "active-alpha-paper-monitor/paper_trades/paper_portfolio_ledger.json"
+    ],
+    "blocked_if_unreadable": [
+      "portfolio_ledger",
+      "recommendation_history",
+      "paper_portfolio_ledger"
+    ],
+    "live_orders_enabled": false,
+    "mutates_ledger": false,
+    "required_output_panel": "schema_baseline_panel"
+  },
+  "paired_skill": "active-alpha-paper-monitor",
+  "auto_trading_enabled": false,
+  "requires_human_confirmation_for_trades": true,
+  "cash_rails": {
+    "separate_crypto_and_us_equity_rails": true,
+    "cross_rail_transfer_requires_manual_confirmation": true
+  },
+  "manual_dispatch_runner": {
+    "enabled": true,
+    "script": "scripts/manual_dispatch_run.py",
+    "operating_playbook": "references/GOAL_10X_OPERATING_PLAYBOOK.md",
+    "active_goal_execution_matrix": {
+      "enabled": true,
+      "required": true,
+      "reference": "references/ACTIVE_GOAL_EXECUTION_MATRIX.md",
+      "purpose": "bind the active user goal to concrete dispatch requirements, evidence gaps, action limits, and next triggers",
+      "blocks_goal_mechanism_ready_if_missing": true,
+      "plain_language_required": true
+    },
+    "preferred_entrypoint_for_manual_reports": true,
+    "passive_manual_boundary": "runs_only_when_invoked_no_background_loop_no_live_orders_no_auto_transfer",
+    "passive_runtime_policy": {
+      "enabled": true,
+      "required": true,
+      "reference": "references/PASSIVE_DISPATCH_RUNTIME_POLICY.md",
+      "ordinary_dispatch_must_be_finite": true,
+      "deep_research_must_not_block_readable_report": true,
+      "stop_is_not_goal_completion": true,
+      "stop_when_readiness_recommends_stop_and_report_status": true,
+      "plain_language_boundary": "active_data_collection_inside_a_user_triggered_dispatch_only; no background trading, no live orders, no auto transfer"
+    },
+    "default_requires_fresh_market_intelligence": true,
+    "allow_degraded_market_intelligence_flag": "--allow-degraded-market-intelligence",
+    "strict_fresh_default_behavior": "outside smoke mode, manual_dispatch_run.py passes --require-fresh-market-intelligence by default; degraded readable reports require explicit opt-out and still block execute_now",
+    "strict_latest_data_for_current_actions": {
+      "enabled": true,
+      "user_requested": true,
+      "scope": [
+        "buy",
+        "sell",
+        "dca",
+        "limit_order",
+        "re_entry",
+        "entry_exit_price"
+      ],
+      "core_market_data_must_be_generated_in_current_dispatch": true,
+      "cross_run_cache_for_current_actions_allowed": false,
+      "on_core_data_failure": "no_current_action_due_to_missing_latest_data",
+      "supplemental_source_failure_behavior": "disclose_gap_but_do_not_use_old_data_as_evidence"
+    },
+    "audit_failure_propagation": "manual_dispatch_run.py marks the whole dispatch report_audit_failed when report_integrity_audit or objective_coverage_audit fails, so failed reports cannot look successful at the top level",
+    "orchestrates": [
+      "generate_manual_report",
+      "due_learning_review_pulse",
+      "learning_review_calendar",
+      "report_integrity_audit",
+      "objective_coverage_audit",
+      "goal_system_completion_audit",
+      "progressive_learning_iteration_audit",
+      "next_dispatch_readiness",
+      "next_goal_execution_queue",
+      "next_manual_dispatch_execution_plan",
+      "manual_dispatch_summary"
+    ],
+    "paper_validation_pulse": {
+      "enabled_by_default_outside_smoke": true,
+      "script": "scripts/due_learning_review_pulse.py",
+      "mode": "due_only_guard_then_exit_only_paper_pulse",
+      "inner_validation_runner": "../active-alpha-paper-monitor/scripts/validation_progress_runner.py",
+      "requires_due_now_before_inner_runner": true,
+      "opens_new_paper_samples": false,
+      "live_orders_enabled": false,
+      "mutates_real_portfolio": false,
+      "default_timeout_seconds": 180,
+      "safe_queue_command": "python3 manual-investment-strategy-operator/scripts/due_learning_review_pulse.py --timeout-seconds 180 --format json",
+      "long_loop_scripts_not_for_normal_manual_dispatch": [
+        "../active-alpha-paper-monitor/scripts/sunday_crypto_realistic_paper_loop.py"
+      ],
+      "skip_flag": "--skip-validation-pulse",
+      "purpose": "each manual dispatch first checks whether paper samples are actually due; only due_now samples trigger a single timeboxed paper validation pulse, while not-yet-due samples produce a status report and stop"
+    },
+    "learning_review_calendar": {
+      "enabled_by_default_outside_smoke": true,
+      "script": "scripts/learning_review_calendar.py",
+      "mode": "read_only_review_queue",
+      "combines": [
+        "active_paper_position_expiry",
+        "manual_recommendation_due_review",
+        "paper_and_recommendation_sample_gaps"
+      ],
+      "live_orders_enabled": false,
+      "mutates_real_portfolio": false,
+      "mutates_recommendation_history": false,
+      "default_max_items": 8,
+      "calibration_targets": {
+        "early_calibration_samples": 10,
+        "usable_calibration_samples": 20
+      },
+      "skip_flag": "--skip-learning-review-calendar",
+      "purpose": "each manual dispatch shows the next paper/recommendation reviews and why execute_now remains blocked until enough outcomes are resolved"
+    },
+    "next_dispatch_readiness": {
+      "enabled": true,
+      "script": "scripts/next_dispatch_readiness.py",
+      "mode": "read_only_preflight",
+      "live_orders_enabled": false,
+      "mutates_ledgers": false,
+      "combines": [
+        "latest_goal_system_completion_audit",
+        "latest_learning_review_calendar",
+        "latest_goal_evidence_closure_package"
+      ],
+      "required_outputs": [
+        "ready_for_next_manual_dispatch",
+        "goal_mechanism_ready",
+        "goal_complete",
+        "max_allowed_current_action",
+        "immediate_focus",
+        "execute_now_preblocked_reasons",
+        "next_paper_review_at",
+        "next_recommendation_review_at",
+        "closure_items",
+        "recommended_current_turn_action",
+        "should_continue_current_turn",
+        "current_turn_closeout_reason",
+        "plain_commands"
+      ],
+      "purpose": "before the next manual run, show whether the system can run a formal report, what blocks execute_now, and which review or evidence task comes first"
+    },
+    "next_goal_execution_queue": {
+      "enabled": true,
+      "script": "scripts/next_goal_execution_queue.py",
+      "mode": "read_only_operational_queue",
+      "live_orders_enabled": false,
+      "mutates_ledgers": false,
+      "combines": [
+        "next_dispatch_readiness",
+        "learning_review_calendar",
+        "goal_evidence_closure_package"
+      ],
+      "required_outputs": [
+        "task_count",
+        "p0_open_count",
+        "execute_now_blocking_task_ids",
+        "recommended_current_turn_action",
+        "should_continue_current_turn",
+        "current_turn_closeout_reason",
+        "tasks",
+        "plain_notes"
+      ],
+      "purpose": "turn readiness, learning reviews, and evidence closure items into a short next-step queue for the following manual dispatch"
+    },
+    "current_goal_status_report": {
+      "enabled": true,
+      "script": "scripts/current_goal_status_report.py",
+      "mode": "read_only_status_report",
+      "live_orders_enabled": false,
+      "mutates_ledgers": false,
+      "runs_when": "recommended_current_turn_action=stop_and_report_status",
+      "required_outputs": [
+        "goal_mechanism_ready",
+        "goal_complete",
+        "ready_for_next_manual_dispatch",
+        "ready_for_tactical_execute_now",
+        "max_allowed_current_action",
+        "recommended_current_turn_action",
+        "next_paper_review_at",
+        "next_recommendation_review_at",
+        "top_next_tasks",
+        "execute_now_blockers",
+        "plain_warning_explanations",
+        "plain_answer"
+      ],
+      "purpose": "turn closeout readiness and next-step queue into a concise user-facing status page instead of continuing long loops"
+    },
+    "next_manual_dispatch_execution_plan": {
+      "enabled": true,
+      "script": "scripts/next_manual_dispatch_execution_plan.py",
+      "mode": "read_only_next_dispatch_plan",
+      "live_orders_enabled": false,
+      "mutates_ledgers": false,
+      "combines": [
+        "goal_system_completion_audit",
+        "next_dispatch_readiness",
+        "next_goal_execution_queue"
+      ],
+      "required_outputs": [
+        "goal_mechanism_ready",
+        "goal_complete",
+        "ready_for_next_manual_dispatch",
+        "ready_for_tactical_execute_now",
+        "max_allowed_current_action",
+        "commands.formal_manual_dispatch",
+        "commands.paper_review_pulse",
+        "dispatch_loop",
+        "crypto_dca_framework",
+        "us_tactical_framework",
+        "p0_blockers",
+        "stop_conditions",
+        "terms_note"
+      ],
+      "purpose": "after readiness and queue, generate a concise next manual-dispatch plan so the next run knows what to refresh, what to review, and when to stop"
+    },
+    "portfolio_evidence_request_report": {
+      "enabled": true,
+      "script": "scripts/portfolio_evidence_request_report.py",
+      "mode": "read_only_user_evidence_request",
+      "live_orders_enabled": false,
+      "mutates_ledgers": false,
+      "combines": [
+        "portfolio_evidence_gap_package",
+        "import_templates"
+      ],
+      "required_outputs": [
+        "portfolio_evidence_gap_count",
+        "blocking_gap_count",
+        "user_requests",
+        "template_columns",
+        "do_not_provide",
+        "after_user_provides_evidence",
+        "plain_term_notes"
+      ],
+      "purpose": "turn portfolio evidence gaps into a user-facing checklist for lcETH cost/redeem terms, US cash rail, ADA/SOL lots, and crypto cash/open orders"
+    },
+    "current_turn_closeout_gate": {
+      "enabled": true,
+      "required_after_readiness_and_queue": true,
+      "script_sources": [
+        "scripts/next_dispatch_readiness.py",
+        "scripts/next_goal_execution_queue.py"
+      ],
+      "stop_and_report_when": [
+        "goal_mechanism_ready=true",
+        "ready_for_next_manual_dispatch=true",
+        "paper_due_now_count=0",
+        "recommendation_due_now_count=0",
+        "goal_complete=false"
+      ],
+      "continue_only_when": [
+        "paper_review_due_now",
+        "recommendation_review_due",
+        "manual_dispatch_mechanism_not_ready",
+        "user_explicitly_requests_fresh_market_report",
+        "user_explicitly_requests_deep_research"
+      ],
+      "purpose": "prevent ordinary passive manual-dispatch turns from running indefinitely after the mechanism is ready and no due-now review exists"
+    },
+    "investment_decision_validity": {
+      "enabled": true,
+      "required_in_dispatch_summary": true,
+      "formal_report_requires_non_smoke": true,
+      "formal_report_requires_report_audits_ok": true,
+      "formal_report_requires_recommendation_history_write": true,
+      "formal_report_requires_system_audit": true,
+      "formal_report_requires_validation_pulse": true,
+      "formal_report_requires_learning_review_calendar": true,
+      "formal_report_requires_progressive_learning_audit": true,
+      "formal_report_requires_next_dispatch_readiness": true,
+      "execute_now_valid_requires_formal_report_and_execute_now_allowed": true,
+      "purpose": "separate a script status=ok from a formal investment report and from execute_now eligibility"
+    },
+    "smoke_mode": {
+      "enabled": true,
+      "uses_existing_inputs": true,
+      "skips_recommendation_history_write": true,
+      "skips_report_audits": true,
+      "purpose": "verify runner wiring without mutating recommendation ledger"
+    },
+    "live_orders_enabled": false,
+    "mutates_portfolio_ledger": false
+  },
+  "manual_dispatch_strategy_contract": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/MANUAL_DISPATCH_STRATEGY_CONTRACT.md",
+    "passive_manual_boundary": "runs_only_after_user_dispatch_no_background_loop_no_live_orders_no_auto_transfer",
+    "required_loop": [
+      "portfolio_and_cash_refresh",
+      "market_data_refresh",
+      "sentiment_and_news_refresh",
+      "full_market_deep_analysis",
+      "monthly_tactical_goal_mapping",
+      "five_to_ten_year_goal_mapping",
+      "plain_action_plan",
+      "human_confirmation_boundary"
+    ],
+    "failure_behavior": {
+      "old_thesis_cannot_replace_missing_data": true,
+      "single_price_or_single_news_source_cannot_replace_full_analysis": true,
+      "incomplete_loop_blocks_execute_now": true,
+      "max_allowed_action_when_incomplete": "conditional_action_or_watch"
+    },
+    "required_report_outputs": [
+      "fresh_market_intelligence_panel",
+      "full_market_deep_analysis_panel",
+      "action_plan",
+      "risk_downgrade_panel"
+    ]
+  },
+  "manual_dispatch_market_sentiment_refresh_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/MANUAL_DISPATCH_MARKET_SENTIMENT_POLICY.md",
+    "passive_manual_boundary": "refresh_data_only_when_user_dispatches_report_no_background_loop_no_live_orders",
+    "position_in_workflow": "after_position_gate_before_portfolio_comparison_and_prior_thesis_challenge",
+    "source_preflight_script": "scripts/market_data_source_preflight.py",
+    "source_preflight_required": true,
+    "api_key_setup_reference": "references/API_KEY_ENVIRONMENT_SETUP.md",
+    "ignored_env_file_supported": true,
+    "ignored_env_file_example": ".env.local",
+    "fresh_market_intelligence_snapshot_required": true,
+    "stale_or_missing_refresh_flag": "market_intelligence_degraded",
+    "strict_mode_flag": "--require-fresh-market-intelligence",
+    "strict_mode_behavior": "fail_report_generation_when_fresh_market_intelligence_is_degraded",
+    "degraded_max_allowed_actions": [
+      "watch",
+      "paper_only",
+      "conditional_action",
+      "no_deploy",
+      "hold",
+      "trim_review"
+    ],
+    "required_domains": [
+      "portfolio_state",
+      "market_data_source_preflight",
+      "cash_rails",
+      "crypto_market_prices_trends_liquidity",
+      "crypto_funding_oi_when_available",
+      "onchain_defi_and_project_thesis",
+      "crypto_key_person_and_news_sentiment",
+      "us_equity_broad_market_and_sector_regime",
+      "us_equity_dynamic_candidates",
+      "macro_regime_and_fund_flows",
+      "goal_gap_and_tactical_progress"
+    ],
+    "required_output_panel": "fresh_market_intelligence_panel",
+    "freshness_targets_minutes": {
+      "spot_price_spread_depth": 15,
+      "funding_oi_24h_stats": 60,
+      "trend_7d_30d": 1440,
+      "tactical_news_social": 4320
+    },
+    "cache_policy": {
+      "cache_allowed_only_within_freshness_window": true,
+      "current_action_cache_must_be_same_dispatch": true,
+      "cross_run_cache_for_current_action_allowed": false,
+      "must_disclose_cache_timestamp": true,
+      "old_report_text_cannot_substitute_for_fresh_refresh": true
+    },
+    "decision_rules": {
+      "old_thesis_must_be_challenged_by_new_data": true,
+      "sentiment_cannot_trigger_execute_now_alone": true,
+      "data_quality_has_veto_power": true,
+      "missing_fresh_refresh_blocks_execute_now": true,
+      "missing_core_latest_data_blocks_current_buy_sell_dca": true,
+      "internal_output_degradation_blocks_execute_now": true,
+      "must_explain_goal_impact_for_crypto_dca_and_us_tactical": true
+    }
+  },
+  "full_market_deep_analysis_objective_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/FULL_MARKET_DEEP_ANALYSIS_OBJECTIVE_GATE.md",
+    "position_in_workflow": "after_manual_dispatch_market_sentiment_refresh_gate_before_prior_thesis_challenge",
+    "purpose": "convert_fresh_market_sentiment_macro_onchain_equity_and_portfolio_data_into_goal_oriented_strategy",
+    "passive_boundary": "runs_only_when_user_dispatches_manual_report_no_background_loop_no_live_orders",
+    "required_inputs": [
+      "fresh_market_intelligence_snapshot",
+      "portfolio_state",
+      "cash_rails",
+      "goal_gap_panel",
+      "asset_goal_contribution_panel",
+      "macro_regime_panel",
+      "crypto_market_and_onchain_data",
+      "us_equity_dynamic_candidates",
+      "market_sentiment_and_news",
+      "risk_and_data_quality"
+    ],
+    "required_outputs": [
+      "monthly_tactical_goal_fit",
+      "five_to_ten_year_goal_fit",
+      "crypto_dca_strategy_fit",
+      "us_equity_tactical_strategy_fit",
+      "cash_rail_deployment_decision",
+      "what_to_do_now",
+      "what_to_wait_for",
+      "what_not_to_do",
+      "max_allowed_action"
+    ],
+    "decision_rules": {
+      "data_summary_alone_is_insufficient": true,
+      "each_main_action_must_explain_goal_contribution": true,
+      "monthly_goal_applies_to_tactical_sleeve_not_whole_portfolio": true,
+      "long_term_goal_applies_to_crypto_dca_and_core_holdings": true,
+      "cash_can_wait_only_with_explicit_trigger_and_review_deadline": true,
+      "sentiment_cannot_override_price_liquidity_risk_or_goal_fit": true
+    },
+    "degraded_behavior": {
+      "missing_goal_mapping_blocks_execute_now": true,
+      "missing_full_market_context_max_allowed_action": "conditional_action_or_watch",
+      "no_high_quality_opportunity_allowed_outputs": [
+        "hold",
+        "watch",
+        "no_deploy",
+        "conditional_action"
+      ]
+    },
+    "required_report_panel": "full_market_deep_analysis_panel"
+  },
+  "goal_evidence_closure_package": {
+    "enabled": true,
+    "required_when_goal_not_complete": true,
+    "reference": "references/GOAL_EVIDENCE_CLOSURE_POLICY.md",
+    "script": "scripts/goal_evidence_closure_packager.py",
+    "runs_after": "goal_system_completion_audit",
+    "read_only": true,
+    "mutates_ledger": false,
+    "live_orders_enabled": false,
+    "required_closure_areas": [
+      "cost_basis_lots",
+      "lceth_staking_redemption_terms",
+      "cash_rails",
+      "recommendation_calibration",
+      "paper_validation",
+      "research_committee_evidence"
+    ],
+    "required_outputs": [
+      "closure_items",
+      "readiness_summary",
+      "user_action_checklist",
+      "automation_commands",
+      "plain_term_notes"
+    ],
+    "import_validator": {
+      "enabled": true,
+      "script": "scripts/goal_evidence_import_validator.py",
+      "read_only": true,
+      "mutates_ledger": false,
+      "default_templates_dir": "import_templates",
+      "validation_required_before_any_manual_import": true,
+      "valid_result_still_requires_human_review": true
+    },
+    "import_preview": {
+      "enabled": true,
+      "script": "scripts/goal_evidence_import_preview.py",
+      "read_only": true,
+      "mutates_ledger": false,
+      "live_orders_enabled": false,
+      "runs_after": "goal_evidence_import_validator",
+      "preview_required_before_any_manual_import": true,
+      "valid_preview_still_requires_human_review": true,
+      "allowed_statuses": [
+        "ready_for_human_review",
+        "empty_preview",
+        "blocked_invalid_validation"
+      ],
+      "may_close_gaps_automatically": false,
+      "may_authorize_trade": false
+    }
+  },
+  "accepted_handoff_types": [
+    "watch_candidate",
+    "paper_candidate",
+    "us_open_scan",
+    "social_key_person_intel",
+    "daily_crypto_paper_auto_trader",
+    "sunday_crypto_realistic_paper_loop",
+    "event_alert",
+    "risk_alert",
+    "small_probe_review"
+  ],
+  "default_report_sections": [
+    "one_page_conclusion",
+    "schema_baseline_panel",
+    "portfolio_comparison_panel",
+    "market_risk_intuition_panel",
+    "fresh_market_intelligence_panel",
+    "full_market_deep_analysis_panel",
+    "current_holdings_status",
+    "portfolio_evidence_gap_panel",
+    "goal_10x_execution_plan",
+    "objective_traceability_panel",
+    "strategy_library_promotion_panel",
+    "strategy_iteration_backlog_panel",
+    "risk_adjusted_path_quality_panel",
+    "goal_gap_panel",
+    "asset_goal_contribution_panel",
+    "long_term_price_scenario_panel",
+    "prior_thesis_challenge_panel",
+    "research_committee_panel",
+    "long_term_trend_matrix",
+    "macro_regime_panel",
+    "crypto_key_person_intelligence_panel",
+    "asset_micro_thesis_matrix",
+    "staking_compounding_model",
+    "missing_data_downgrade_panel",
+    "dca_pair_recommendation",
+    "unified_candidate_deep_dive",
+    "open_tactical_position_risk_sentinel_panel",
+    "pre_entry_downside_and_capital_risk_panel",
+    "us_equity_high_return_focus",
+    "us_tactical_performance_panel",
+    "tactical_rotation_relay_panel",
+    "technical_execution_window",
+    "short_term_actions",
+    "long_term_dca_plan",
+    "cash_rail_and_risk_review",
+    "recommendation_history_panel",
+    "objective_coverage_audit"
+  ],
+  "required_workflow_order": [
+    "schema_baseline_gate",
+    "position_gate",
+    "manual_dispatch_market_sentiment_refresh_gate",
+    "full_market_deep_analysis_objective_gate",
+    "portfolio_comparison_panel",
+    "market_risk_intuition_gate",
+    "portfolio_evidence_gap_gate",
+    "goal_10x_execution_plan_gate",
+    "objective_traceability_gate",
+    "strategy_library_promotion_gate",
+    "strategy_iteration_backlog_gate",
+    "risk_adjusted_path_quality_gate",
+    "goal_gap_gate",
+    "asset_goal_contribution_gate",
+    "long_term_price_scenario_gate",
+    "prior_thesis_challenge_gate",
+    "research_committee_gate",
+    "macro_regime_gate",
+    "crypto_key_person_intelligence_gate",
+    "asset_micro_thesis_gate",
+    "staking_compounding_gate",
+    "missing_data_downgrade_gate",
+    "dca_pair_gate",
+    "tactical_drawdown_sentinel_gate",
+    "candidate_deep_dive_gate",
+    "pre_entry_downside_and_capital_risk_gate",
+    "us_equity_high_return_focus_gate",
+    "us_tactical_performance_gate",
+    "tactical_rotation_relay_gate",
+    "action_plan_gate",
+    "risk_gate",
+    "recommendation_history_gate",
+    "objective_coverage_audit_gate",
+    "review_gate"
+  ],
+  "portfolio_comparison_panel": {
+    "required": true,
+    "default_windows": [
+      "current",
+      "1d",
+      "7d",
+      "30d"
+    ],
+    "assume_constant_quantities_when_trade_history_missing": true,
+    "must_label_estimated_history": true,
+    "required_tables": [
+      "overall_portfolio_level",
+      "asset_bucket_weights",
+      "major_holding_changes",
+      "cash_and_staking_status",
+      "structured_conclusion"
+    ]
+  },
+  "position_gate_required_fields": [
+    "total_portfolio_value",
+    "valuation_basis",
+    "crypto_value_pct",
+    "us_equity_value_pct",
+    "crypto_cash_or_stablecoin",
+    "us_equity_cash",
+    "staking_status",
+    "goal_gap_summary",
+    "fresh_market_intelligence_summary",
+    "full_market_deep_analysis_summary",
+    "market_sentiment_summary",
+    "macro_regime_summary",
+    "crypto_key_person_intel_summary",
+    "asset_micro_thesis_summary",
+    "staking_compounding_summary",
+    "missing_data_downgrade_summary",
+    "overweight_assets",
+    "underweight_assets",
+    "blocked_assets",
+    "data_quality_summary"
+  ],
+  "objective_traceability_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/OBJECTIVE_TO_MECHANISM_TRACEABILITY.md",
+    "must_map_objectives_to": [
+      "panel_or_gate",
+      "script_or_evidence",
+      "missing_data_behavior",
+      "max_allowed_action"
+    ],
+    "required_objectives": [
+      "5_year_10x_aggressive_path",
+      "10_year_10x_fallback_path",
+      "monthly_crypto_dca_1000_usd_default",
+      "crypto_long_term_dca_and_staking_compounding",
+      "us_tactical_monthly_roi_100pct_attack_goal",
+      "manual_dispatch_fresh_market_and_sentiment_refresh",
+      "progressive_learning_from_60_to_80_plus",
+      "manual_confirmation_no_auto_trading"
+    ],
+    "missing_traceability_behavior": "report_degraded_and_block_execute_now",
+    "purpose": "prove every user objective is tied to a report panel, script evidence, and downgrade rule instead of being treated as a vague aspiration"
+  },
+  "goal_10x_execution_plan": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/GOAL_10X_EXECUTION_PLAN.md",
+    "projection_script": "scripts/goal_path_projection.py",
+    "default_monthly_dca_usd": 1000,
+    "required_horizons_years": [
+      5,
+      10
+    ],
+    "target_definitions": [
+      "current_principal_10x",
+      "cumulative_capital_10x"
+    ],
+    "cumulative_capital_10x_policy": "extreme_bull_reference_not_default_execution_baseline",
+    "us_equity_tactical_goal": {
+      "monthly_roi_100pct_attack_goal": true,
+      "quarterly_is_reporting_checkpoint_not_lower_alternative_goal": true,
+      "applies_to": "deployable_tactical_position_only",
+      "does_not_apply_to": [
+        "protected_long_term_holdings",
+        "whole_portfolio",
+        "core_dca"
+      ],
+      "entry_gate": {
+        "universal_probability_floor_pct": null,
+        "min_reward_risk_ratio": 2.0,
+        "positive_conservative_expected_value_required": true,
+        "realtime_signal_complete_required": true,
+        "small_entry_sample_range": [10, 29],
+        "small_entry_max_account_risk_pct": 0.25,
+        "enter_now_min_sample_size": 30,
+        "enter_now_untouched_holdout_required": true,
+        "enter_now_lookahead_free_required": true,
+        "enter_now_max_account_risk_pct": 0.5
+      }
+    },
+    "us_tactical_performance_tracker": {
+      "enabled": true,
+      "required": true,
+      "ledger_path": "performance/us_tactical_performance.json",
+      "script": "scripts/us_tactical_performance_tracker.py",
+      "baseline_reset_requires_user_confirmation": true,
+      "bootstrap_current_example_tactical_symbols": [
+        "SOXL"
+      ],
+      "dynamic_source_of_truth": "active_sleeve_baseline_or_report_identified_deployable_tactical_position",
+      "default_tactical_cash_symbols": [
+        "USD_US_EQUITY"
+      ],
+      "protected_holdings_excluded": [
+        "CRCL"
+      ],
+      "conditional_symbols_excluded_by_default": [
+        "COIN"
+      ],
+      "target_monthly_return_pct": 100,
+      "target_quarterly_return_pct": 100,
+      "required_outputs": [
+        "baseline_value_usd",
+        "current_tactical_value_usd",
+        "current_return_pct",
+        "monthly_target_value_usd",
+        "monthly_gap_usd",
+        "quarterly_target_value_usd",
+        "quarterly_gap_usd",
+        "tactical_cash_drag_pct",
+        "monthly_progress_status",
+        "quarterly_progress_status",
+        "max_allowed_action"
+      ],
+      "missing_or_degraded_max_action": "conditional_action_or_watch"
+    },
+    "required_report_outputs": [
+      "required_annual_return_for_5y_and_10y",
+      "survival_base_bull_scenarios",
+      "dca_allocation_toward_goal",
+      "us_equity_tactical_path_toward_monthly_100pct_attack_goal",
+      "data_gaps_that_downgrade_goal_actions"
+    ]
+  },
+  "strategy_library_promotion_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/GOAL_10X_STRATEGY_LIBRARY.md",
+    "required_strategy_families": [
+      "goal_weighted_dca",
+      "staking_compound_satellite",
+      "core_satellite_barbell",
+      "convex_tail_sleeve",
+      "dynamic_reserve_timing",
+      "trend_rotation_relay",
+      "event_news_alpha",
+      "walk_forward_paper_validation",
+      "risk_adjusted_path_quality"
+    ],
+    "promotion_status_values": [
+      "research_only",
+      "paper_only",
+      "paper_validated",
+      "human_confirmed_live_candidate",
+      "api_ready_candidate"
+    ],
+    "default_max_action_by_family": {
+      "goal_weighted_dca": "conditional_action",
+      "staking_compound_satellite": "conditional_action",
+      "core_satellite_barbell": "hold_or_conditional_action",
+      "convex_tail_sleeve": "watch_or_no_deploy",
+      "dynamic_reserve_timing": "conditional_action",
+      "trend_rotation_relay": "paper_only_until_evidence_gate_passes",
+      "event_news_alpha": "watch_or_paper_only",
+      "walk_forward_paper_validation": "paper_only",
+      "risk_adjusted_path_quality": "research_only_paper_only"
+    },
+    "evidence_thresholds": {
+      "min_closed_paper_trades": 20,
+      "min_paper_win_rate_pct": 55,
+      "min_paper_net_return_pct": 5,
+      "max_paper_drawdown_pct": -15,
+      "min_recommendation_outcome_reviews": 10,
+      "min_calibration_resolved": 10,
+      "risk_adjusted_path_min_independent_windows": 3,
+      "risk_adjusted_path_max_drawdown_ablation_worsening_pct_points": 2
+    },
+    "evidence_gate_failure_effect": {
+      "set_report_readiness_execute_now_allowed": false,
+      "cap_tactical_max_action_at": "paper_only",
+      "append_failed_gate": "strategy_promotion_evidence_gate_failed"
+    },
+    "execute_now_positive_path": {
+      "enabled": true,
+      "gate_version": "positive-path-v1",
+      "requires_verified_external_research_panel": true,
+      "requires_strategy_promotion_gate_passed": true,
+      "requires_calibrated_sample_size_gte": 30,
+      "requires_untouched_holdout_and_no_lookahead": true,
+      "requires_conservative_expected_value_gt": 0,
+      "requires_reward_risk_ratio_gte": 2,
+      "max_account_risk_pct": 0.5,
+      "execution_readiness_means_price_liquidity_cash_and_operations_only": true,
+      "requires_no_blocking_missing_data": true,
+      "requires_live_orders_disabled_until_manual_confirmation": true,
+      "current_expected_state": "blocked_until_paper_validation_and_probability_calibration_clear"
+    },
+    "report_panel_required": true,
+    "new_strategy_requires_proposed_change": true
+  },
+  "risk_adjusted_path_quality_gate": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/RISK_ADJUSTED_PATH_QUALITY_POLICY.md",
+    "source_script": "../active-alpha-paper-monitor/scripts/risk_adjusted_path_quality.py",
+    "context_field": "risk_adjusted_path_panel",
+    "strategy_role": "secondary_path_quality_factor",
+    "hard_sharpe_gt_3_gate": false,
+    "trend_max_ranking_adjustment_points": 7.5,
+    "value_repair_max_ranking_adjustment_points": 4,
+    "value_repair_requires_value_catalyst_gate_pass": true,
+    "longterm_dca_effect": "pacing_only_not_asset_quality",
+    "promotion_status": "research_only_paper_only",
+    "promotion_requires_independent_non_overlapping_windows": 3,
+    "promotion_requires_paired_ablation": true,
+    "live_gate_effect": "none_until_promotion",
+    "probability_mapping_forbidden": true,
+    "fair_value_mapping_forbidden": true,
+    "live_orders_enabled": false
+  },
+  "strategy_iteration_backlog_gate": {
+    "enabled": true,
+    "required": true,
+    "script": "scripts/strategy_iteration_backlog.py",
+    "reference": "references/GOAL_10X_STRATEGY_LIBRARY.md#strategy-iteration-backlog",
+    "live_orders_enabled": false,
+    "mutates_ledgers": false,
+    "required_strategy_candidates": [
+      "crypto_drawdown_weighted_dca",
+      "staking_adjusted_relative_value",
+      "high_convexity_tail_screen",
+      "us_short_mid_trend_relay",
+      "event_volume_confirmation_alpha",
+      "risk_regime_cash_timing",
+      "risk_adjusted_path_quality"
+    ],
+    "max_allowed_action_for_new_strategy": "paper_only_or_conditional_action",
+    "must_not_enter_final_buy_sell_list": true,
+    "purpose": "keep searching for better strategies while forcing every new idea through research, paper validation, recommendation calibration, and manual confirmation"
+  },
+  "asset_goal_contribution_panel": {
+    "enabled": true,
+    "required": true,
+    "script": "scripts/asset_goal_contribution.py",
+    "context_field": "asset_goal_contribution_panel",
+    "ledger_path": "../unified-longterm-alpha-investor/config/portfolio_ledger.json",
+    "required_assets_when_present": [
+      "ETH",
+      "SOL",
+      "ADA",
+      "NIGHT",
+      "BTC",
+      "USDT",
+      "CRCL",
+      "COIN",
+      "SOXL"
+    ],
+    "required_outputs": [
+      "goal_gap_contribution",
+      "staking_compounding_summary",
+      "five_year_price_multiple_required_for_10x_after_staking",
+      "ten_year_price_multiple_required_for_10x_after_staking",
+      "dca_weight_implication",
+      "concentration_flags",
+      "missing_data"
+    ],
+    "allowed_labels": [
+      "accelerator",
+      "neutral",
+      "drag",
+      "tail_convexity"
+    ],
+    "degraded_max_action": "conditional_action",
+    "notes": "This panel converts holdings, staking APY, lock/unlock data, and goal gaps into asset-level DCA implications. It must not by itself authorize execute_now."
+  },
+  "long_term_price_scenario_panel": {
+    "enabled": true,
+    "required_for_long_term_dca": true,
+    "policy": "references/LONG_TERM_PRICE_SCENARIO_POLICY.md",
+    "compare_only_decision_relevant_assets": true,
+    "required_fields": [
+      "current_price",
+      "current_market_cap",
+      "current_fdv",
+      "supply_basis",
+      "five_year_survival_price_range",
+      "five_year_base_price_range",
+      "five_year_bull_price_range",
+      "ten_year_base_price_range",
+      "ten_year_bull_price_range",
+      "staking_adjusted_return_note",
+      "ten_x_goal_fit",
+      "dca_implication",
+      "confidence_band",
+      "downgrade_reasons"
+    ],
+    "goal_fit_labels": [
+      "strong_engine",
+      "satellite",
+      "tail_convexity",
+      "quality_hold",
+      "drag_for_new_dca"
+    ],
+    "eth_rule": {
+      "existing_overweight_eth_can_be_quality_hold": true,
+      "overweight_eth_new_dca_label": "drag_for_new_dca",
+      "resume_new_dca_conditions": [
+        "portfolio_eth_concentration_back_in_target_range",
+        "extreme_price_dislocation",
+        "staking_unlock_liquidity_terms_verified",
+        "scenario_model_improves_vs_alternatives"
+      ],
+      "default_dca_implication_when_overweight": "hold_only_or_no_new_dca"
+    }
+  },
+  "portfolio_evidence_gap_panel": {
+    "enabled": true,
+    "required": true,
+    "script": "scripts/portfolio_evidence_gap_packager.py",
+    "context_field": "portfolio_evidence_gap_panel",
+    "ledger_path": "../unified-longterm-alpha-investor/config/portfolio_ledger.json",
+    "overrides_path": "config/current_position_overrides.json",
+    "read_only_by_default": true,
+    "mutates_ledger": false,
+    "template_outputs": [
+      "crypto_lot_import_template.csv",
+      "lceth_staking_lot_import_template.csv",
+      "us_equity_cash_rail_template.csv"
+    ],
+    "required_gap_categories": [
+      "cost_basis",
+      "staking_redemption",
+      "cash_rail"
+    ],
+    "blocking_gap_effect": {
+      "full_cost_aware_pnl": "blocked",
+      "us_tactical_real_sizing": "conditional_action_or_watch",
+      "lceth_new_dca_when_concentrated": "blocked"
+    },
+    "notes": "This panel converts missing lcETH lots/redemption terms, partial ADA/SOL lots, US broker cash/buying power and crypto cash-floor issues into an import checklist. It must not invent cost basis or treat user-stated broker cash as verified."
+  },
+  "candidate_deep_dive_gate": {
+    "enabled": true,
+    "scope": [
+      "us_tactical",
+      "crypto_tactical",
+      "dca",
+      "long_term",
+      "hold_trim"
+    ],
+    "candidate_card_required_before_action": true,
+    "tactical_entry_uses_sample_tier_conservative_ev_and_risk": true,
+    "universal_probability_threshold_forbidden": true,
+    "dca_and_longterm_use_independent_goal_and_marginal_contribution_ranking": true,
+    "missing_entry_exit_probability_or_invalidation_max_action": "watch",
+    "required_candidate_card_fields": [
+      "candidate_type",
+      "rail",
+      "symbol_or_pair",
+      "generated_at",
+      "price_as_of",
+      "price_source",
+      "data_age_minutes",
+      "data_freshness_status",
+      "entry_zone",
+      "secondary_entry",
+      "optimal_entry",
+      "entry_window_start",
+      "entry_window_end",
+      "allowed_session",
+      "entry_trigger",
+      "no_entry_if_not_triggered",
+      "entry_deadline",
+      "expected_holding_days",
+      "max_holding_days",
+      "target_price_or_scenario",
+      "target_time_window",
+      "target_1_price_or_scenario",
+      "target_1_evaluation_window",
+      "target_2_price_or_scenario",
+      "target_2_evaluation_window",
+      "forecast_probability_pct",
+      "execution_readiness_score",
+      "probability_basis",
+      "target_before_stop_probability_pct",
+      "stop_before_target_probability_pct",
+      "expected_mae_pct_5d",
+      "expected_mae_pct_10d",
+      "expected_mae_pct_20d",
+      "stress_gap_pct",
+      "reward_risk_ratio",
+      "binary_event_calendar",
+      "financing_and_dilution_snapshot",
+      "capital_funding_gap_status",
+      "contract_quality_snapshot",
+      "valuation_expectation_risk",
+      "price_extension_state",
+      "position_size_from_stress_loss",
+      "stop_or_invalid",
+      "time_stop",
+      "event_exit_date",
+      "event_handling_plan",
+      "take_profit_or_review",
+      "trim_or_partial_exit",
+      "full_exit_or_invalidation",
+      "latest_exit_or_review_date",
+      "post_exit_state",
+      "auto_relay_forbidden",
+      "position_size_plan",
+      "current_deployable_cash_usd",
+      "cash_rail_source",
+      "settlement_constraint",
+      "execution_action",
+      "observation_action",
+      "observation_trigger",
+      "impulse_monitoring_required",
+      "impulse_check_deadline",
+      "candidate_coverage_matrix",
+      "baseline_frozen",
+      "historical_baseline_mutation_forbidden",
+      "baseline_snapshot_sha256",
+      "live_orders_enabled",
+      "private_api_used",
+      "human_confirmation_required",
+      "data_quality_status",
+      "action_allowed"
+    ],
+    "longterm_required_fields": [
+      "thesis_confidence_pct",
+      "goal_gap_contribution",
+      "macro_regime_dca_pace",
+      "micro_thesis_score",
+      "staking_compounding_summary",
+      "missing_data_downgrade",
+      "dca_batch_plan",
+      "expected_1y_3y_5y_scenarios",
+      "thesis_break_conditions",
+      "staking_or_liquidity_notes"
+    ],
+    "benchmark_comparison_required": {
+      "us_tactical": "current_tactical_position",
+      "crypto_tactical": [
+        "SOL",
+        "ADA",
+        "ETH_lcETH"
+      ]
+    },
+    "max_entry_steps": 2,
+    "max_exit_steps": 2,
+    "collapse_extra_levels_to_notes": true
+  },
+  "prior_thesis_challenge_gate": {
+    "enabled": true,
+    "required": true,
+    "must_run_before_reusing_old_conclusion": true,
+    "old_thesis_reuse_allowed_only_when": [
+      "prior_thesis_status_confirmed",
+      "no_material_disconfirming_evidence",
+      "data_quality_not_degraded_for_key_inputs",
+      "risk_gate_not_blocking"
+    ],
+    "required_panel_fields": [
+      "previous_recommendation_or_thesis",
+      "new_supporting_evidence",
+      "new_disconfirming_evidence",
+      "invalidation_conditions_triggered",
+      "prior_thesis_status",
+      "old_thesis_reuse_allowed",
+      "what_would_change_my_mind"
+    ],
+    "status_values": [
+      "confirmed",
+      "weakened",
+      "invalidated",
+      "insufficient_data"
+    ],
+    "invalidated_or_insufficient_data_max_action": "watch_or_rebuild_thesis_before_action"
+  },
+  "research_committee_gate": {
+    "enabled": true,
+    "required": true,
+    "orchestration_runbook": "references/SUBAGENT_ORCHESTRATION_RUNBOOK.md",
+    "force_real_subagents_when_tool_available": true,
+    "default_coverage": "full_8_roles_even_when_request_is_narrow",
+    "required_external_roles_policy": "all_8_default_roles_must_be_present; at_least_6_must_be_successful; non_applicable_roles_return_asset_scope_not_applicable",
+    "external_outputs_path_pattern": "/private/tmp/{run_id}-external-subagent-outputs.json",
+    "position_in_workflow": "after_candidate_deep_dive_before_action_plan",
+    "mode": "mandatory_parallel_research_committee",
+    "min_successful_roles": 6,
+    "timeboxed_closeout": {
+      "enabled": true,
+      "default_for_manual_dispatch": true,
+      "purpose": "prevent one manual dispatch from turning into an open-ended deep research run",
+      "initial_wait_seconds": 180,
+      "convergence_wait_seconds_after_interrupt": 90,
+      "max_total_external_wait_seconds": 300,
+      "ordinary_dispatch_wall_clock_hard_stop_minutes": 30,
+      "collect_partial_outputs": true,
+      "closeout_audit_script": "scripts/timeboxed_committee_closeout_audit.py",
+      "closeout_audit_required_when_partial": true,
+      "missing_roles_marked_as": "missing_or_degraded",
+      "partial_committee_report_allowed": true,
+      "partial_committee_max_allowed_action": "watch",
+      "partial_committee_can_satisfy_goal_mechanism_ready": true,
+      "partial_committee_cannot_satisfy_execute_now": true,
+      "deep_full_committee_requires_explicit_user_request": true,
+      "no_new_subagents_after_closeout": true,
+      "non_blocking_role_policy": {
+        "social_news_agent": {
+          "missing_or_timeout_allows_readable_report": true,
+          "missing_or_timeout_blocks_execute_now": true,
+          "maximum_action_when_missing": "watch",
+          "reason": "social/news improves discovery and risk alerts but cannot be the sole basis for a real trade"
+        }
+      },
+      "required_report_note": "state which roles returned, which roles timed out, why the report is degraded, and what short follow-up task would repair the gap"
+    },
+    "degrade_if_unavailable": true,
+    "research_panel_required_in_handoff": true,
+    "local_research_panel_runner": "scripts/research_panel_runner.py",
+    "external_quality_auditor": "scripts/research_committee_quality_auditor.py",
+    "evidence_backlog_builder": "scripts/research_evidence_backlog_builder.py",
+    "subagent_task_packager": "scripts/research_subagent_task_packager.py",
+    "subagent_output_collector": "scripts/research_subagent_output_collector.py",
+    "quality_audit_required_when_external_outputs_supplied": true,
+    "evidence_backlog_required_when_quality_audit_fails": true,
+    "subagent_task_package_required_before_next_external_research_run": true,
+    "local_runner_without_external_subagents_sets_degraded": true,
+    "missing_research_panel_handling": "mark_research_panel_missing_and_block_new_execute_now",
+    "degraded_max_allowed_actions": [
+      "watch",
+      "paper_only",
+      "conditional_action",
+      "risk_alert",
+      "no_deploy",
+      "hold",
+      "trim_review"
+    ],
+    "roles": [
+      {
+        "agent_id": "prior_thesis_challenge_agent",
+        "purpose": "challenge_previous_recommendations_and_old_thesis_before_reuse"
+      },
+      {
+        "agent_id": "portfolio_state_agent",
+        "purpose": "verify_holdings_cash_rails_staking_goal_gap_overweight_underweight"
+      },
+      {
+        "agent_id": "macro_regime_agent",
+        "purpose": "verify_rates_dxy_vix_yields_cpi_pce_risk_appetite_fund_flows"
+      },
+      {
+        "agent_id": "crypto_market_agent",
+        "purpose": "verify_prices_1d_7d_30d_volume_order_book_liquidity_funding_oi"
+      },
+      {
+        "agent_id": "onchain_defi_agent",
+        "purpose": "verify_defillama_tvl_fees_revenue_stablecoins_onchain_supply_unlock_gaps"
+      },
+    {
+      "agent_id": "social_news_agent",
+      "purpose": "verify_official_announcements_key_people_news_social_heat_watch_only_by_default",
+      "blocking_scope": "may_block_execute_now_or_risk_escalation; must_not_block_ordinary_readable_report",
+      "timeout_behavior": "mark_missing_degraded_and_continue"
+    },
+      {
+        "agent_id": "us_equity_alpha_agent",
+        "purpose": "verify_us_open_trend_sector_rotation_earnings_news_vs_current_tactical_position"
+      },
+      {
+        "agent_id": "backtest_validation_agent",
+        "purpose": "verify_base_rate_walk_forward_sample_size_and_overfitting_risk"
+      }
+    ],
+    "required_agent_output_fields": [
+      "agent_id",
+      "asset_scope",
+      "sources_used",
+      "source_refs",
+      "evidence_items",
+      "signals",
+      "plain_language_notes",
+      "confidence_pct",
+      "data_quality",
+      "missing_data",
+      "failed_gates",
+      "recommended_max_action",
+      "what_would_change_my_mind"
+    ],
+    "subagent_output_contract": {
+      "requires_source_refs": true,
+      "requires_evidence_items": true,
+      "requires_plain_language_notes": true,
+      "forbid_subagent_execute_now": true,
+      "collector_must_enforce_max_allowed_action_for_subagent": true,
+      "collector_must_fail_on_missing_expected_agents_for_full_task_packages": true,
+      "ok_sources_must_have_specific_timestamp_provider_and_coverage": true
+    },
+    "research_panel_fields": [
+      "run_id",
+      "agent_outputs",
+      "researcher_votes",
+      "bull_case",
+      "bear_case",
+      "base_case",
+      "disconfirming_evidence",
+      "prior_thesis_status",
+      "arbiter_decision",
+      "old_thesis_reuse_allowed",
+      "missing_data_summary",
+      "max_allowed_action",
+      "research_committee_degraded",
+      "research_panel_missing_reason",
+      "research_method",
+      "external_roles_used",
+      "local_fallback_roles",
+      "missing_external_roles",
+      "required_external_roles",
+      "external_agent_validation"
+    ],
+    "prior_thesis_status_values": [
+      "confirmed",
+      "weakened",
+      "invalidated",
+      "insufficient_data"
+    ],
+    "arbiter_rules": {
+      "long_term_goal_has_priority_over_short_term_technical_signal": true,
+      "data_quality_has_veto_power": true,
+      "old_thesis_reuse_requires_prior_thesis_challenge_no_disconfirming_evidence": true,
+      "any_key_agent_block_blocks_new_position_for_that_asset": true,
+      "social_news_cannot_trigger_execute_now_alone": true,
+      "us_tactical_uses_sample_tier_conservative_ev_reward_risk_and_realtime_signal": true,
+      "crypto_tactical_uses_sample_tier_conservative_ev_reward_risk_and_realtime_signal": true
+    },
+    "quality_gate_requirements": {
+      "min_successful_known_roles": 6,
+      "min_evidence_verified_known_roles": 6,
+      "min_roles_with_ok_sources": 6,
+      "all_required_external_roles_present": true,
+      "evidence_quality_gate_blocks_non_degraded_committee": true,
+      "action_readiness_gate_blocks_execute_now": true,
+      "missing_data_or_failed_gates_cap_action_at": "watch_or_paper_or_conditional",
+      "quality_audit_failure_blocks_execute_now": true,
+      "normalized_output_can_be_reused_but_cannot_upgrade_data_quality": true,
+      "notes": "Evidence quality is separate from action readiness. A role may be evidence-verified while action remains blocked by conservative EV, reward/risk, current signal, cash, or human confirmation."
+    },
+    "report_panels_required": [
+      "prior_thesis_challenge_panel",
+      "research_committee_panel",
+      "bull_base_bear_cases",
+      "disconfirming_evidence",
+      "missing_data_summary",
+      "arbiter_decision",
+      "max_allowed_action",
+      "what_would_change_my_mind"
+    ]
+  },
+  "recommendation_history": {
+    "enabled": true,
+    "required": true,
+    "reference": "references/RECOMMENDATION_HISTORY_POLICY.md",
+    "ledger_path": "recommendations/recommendation_history.json",
+    "script": "scripts/recommendation_history.py",
+    "outcome_reviewer_script": "scripts/recommendation_outcome_reviewer.py",
+    "calibration_packager_script": "scripts/recommendation_calibration_packager.py",
+    "calibration_package_required_for_monthly_review": true,
+    "calibration_package_mutates_ledger": false,
+    "calibration_confirmation_requires_human": true,
+    "superseded_records_counted_for_calibration": false,
+    "append_required_for_action_plan": true,
+    "write_failure_max_action": "watch_or_conditional_only",
+    "degraded_flag": "recommendation_history_degraded",
+    "required_for_actions": [
+      "execute_now",
+      "conditional_action",
+      "paper_only",
+      "watch",
+      "no_deploy",
+      "hold",
+      "trim_review",
+      "dca_plan"
+    ],
+    "required_record_fields": [
+      "recommendation_id",
+      "run_id",
+      "strategy_version",
+      "config_hash",
+      "generated_at",
+      "asset_class",
+      "symbol",
+      "bucket",
+      "action",
+      "direction",
+      "time_window",
+      "data_quality_status",
+      "validation_status",
+      "promotion_status",
+      "risk_decision",
+      "outcome_status"
+    ],
+    "tactical_or_real_action_required_fields": [
+      "forecast_probability_pct",
+      "execution_readiness_score",
+      "entry_range",
+      "target_range",
+      "stop_or_invalid",
+      "forecast_invalid_if",
+      "capital_sleeve",
+      "cash_rail_source",
+      "target_before_stop_probability_pct",
+      "stop_before_target_probability_pct",
+      "expected_mae_pct_5d_10d_20d",
+      "stress_gap_pct",
+      "financing_and_dilution_snapshot",
+      "price_as_of",
+      "price_source",
+      "data_age_minutes",
+      "data_freshness_status",
+      "entry_window_start",
+      "entry_window_end",
+      "allowed_session",
+      "entry_trigger",
+      "no_entry_if_not_triggered",
+      "expected_holding_days",
+      "max_holding_days",
+      "target_1_price_or_scenario",
+      "target_1_evaluation_window",
+      "target_2_price_or_scenario",
+      "target_2_evaluation_window",
+      "time_stop",
+      "event_exit_date",
+      "event_handling_plan",
+      "post_exit_state",
+      "auto_relay_forbidden",
+      "current_deployable_cash_usd",
+      "settlement_constraint",
+      "action_allowed",
+      "execution_action",
+      "observation_action",
+      "observation_trigger",
+      "impulse_monitoring_required",
+      "impulse_check_deadline",
+      "candidate_coverage_matrix",
+      "baseline_frozen",
+      "historical_baseline_mutation_forbidden",
+      "baseline_snapshot_sha256",
+      "live_orders_enabled",
+      "private_api_used",
+      "human_confirmation_required"
+    ],
+    "outcome_status_values": [
+      "pending",
+      "hit",
+      "failed",
+      "not_triggered",
+      "expired",
+      "invalidated"
+    ],
+    "monthly_review_required_outputs": [
+      "total_recommendations",
+      "hit_rate",
+      "failed_rate",
+      "not_triggered_rate",
+      "asset_class_breakdown",
+      "capital_sleeve_breakdown",
+      "probability_bucket_calibration",
+      "error_attribution_ranking",
+      "pending_proposed_changes"
+    ],
+    "proposed_changes_require_human_confirmation": true,
+    "no_secret_storage": true
+  },
+  "crypto_key_person_intelligence": {
+    "enabled": true,
+    "source_handoff_type": "social_key_person_intel",
+    "panel_position": "after_macro_before_asset_micro_thesis",
+    "accepted_recommended_max_actions": [
+      "watch",
+      "paper_only",
+      "conditional_action",
+      "risk_alert"
+    ],
+    "never_allowed_actions": [
+      "execute_now",
+      "live_order"
+    ],
+    "required_panel_fields": [
+      "person_or_entity",
+      "role",
+      "platform",
+      "asset_tags",
+      "event_type",
+      "summary",
+      "verified_identity_status",
+      "confirmation_status",
+      "social_intel_score_points",
+      "price_reaction_window",
+      "recommended_max_action",
+      "risk_flags"
+    ],
+    "manual_processing_rules": {
+      "single_source_social_cannot_increase_real_money_size": true,
+      "unverified_or_rumor_max_action": "watch",
+      "official_security_tokenomics_delisting_regulatory_event": "risk_alert_pause_new_risk_until_confirmed",
+      "positive_roadmap_or_partnership_requires_official_or_cross_source_confirmation": true,
+      "must_recheck_price_volume_liquidity_before_action": true
+    },
+    "report_impacts": [
+      "watch_priority",
+      "dca_pace",
+      "micro_thesis_score",
+      "missing_data_downgrade",
+      "risk_gate"
+    ]
+  },
+  "dca_pair_recommendation_required_fields": [
+    "primary_pair",
+    "secondary_pair",
+    "satellite_pair",
+    "avoid_pairs",
+    "amount_usd",
+    "split_plan",
+    "buy_now_amount",
+    "trigger_prices",
+    "invalidation",
+    "confidence_reason",
+    "goal_gap_effect",
+    "long_term_price_scenario",
+    "macro_regime_dca_pace",
+    "micro_thesis_score",
+    "staking_compounding_summary",
+    "missing_data_downgrade",
+    "candidate_card"
+  ],
+  "us_equity_high_return_focus": {
+    "mode": "dynamic_high_vol_news_alpha",
+    "max_recommendations": 3,
+    "default_tactical_pool_source": "dynamic_current_tactical_position",
+    "conditional_tactical_pool_source": "dynamic_supplemental_liquidity_position",
+    "long_term_protected_holdings": [
+      "CRCL"
+    ],
+    "deployable_tactical_position_policy": {
+      "identify_source_position_dynamically": true,
+      "eligible_sources": [
+        "current_us_equity_tactical_holdings",
+        "liquid_us_equity_positions_not_protected",
+        "conditional_supplemental_liquidity_positions"
+      ],
+      "protected_long_term_holdings": [
+        "CRCL"
+      ],
+      "selection_factors": [
+        "current_position_value",
+        "liquidity",
+        "unrealized_pnl",
+        "volatility",
+        "holding_time",
+        "long_term_protection_status",
+        "relative_opportunity_strength"
+      ],
+      "do_not_hardcode_symbol": true,
+      "current_example_only": "SOXL may be selected today, but it is not a permanent benchmark or funding source"
+    },
+    "dynamic_candidate_discovery": {
+      "enabled": true,
+      "candidate_sources": [
+        "market_movers",
+        "earnings_surprises",
+        "news_catalysts",
+        "unusual_volume",
+        "relative_strength",
+        "sector_rotation",
+        "active_monitor_handoff"
+      ],
+      "fixed_scan_list_required": false,
+      "price_rule": "prefer_lower_price_not_hard_filter",
+      "volatility_rule": "prefer_high_realized_volatility_not_hard_filter",
+      "deprioritize_when_price_volatility_or_catalyst_is_weak": [
+        "NVDL",
+        "TQQQ"
+      ],
+      "current_tactical_position_benchmark_required": true,
+      "unverified_news_max_action": "watch"
+    },
+    "ranking_weights_pct": {
+      "short_term_catalyst": 30,
+      "volatility_and_elasticity": 25,
+      "current_momentum": 20,
+      "liquidity": 15,
+      "price_and_capital_fit": 5,
+      "risk_reward": 5
+    },
+    "short_mid_trend_thesis_gate": {
+      "enabled": true,
+      "must_run_before_single_trade_recommendation": true,
+      "default_trend_horizon_trading_days": {
+        "min": 10,
+        "max": 20
+      },
+      "event_scalp_horizon_trading_days": {
+        "min": 1,
+        "max": 5
+      },
+      "monthly_goal_mapping_required": true,
+      "allowed_trend_roles": [
+        "primary_tactical_vehicle",
+        "conditional_rotation_candidate",
+        "event_scalp_candidate",
+        "watch_only",
+        "no_action"
+      ],
+      "required_outputs": [
+        "primary_tactical_thesis",
+        "primary_tactical_vehicle",
+        "trend_role",
+        "expected_trend_path",
+        "monthly_goal_mapping",
+        "trade_clock_state",
+        "one_week_test",
+        "two_week_trend",
+        "monthly_goal_path",
+        "cash_wait_deadline",
+        "advantage_reentry",
+        "trend_follow_small_probe",
+        "base_case",
+        "secondary_entry",
+        "optimal_entry",
+        "trim_or_partial_exit",
+        "full_exit_or_invalidation",
+        "candidate_relay",
+        "next_review_date",
+        "best_plan",
+        "notes"
+      ],
+      "decision_rules": {
+        "prefer_current_tactical_position_when_trend_intact_and_candidates_not_clearly_better": true,
+        "do_not_full_chase_after_extended_move": true,
+        "main_action_must_prefer_advantage_reentry_after_user_sold_high": true,
+        "small_probe_must_be_explicitly_labeled_when_chasing_strength": true,
+        "one_week_test_must_include_entry_target_stop_review": true,
+        "two_week_trend_must_include_reassess_rules": true,
+        "monthly_goal_path_must_explain_cash_vs_trade_opportunity_cost": true,
+        "must_provide_pullback_and_breakout_scenarios_for_intact_trend": true,
+        "event_candidate_cannot_replace_primary_trend_without_stronger_probability": true,
+        "long_term_protected_holdings_excluded_from_regular_tactical_rotation": true,
+        "max_entry_steps": 2,
+        "max_exit_steps": 2,
+        "collapse_extra_levels_to_notes": true
+      },
+      "probability_tiers": {
+        "n_lt_10": "judgment_only_watch_or_paper",
+        "n_10_29": "wide_interval_positive_conservative_ev_small_entry_max_risk_0_25pct",
+        "n_gte_30": "calibrated_untouched_holdout_positive_lower_bound_ev_enter_max_risk_0_5pct",
+        "universal_probability_threshold": null
+      }
+    },
+    "goal_linked_timeboxed_trade_plan": {
+      "enabled": true,
+      "required": true,
+      "purpose": "force US tactical advice to connect the user's monthly tactical return goal to concrete one-week, two-week, and monthly decision nodes",
+      "time_windows": {
+        "one_week_test_trading_days": {
+          "min": 1,
+          "max": 5
+        },
+        "two_week_trend_trading_days": {
+          "min": 6,
+          "max": 10
+        },
+        "monthly_goal_review_trading_days": {
+          "min": 15,
+          "max": 22
+        }
+      },
+      "trade_clock_states": [
+        "fresh_pullback_entry",
+        "extended_chase_risk",
+        "trend_intact_wait_pullback",
+        "breakout_confirmed_small_probe",
+        "thesis_broken_no_entry"
+      ],
+      "required_outputs": [
+        "goal_role",
+        "trade_clock_state",
+        "one_week_test",
+        "two_week_trend",
+        "monthly_goal_path",
+        "cash_wait_deadline",
+        "reentry_is_worth_it_if",
+        "do_not_reenter_if",
+        "planned_exit"
+      ],
+      "after_user_sold_high_rules": {
+        "must_distinguish_trend_follow_small_probe_from_advantage_reentry": true,
+        "advantage_reentry_is_primary": true,
+        "trend_follow_small_probe_max_pct_of_tactical_cash": 25,
+        "do_not_reenter_above_prior_sale_without_breakout_confirmation": true
+      },
+      "cash_wait_policy": {
+        "default_cash_wait_max_trading_days": 2,
+        "cash_wait_can_extend_only_with_new_refresh": true,
+        "if_no_trigger_after_deadline": "reassess_all_candidates_against_cash_and_monthly_goal"
+      }
+    },
+    "target_achievement_gate": {
+      "min_reward_risk_ratio": 2,
+      "small_entry_max_account_risk_pct": 0.25,
+      "enter_now_max_account_risk_pct": 0.5,
+      "conservative_expected_value_formula": "p_target*target_return-p_stop*loss-friction",
+      "default_tactical_review_days": {
+        "min": 1,
+        "max": 5
+      },
+      "max_holding_days": 10,
+      "primary_tactical_vehicle_trend_horizon_days": {
+        "min": 10,
+        "max": 20,
+        "review_every_days_min": 1,
+        "review_every_days_max": 5
+      },
+      "monthly_goal_context": "double_soxl_pool_when_validated_opportunities_exist",
+      "execute_now_requires_calibrated_positive_lower_bound_ev": true,
+      "small_entry_now_allowed_for_wide_interval_positive_ev": true,
+      "missing_probability_basis_max_action": "watch",
+      "unverified_news_max_action": "watch",
+      "probability_not_readiness_note": "forecast probability is event probability; execution readiness covers price, liquidity, cash and operations only",
+      "execution_readiness_breakdown_points": {
+        "data_verified_multisource": 20,
+        "confirmed_catalyst": 20,
+        "price_volume_volatility_support": 20,
+        "liquidity_spread_executable": 15,
+        "stop_take_risk_reward_defined": 15,
+        "capital_source_position_fit": 10
+      }
+    },
+    "single_trade_drawdown_limit_pct": {
+      "min": 8,
+      "max": 12
+    },
+    "execute_now_policy": {
+      "only_primary_candidate_can_be_current_execution_candidate": true,
+      "qualified_alternatives_max": 2,
+      "qualified_alternatives_must_show_historical_comparison": true,
+      "must_be_clearly_better_than_current_tactical_position": true,
+      "otherwise_output": "watch_or_no_action"
+    },
+    "capital_policy": {
+      "external_cash_default": "do_not_use",
+      "exceptional_add_signal_required_for_external_cash": true,
+      "crcl_not_used_for_regular_rotation": true
+    },
+    "tactical_rotation_relay": {
+      "enabled": true,
+      "identify_source_position_dynamically": true,
+      "protected_long_term_holdings": [
+        "CRCL"
+      ],
+      "cash_wait_max_trading_days": 2,
+      "prefer_same_day_rotation": true,
+      "fallback_after_wait": "reassess_current_tactical_position_vs_top_candidates",
+      "states": [
+        "holding_tactical_position",
+        "sell_triggered",
+        "cash_pending_reentry",
+        "candidate_entry_ready",
+        "rotated_position_open",
+        "failed_reentry_reassess"
+      ],
+      "required_panel_fields": [
+        "current_tactical_position",
+        "sellable_status",
+        "target_sell_zone",
+        "released_cash_estimate",
+        "relay_candidate_queue",
+        "candidate_entry_triggers",
+        "cash_wait_deadline",
+        "fallback_action"
+      ]
+    },
+    "required_output_modules": [
+      "current_us_equity_holdings",
+      "deployable_capital",
+      "dynamic_discovery_summary",
+      "current_tactical_position_comparison",
+      "target_achievement_gate",
+      "top_1_to_3_candidates",
+      "tactical_rotation_relay_panel",
+      "rotation_decision",
+      "risk_conditions",
+      "crcl_long_term_signal"
+    ],
+    "required_recommendation_fields": [
+      "best_plan",
+      "source_position_to_sell",
+      "target_symbol_to_buy",
+      "amount_or_quantity",
+      "rotation_reason",
+      "expected_short_term_roi_rank",
+      "entry_zone",
+      "secondary_entry",
+      "optimal_entry",
+      "target_price",
+      "target_time_window",
+      "target_achievement_probability_pct",
+      "probability_basis",
+      "readiness_breakdown",
+      "stop_loss_pct",
+      "trim_or_partial_exit",
+      "full_exit_or_invalidation",
+      "max_holding_days",
+      "invalidation",
+      "discovery_source",
+      "data_quality_status",
+      "catalyst_type",
+      "current_tactical_position_comparison",
+      "why_better_than_current_tactical_position",
+      "exceptional_add_signal",
+      "human_confirmation_required"
+    ],
+    "two_step_action_ladder": {
+      "enabled": true,
+      "max_entry_steps": 2,
+      "max_exit_steps": 2,
+      "collapse_extra_levels_to_notes": true,
+      "main_action_fields": [
+        "best_plan",
+        "secondary_entry",
+        "optimal_entry",
+        "trim_or_partial_exit",
+        "full_exit_or_invalidation",
+        "notes"
+      ],
+      "dca_batch_limit": 2,
+      "dca_batch_names": [
+        "near_price_small_entry",
+        "better_pullback_main_entry"
+      ],
+      "when_more_levels_exist": "merge_to_two_most_important_levels_or_output_watch",
+      "report_order": [
+        "best_plan",
+        "optimal_entry",
+        "secondary_entry",
+        "trim_or_partial_exit",
+        "full_exit_or_invalidation"
+      ]
+    }
+  },
+  "goal_oriented_dca": {
+    "primary_goal": "maximize_probability_of_5y_and_10y_10x_without_destroying_survival_probability",
+    "monthly_dca_usd_default": 1000,
+    "monthly_dca_usd_can_float_with_market_regime": true,
+    "btc_role": "opportunistic_liquidity_anchor_not_default_dca_core",
+    "btc_default_new_dca_weight_pct": 0,
+    "eth_lceth_role": "existing_core_hold_track_staking_unlock_and_valuation_do_not_add_when_overweight",
+    "sol_role": "long_term_growth_engine_candidate_not_mechanical_full_weight",
+    "night_role": "long_duration_convex_tail_candidate_not_stable_yield_asset",
+    "ada_role": "deep_value_staking_satellite_with_approximately_3pct_apy_delayed_reward_visibility_and_conditional_15_to_22pct_crypto_target",
+    "concentrated_long_term_dca_gate": {
+      "enabled": true,
+      "purpose": "keep long-term DCA concentrated in a few high-quality assets and require every new candidate to beat adding to an existing underweight holding",
+      "max_active_dca_destinations_per_cycle": 2,
+      "max_material_crypto_assets": 4,
+      "material_weight_threshold_pct": 5,
+      "existing_holdings_comparison_required": true,
+      "existing_holding_benchmark_order": [
+        "current_underweight_primary_growth_holding",
+        "current_underweight_staking_or_value_holding",
+        "quality_core_when_not_overweight"
+      ],
+      "new_asset_default_mode": "replacement_not_addition",
+      "new_asset_min_thesis_score_advantage_points": 10,
+      "new_asset_requires_distinct_portfolio_role": true,
+      "correlation_overlap_must_be_disclosed": true,
+      "no_confirmed_crypto_cash_behavior": "plan_next_dca_cycle_only_no_current_order",
+      "required_outputs": [
+        "material_crypto_asset_count",
+        "active_dca_destinations_this_cycle",
+        "existing_holding_benchmark",
+        "replacement_not_addition",
+        "correlation_overlap",
+        "why_not_add_more_assets"
+      ]
+    },
+    "goal_gap_panel": {
+      "enabled": true,
+      "required_cagr_to_10x": {
+        "five_year_pct": 58,
+        "ten_year_pct": 26
+      },
+      "required_holding_labels": [
+        "accelerator",
+        "neutral",
+        "drag",
+        "tail_convexity"
+      ],
+      "must_calculate_price_multiple_after_staking": true,
+      "must_explain_goal_alignment_before_dca": true
+    },
+    "dca_investment_intensity_panel": {
+      "enabled": true,
+      "required_at_start_of_crypto_dca_report": true,
+      "purpose": "make the report explicitly answer whether current crypto cash should be deployed normally, accelerated, fully deployed, or held for a trigger",
+      "allowed_intensity_outputs": [
+        "no_extra_deploy",
+        "normal_dca",
+        "accelerated_dca_light",
+        "accelerated_dca_medium",
+        "full_near_term_deploy"
+      ],
+      "required_outputs": [
+        "confirmed_crypto_cash_usdt",
+        "unconfirmed_or_user_stated_cash_usdt",
+        "recommended_deploy_now_usd",
+        "recommended_limit_order_usd",
+        "recommended_keep_usdt",
+        "front_load_extra_months",
+        "front_load_amount_usd",
+        "why_this_intensity",
+        "what_would_increase_intensity",
+        "what_would_reduce_or_pause_intensity",
+        "two_step_buy_plan"
+      ],
+      "intensity_rules": {
+        "extreme_fear_long_term_low_value_verified": "at_least_normal_dca_or_accelerated_dca_light_when_thesis_intact_and_asset_underweight",
+        "missing_onchain_or_unlock_data_but_price_and_liquidity_verified": "max_accelerated_dca_light",
+        "disputed_price_or_project_risk_or_liquidity_collapse": "no_extra_deploy_or_hold_stablecoin_until_trigger",
+        "portfolio_already_overweight_core_asset": "redirect_new_dca_to_underweight_growth_or_tail_convexity_assets",
+        "full_near_term_deploy_requires": [
+          "verified_data_quality",
+          "long_term_low_value_zone",
+          "short_term_downtrend_not_disorderly",
+          "stablecoin_opportunity_bucket_preserved",
+          "clear_5y_10y_goal_improvement"
+        ]
+      },
+      "max_buy_steps": 2,
+      "buy_step_names": [
+        "near_price_entry",
+        "better_pullback_entry"
+      ],
+      "plain_language_required": true
+    },
+    "macro_regime_panel": {
+      "enabled": true,
+      "script": "scripts/macro_regime_snapshot.py",
+      "context_field": "macro_regime_panel",
+      "network_fetch_must_be_explicit_before_context_build": true,
+      "macro_affects_dca_pace_only": true,
+      "allowed_dca_pace_outputs": [
+        "accelerate",
+        "normal",
+        "split_more",
+        "wait_for_pullback"
+      ],
+      "required_inputs": [
+        "fed_or_cme_rate_expectations",
+        "10y_2y_treasury_yields",
+        "dxy",
+        "cpi_or_pce",
+        "nasdaq_semiconductor_risk_appetite",
+        "btc_eth_etf_or_digital_asset_fund_flows"
+      ],
+      "public_market_proxy_symbols": [
+        "SPY",
+        "QQQ",
+        "SOXX",
+        "SMH",
+        "VIX",
+        "DXY",
+        "BTC",
+        "ETH"
+      ],
+      "preferred_sources": [
+        "FRED",
+        "BLS",
+        "BEA",
+        "US_Treasury",
+        "CME_FedWatch",
+        "CoinShares",
+        "public_market_data"
+      ],
+      "missing_macro_data_default": "split_more_or_conditional_only"
+    },
+    "long_horizon_low_value_acceleration_gate": {
+      "enabled": true,
+      "purpose": "when crypto is in a long-term low-value zone, compare waiting for a pullback against early exposure, time-in-market and staking compounding; waiting must prove it is better than at least a first tranche",
+      "time_horizon_years": [
+        5,
+        10
+      ],
+      "decision_bias_when_long_term_low_value_verified": "prefer_near_price_entry_or_accelerated_dca_over_idle_cash_unless_waiting_has_clear_expected_discount_edge",
+      "cash_idle_not_default_for_verified_stakeable_low_value_assets": true,
+      "increase_current_month_dca_when_long_term_low_value_verified": true,
+      "dynamic_buy_strategy_rule": "size and timing can shift between near-price entry, better-pullback limit order and front-loaded DCA according to long-term value zone, thesis quality, staking activation delay, liquidity and current portfolio underweight status",
+      "allowed_timing_decisions": [
+        "accelerated_dca",
+        "near_price_entry",
+        "limit_order_wait",
+        "hold_stablecoin_until_trigger"
+      ],
+      "required_checks": [
+        "long_term_value_zone",
+        "thesis_intact",
+        "staking_apy_verified_for_stakeable_assets",
+        "reward_delay_or_lock_considered",
+        "time_cost_risk_considered",
+        "five_to_ten_year_value_zone_considered",
+        "cash_idle_drag_considered",
+        "expected_pullback_advantage_compared_to_time_in_market",
+        "portfolio_underweight_or_goal_accelerator",
+        "liquidity_and_spread_acceptable",
+        "supply_unlock_not_blocking",
+        "cash_rail_confirmed",
+        "data_quality_not_disputed_or_stale",
+        "front_load_budget_cap_checked"
+      ],
+      "staking_opportunity_cost_model": {
+        "enabled": true,
+        "formula": "planned_wait_days / 365 * apy * planned_amount",
+        "required_fields": [
+          "planned_wait_days",
+          "apy",
+          "planned_amount",
+          "time_horizon_years",
+          "staking_wait_cost_usd",
+          "staking_activation_delay_cost_usd",
+          "estimated_staking_start_if_buy_now",
+          "estimated_staking_start_if_wait",
+          "long_term_low_value_zone_status",
+          "low_value_evidence_summary",
+          "early_entry_benefit_summary",
+          "time_in_market_bias_score",
+          "wait_requires_specific_pullback_trigger",
+          "front_load_extra_months",
+          "front_load_amount_usd",
+          "near_term_total_budget_usd",
+          "missed_upside_buffer_pct",
+          "required_pullback_to_wait_pct",
+          "front_load_reason",
+          "cash_idle_drag_comment",
+          "waiting_burden_of_proof_comment",
+          "dynamic_buy_strategy",
+          "decision"
+        ],
+        "rule": "if expected_pullback_advantage_pct is less than required_pullback_to_wait_pct, prefer near_price_entry or accelerated_dca; for stakeable assets, waiting must also compensate delayed staking activation"
+      },
+      "low_value_entry_panel": {
+        "enabled": true,
+        "required": true,
+        "plain_language_required": true,
+        "purpose": "force every DCA report to decide whether long-term low-value conditions justify earlier entry, front-loaded DCA, or waiting with a clear trigger",
+        "required_outputs": [
+          "long_term_low_value_zone_status",
+          "low_value_evidence_summary",
+          "early_entry_or_staking_benefit",
+          "time_in_market_bias_score",
+          "wait_requires_specific_pullback_trigger",
+          "minimum_extra_discount_required_to_wait",
+          "cash_idle_drag_comment",
+          "final_timing_decision"
+        ],
+        "cash_idle_default": "cash is a temporary opportunity bucket, not a long-term default, when verified long-term low-value stakeable assets are underweight"
+      },
+      "front_load_decision_matrix": {
+        "verified_low_value_stakeable_underweight": "front_load_0_5_to_1_0_month_if_stablecoin_bucket_preserved",
+        "mildly_degraded_or_high_short_term_volatility": "front_load_0_25_to_0_5_month_or_near_price_first_tranche",
+        "disputed_stale_unlock_or_liquidity_block": "front_load_0_month_and_wait_for_trigger",
+        "plain_language_rule": "早买不是追高；只有在长期低位和质押/长期暴露收益能补偿等待风险时，才把未来一小部分DCA提前。"
+      },
+      "front_load_limits": {
+        "can_front_load_future_dca": true,
+        "default_max_extra_months_to_pull_forward": 1,
+        "larger_front_load_requires_human_confirmed_proposed_change": true,
+        "must_preserve_stablecoin_opportunity_bucket_min_pct": 5,
+        "must_not_use_us_equity_cash_without_confirmed_transfer": true
+      },
+      "report_requirements": [
+        "state that waiting is not the default when verified long-term low-value stakeable assets are underweight",
+        "state why early staking/time-in-market is better or worse than waiting",
+        "state whether staking activation delay makes waiting more expensive",
+        "state whether this run should front-load 0, 0.25, 0.5, or 1.0 month of future DCA for verified long-term low-value assets",
+        "show the near-term total budget after front-loading, while preserving the stablecoin opportunity bucket",
+        "keep DCA action to at most two tranches",
+        "show whether accelerated DCA improves 5y/10y 10x probability",
+        "show whether waiting creates time-cost risk from missed staking compounding or missed long-term recovery",
+        "show what would invalidate the acceleration"
+      ]
+    },
+    "asset_micro_thesis_matrix": {
+      "enabled": true,
+      "compare_only_decision_relevant_assets": true,
+      "required_dimensions": [
+        "price_location",
+        "network_usage",
+        "developer_ecosystem",
+        "liquidity_depth",
+        "supply_unlock",
+        "staking_compounding",
+        "fund_flow_narrative",
+        "risk_events"
+      ],
+      "allowed_action_implications": [
+        "increase_weight",
+        "hold_weight",
+        "reduce_new_dca",
+        "reduce_or_trim",
+        "watch_only"
+      ]
+    },
+    "staking_compounding_model": {
+      "enabled": true,
+      "required_for_stakeable_relevant_assets": true,
+      "staking_rewards_are_variable_not_fixed": true,
+      "required_fields": [
+        "apy_used",
+        "provider_or_protocol",
+        "reward_delay_or_lock",
+        "net_reward_rate_after_provider_or_validator_fees",
+        "reward_source_quality",
+        "token_inflation_or_dilution_offset",
+        "liquidity_cost",
+        "operational_or_slashing_risk",
+        "compounding_reliability",
+        "five_year_compounding_multiplier",
+        "ten_year_compounding_multiplier",
+        "price_multiple_required_after_staking_for_10x",
+        "staking_risk_notes"
+      ],
+      "missing_apy_or_unlock_max_action": "conditional_action_or_smaller_size"
+    },
+    "missing_data_downgrade_panel": {
+      "enabled": true,
+      "required_categories": [
+        "macro",
+        "micro",
+        "staking",
+        "unlock",
+        "chain_or_ecosystem",
+        "liquidity",
+        "social_key_person_intel",
+        "cost_basis",
+        "portfolio_evidence_gap",
+        "cash_rail"
+      ],
+      "impact_levels": [
+        "no impact",
+        "smaller size",
+        "conditional only",
+        "block"
+      ]
+    },
+    "dynamic_monthly_dca_adjustment": {
+      "enabled": true,
+      "single_review_weight_change_limit_pct_points": 10,
+      "larger_change_requires_proposed_change_and_human_confirmation": true,
+      "market_regime_inputs": [
+        "fear_greed",
+        "7d_30d_90d_drawdown",
+        "funding",
+        "open_interest",
+        "quote_volume",
+        "bid_ask_spread",
+        "order_book_depth",
+        "fund_flows",
+        "project_news",
+        "social_key_person_intel",
+        "staking_apy",
+        "onchain_or_ecosystem_data",
+        "portfolio_weight_gap"
+      ]
+    },
+    "dynamic_weight_ranges_pct": {
+      "quality_core": {
+        "min": 45,
+        "max": 65
+      },
+      "primary_growth_engine": {
+        "min": 20,
+        "max": 35
+      },
+      "staking_or_value_satellite": {
+        "min": 5,
+        "max": 15
+      },
+      "validated_new_satellite": {
+        "min": 0,
+        "max": 12
+      },
+      "stablecoin_opportunity_bucket": {
+        "min": 0,
+        "max": 10
+      }
+    },
+    "long_term_thesis_score": {
+      "enabled": true,
+      "score_range": {
+        "min": 0,
+        "max": 100
+      },
+      "dimensions": [
+        "network_adoption",
+        "token_utility",
+        "supply_unlock",
+        "liquidity",
+        "staking_or_yield",
+        "price_location",
+        "narrative_quality",
+        "key_person_social_intel",
+        "data_quality",
+        "goal_gap_contribution",
+        "macro_sensitivity",
+        "compounding_required_price_multiple"
+      ],
+      "actions": {
+        "high_score": "long_term_dca",
+        "medium_score": "long_term_watch_or_small_dca",
+        "low_score": "hold_only_or_no_new_dca",
+        "deteriorating_score": "reduce_or_no_new_dca"
+      },
+      "short_term_paper_or_no_deploy_does_not_auto_block_longterm_small_dca": true
+    },
+    "night_long_duration_convex_policy": {
+      "enabled": true,
+      "not_stable_yield_asset": true,
+      "track_fields": [
+        "DUST_demand",
+        "NIGHT_DUST_economic_model",
+        "official_roadmap",
+        "ecosystem_apps",
+        "developer_growth",
+        "exchange_liquidity",
+        "quote_volume",
+        "bid_ask_spread",
+        "order_book_depth",
+        "airdrop_redemption_or_thawing_schedule",
+        "supply_pressure",
+        "long_term_trend"
+      ],
+      "allowed_longterm_actions": [
+        "long_term_watch_or_small_dca",
+        "long_term_dca",
+        "hold_only",
+        "reduce_or_no_new_dca"
+      ],
+      "short_term_score_low_does_not_mean_permanent_no_deploy": true,
+      "single_day_rally_cannot_trigger_strong_add": true
+    },
+    "comprehensive_data_quality_gate": {
+      "enabled": true,
+      "required_before_dca": true,
+      "required_data_fields": [
+        "realtime_price",
+        "24h_trend",
+        "7d_trend",
+        "30d_trend",
+        "volume",
+        "bid_ask_spread",
+        "order_book_depth",
+        "funding",
+        "open_interest",
+        "exchange_liquidity",
+        "project_announcements",
+        "social_key_person_intel",
+        "onchain_or_ecosystem_data",
+        "fund_flows",
+        "fed_or_cme_rate_expectations",
+        "10y_2y_treasury_yields",
+        "dxy",
+        "cpi_or_pce",
+        "nasdaq_semiconductor_risk_appetite",
+        "market_sentiment",
+        "major_news"
+      ],
+      "price_source_priority": [
+        "Binance",
+        "CoinMarketCap_or_CoinGecko",
+        "additional_exchange_or_DeFiLlama_or_project_source"
+      ],
+      "quality_states": [
+        "verified",
+        "degraded",
+        "disputed",
+        "stale",
+        "missing"
+      ],
+      "downgrade_rules": {
+        "degraded": "conditional_action_or_smaller_dca",
+        "disputed": "watch_or_hold_USDT_until_verified",
+        "stale": "no_immediate_action",
+        "missing": "block_asset_specific_recommendation"
+      },
+      "report_must_include_sources_timestamps_and_downgrade_reasons": true
+    },
+    "ada_deep_value_policy": {
+      "enabled": true,
+      "conditional_crypto_target_range_pct": {
+        "min": 15,
+        "max": 22
+      },
+      "requires_deep_historical_drawdown": true,
+      "requires_verified_or_mildly_degraded_data": true,
+      "requires_sustainable_staking": true,
+      "requires_not_overweight": true,
+      "remain_satellite_if_weaker_than_sol_on": [
+        "ecosystem",
+        "tvl",
+        "developer_growth",
+        "fund_flows"
+      ]
+    },
+    "source_to_decision_mapping": {
+      "macro_regime": "dca_pace_only",
+      "fund_flows": "category_weight_tilt_not_standalone_buy",
+      "defillama_or_explorer": "micro_thesis_score",
+      "staking_provider_or_protocol": "staking_compounding_model_and_size",
+      "order_book_spread_volume": "execution_readiness_and_size",
+      "official_roadmap_tokenomics": "thesis_confidence_and_supply_risk",
+      "crypto_key_person_social_intel": "watch_priority_risk_alert_and_dca_pace_not_standalone_buy"
+    },
+    "dynamic_report_rules": {
+      "compare_only_decision_relevant_assets": true,
+      "do_not_force_fixed_token_comparison_table": true,
+      "must_explain_weight_change_and_goal_impact": true,
+      "must_state_data_confidence": true
+    },
+    "satellite_research_universe_examples_not_default_holdings": [
+      "NEAR",
+      "LINK",
+      "SUI",
+      "TRX",
+      "AAVE",
+      "NIGHT"
+    ],
+    "satellite_real_money_gate": {
+      "requires_multisource_verified_data": true,
+      "requires_long_term_thesis_score_for_dca": true,
+      "requires_walk_forward_or_paper_support_for_tactical": true,
+      "requires_current_signal_for_tactical": true,
+      "requires_positive_ev": true,
+      "requires_liquidity_pass": true,
+      "requires_risk_model_not_block": true,
+      "requires_human_confirmation": true
+    },
+    "five_year_projection_required_when_discussing_long_term_plan": true,
+    "ten_year_projection_required_when_discussing_long_term_plan": true,
+    "readable_action_ladder": {
+      "max_dca_batches": 2,
+      "batch_names": [
+        "near_price_small_entry",
+        "better_pullback_main_entry"
+      ],
+      "collapse_extra_levels_to_notes": true,
+      "long_term_hold_output": "review_date_and_thesis_invalidation_only_when_no_tactical_exit"
+    }
+  },
+  "live_trade_policy": "manual_confirmation_only_no_auto_orders"
+}

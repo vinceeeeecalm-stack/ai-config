@@ -1,0 +1,22 @@
+{
+  "name": "Codex Bridge",
+  "short_name": "Bridge",
+  "start_url": "/relay-chat.html",
+  "display": "standalone",
+  "background_color": "#f6f2e8",
+  "theme_color": "#17201d",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "打开配对",
+      "url": "/relay-chat.html#registerPanel"
+    }
+  ]
+}

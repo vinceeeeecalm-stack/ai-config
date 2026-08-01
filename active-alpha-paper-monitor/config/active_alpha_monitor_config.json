@@ -1,0 +1,1603 @@
+{
+  "skill_name": "active-alpha-paper-monitor",
+  "version": "monitor-v3.0-fast-candidate-funnel",
+  "role": "active_alpha_scanner_and_paper_monitor",
+  "paired_skill": "manual-investment-strategy-operator",
+  "auto_trading_enabled": false,
+  "live_order_api_enabled": false,
+  "withdrawal_api_enabled": false,
+  "margin_futures_perpetuals_enabled": false,
+  "private_api_keys_policy": "environment_variables_only_never_log",
+  "default_outputs": {
+    "reports": "reports/YYYY-MM-DD-alpha-monitor.md",
+    "handoffs": "handoffs/YYYY-MM-DD-alpha-handoff.json",
+    "us_open_reports": "reports/YYYY-MM-DD-us-open-monitor.md",
+    "us_open_handoffs": "handoffs/YYYY-MM-DD-us-open-handoff.json",
+    "sunday_crypto_reports": "reports/YYYY-MM-DD-sunday-crypto-hourly-HHMM.md",
+    "sunday_crypto_handoffs": "handoffs/YYYY-MM-DD-sunday-crypto-hourly-HHMM-handoff.json",
+    "daily_crypto_reports": "reports/YYYY-MM-DD-daily-crypto-paper-HHMM.md",
+    "daily_crypto_handoffs": "handoffs/YYYY-MM-DD-daily-crypto-paper-HHMM-handoff.json",
+    "daily_crypto_experiments": "experiments/YYYYMMDD-HHMM-daily-crypto-paper-auto-trader.json",
+    "fast_crypto_reports": "reports/YYYY-MM-DD-fast-crypto-paper-HHMM.md",
+    "fast_crypto_handoffs": "handoffs/YYYY-MM-DD-fast-crypto-paper-HHMM-handoff.json",
+    "fast_crypto_experiments": "experiments/YYYYMMDD-HHMM-fast-crypto-paper-auto-trader.json",
+    "paper_exit_monitor_reports": "reports/YYYY-MM-DD-paper-exit-monitor-HHMM.md",
+    "paper_exit_monitor_handoffs": "handoffs/YYYY-MM-DD-paper-exit-monitor-HHMM-handoff.json",
+    "paper_exit_monitor_experiments": "experiments/YYYYMMDD-HHMM-paper-position-exit-monitor.json",
+    "resume_preflight_reports": "reports/YYYY-MM-DD-resume-preflight-HHMM.md",
+    "resume_preflight_experiments": "experiments/YYYYMMDD-HHMMSS-resume-preflight.json",
+    "safety_invariant_audit_reports": "reports/YYYY-MM-DD-safety-invariant-audit-HHMM.md",
+    "safety_invariant_audit_experiments": "experiments/YYYYMMDD-HHMMSS-safety-invariant-audit.json",
+    "validation_progress_reports": "reports/YYYY-MM-DD-validation-progress-runner-HHMM.md",
+    "validation_progress_experiments": "experiments/YYYYMMDD-HHMM-validation-progress-runner.json",
+    "strategy_recovery_optimizer_experiments": "experiments/YYYYMMDD-HHMM-strategy-recovery-optimizer.json",
+    "social_key_person_reports": "reports/YYYY-MM-DD-social-key-person-intel.md",
+    "social_key_person_handoffs": "handoffs/YYYY-MM-DD-social-key-person-intel-handoff.json",
+    "social_key_person_experiments": "experiments/YYYYMMDD-social-key-person-intel.json",
+    "sunday_crypto_experiments": "experiments/YYYYMMDD-HHMM-sunday-crypto-realistic-paper.json",
+    "experiments": "experiments/YYYYMMDD-alpha-monitor.json",
+    "paper_trades": "paper_trades/YYYY-MM-DD-paper-trades.json"
+  },
+  "candidate_levels": [
+    "no_deploy",
+    "research_watch",
+    "paper_only",
+    "paper_forward_candidate",
+    "small_probe_review"
+  ],
+  "progressive_validation_learning_loop": {
+    "enabled": true,
+    "purpose": "collect reviewable paper and signal samples for sample-tiered probability calibration without a universal probability cutoff",
+    "learning_floor_pct": 60,
+    "calibrated_min_sample_size": 30,
+    "untouched_holdout_required": true,
+    "current_phase_accepts_paper_only_samples": true,
+    "does_not_authorize_live_trades": true,
+    "manual_skill_must_arbitrate_before_real_action": true
+  },
+  "fast_candidate_funnel": {
+    "schema_version": "fast-candidate-funnel-v1",
+    "discovery_candidate_schema": "DiscoveryCandidateV1",
+    "discovery_top3_p95_seconds": 15,
+    "validated_top1_seconds": 45,
+    "deep_research_top1_seconds": 120,
+    "end_to_end_seconds": 180,
+    "discovery_forbidden_inputs": [
+      "forecast_probability",
+      "portfolio_cash",
+      "full_financing_audit",
+      "research_committee",
+      "execution_permission"
+    ],
+    "deep_risk_scope": "top3_only",
+    "bounded_historical_comparison_scope": "top3_same_point_in_time_rules",
+    "ranked_primary_count": 1,
+    "qualified_alternative_max": 2,
+    "weak_alternatives_must_be_omitted": true,
+    "deep_research_scope": "top1_only",
+    "live_orders_enabled": false
+  },
+  "current_signal_freshness_contract": {
+    "enabled": true,
+    "signal_bar_policy": "latest_closed_bar_only_remove_current_open_bar",
+    "interval_max_age_bars": {
+      "1m": 3,
+      "5m": 3,
+      "15m": 3,
+      "1h": 2,
+      "4h": 2,
+      "1d": 2
+    },
+    "stale_or_future_frame_policy": "exclude_from_current_signal_and_report_reason",
+    "required_report_fields": [
+      "frames_discovered",
+      "frames_fresh",
+      "frames_stale",
+      "open_bar_rows_removed"
+    ],
+    "does_not_authorize_live_trading": true
+  },
+  "three_segment_current_signal_retest": {
+    "enabled": true,
+    "scope": "paper_only",
+    "validation_protocol": "train_50_validation_25_final_holdout_25",
+    "holdout_used_for_selection": false,
+    "requires_no_promotion_blockers": true,
+    "default_notional_usd": 25,
+    "dry_run_artifact_persistence_supported": true,
+    "dry_run_must_not_mutate_ledger": true,
+    "small_holdout_sample_is_not_calibrated_probability": true,
+    "requires_automation_authorization_before_paper_ledger_mutation": true,
+    "requires_current_signal_robustness_audit": true,
+    "robustness_audit_path": "experiments/current-signal-robustness-audit.json",
+    "robustness_batch_script": "scripts/current_signal_robustness_batch.py",
+    "robustness_match_key": ["symbol", "interval", "complete_strategy_parameters"],
+    "robustness_max_candidates_per_run": 12,
+    "robustness_required_gate": "allow_minimum_paper_retest",
+    "robustness_requires_reference_signal_still_active": true,
+    "robustness_min_current_parameter_neighbors": 5,
+    "robustness_min_no_blocker_neighbors": 8,
+    "robustness_min_no_blocker_neighbor_share_pct": 15,
+    "robustness_min_holdout_trades": 20,
+    "robustness_absolute_min_holdout_trades": 6,
+    "robustness_holdout_opportunity_coverage_ratio": 0.4,
+    "robustness_adaptive_sample_rule": "min(20,max(6,floor(holdout_window_bars/median_holding_bars*0.4)))",
+    "robustness_min_wilson_95pct_lower_pct": 45,
+    "robustness_friction_stress_pct": [0.46, 0.8, 1.2],
+    "microstructure_gate": {
+      "max_spread_bps": 15,
+      "min_depth_1pct_usd": 2500,
+      "min_depth_1pct_multiple_of_notional": 100,
+      "min_top20_ask_depth_usd": 200,
+      "min_top20_ask_depth_multiple_of_notional": 8,
+      "min_quote_volume_24h_usd": 1000000,
+      "min_recent_taker_buy_quote_ratio": 0.55,
+      "paper_fill_price": "public_best_ask_plus_configured_slippage"
+    },
+    "does_not_authorize_live_trading": true
+  },
+  "cross_sectional_rotation_research": {
+    "enabled": true,
+    "scope": "research_only_strategy_iteration",
+    "exact_timestamp_alignment": true,
+    "forward_fill_enabled": false,
+    "entry_policy": "next_bar_open_after_closed_signal",
+    "same_bar_stop_take_policy": "conservative_stop_first",
+    "round_trip_friction_pct": 0.46,
+    "promotion_requires_positive_train_validation_holdout": true,
+    "promotion_min_holdout_win_rate_pct": 55,
+    "promotion_min_holdout_symbol_count": 3,
+    "minimum_independent_windows": 3,
+    "paper_entry_enabled": false,
+    "auto_overlay_apply_enabled": false,
+    "does_not_authorize_live_trading": true
+  },
+  "goal_completion_audit": {
+    "enabled": true,
+    "script": "scripts/phase_goal_readiness_auditor.py",
+    "latest_report": "reports/ACTIVE_ALPHA_GOAL_COMPLETION_AUDIT.md",
+    "latest_experiment": "experiments/active-alpha-goal-completion-audit.json",
+    "strict_status_policy": "only_proven_pass_ok_count_as_complete",
+    "partial_blocked_by_design_manual_review_required_are_incomplete": true,
+    "requires_all_phase_checks": true,
+    "requires_all_objective_coverage_rows": true,
+    "scheduler_contract_is_explicit_requirement": true,
+    "blocked_deployment_forces_max_action": "offline_audit_and_public_data_rebuild_only",
+    "does_not_fetch_market_data": true,
+    "does_not_mutate_ledger": true,
+    "does_not_authorize_live_trading": true
+  },
+  "paper_testnet_risk_controls": {
+    "enabled": true,
+    "scope": "paper_and_spot_testnet_only",
+    "script": "scripts/paper_testnet_risk_control_auditor.py",
+    "latest_report": "reports/PAPER_TESTNET_RISK_CONTROL_AUDIT.md",
+    "latest_experiment": "experiments/paper-testnet-risk-control-audit.json",
+    "max_daily_realized_loss_pct": 5,
+    "max_portfolio_drawdown_pct": 15,
+    "loss_streak_lookback_hours": 72,
+    "reduce_after_consecutive_losses": 2,
+    "reduced_size_multiplier": 0.5,
+    "pause_after_consecutive_losses": 3,
+    "pause_hours": 24,
+    "max_single_trade_notional_usd": 150,
+    "max_single_position_pct_of_equity": 30,
+    "max_total_open_exposure_pct_of_equity": 85,
+    "max_open_positions": 8,
+    "max_positions_per_symbol": 3,
+    "duplicate_id_policy": "block_new_entries",
+    "risk_decisions": [
+      "allow_paper_only",
+      "reduce_new_entry_size",
+      "block_new_entries"
+    ],
+    "rollback_contract": {
+      "strategy_snapshot_before_apply": true,
+      "stable_change_id_required": true,
+      "append_only_decision_log_required": true,
+      "forward_degradation_rollback_required": true,
+      "human_approval_before_live_required": true
+    },
+    "live_orders_enabled": false,
+    "withdrawals_enabled": false,
+    "margin_futures_perpetuals_enabled": false,
+    "does_not_authorize_live_trading": true
+  },
+  "dynamic_scan_pool_contract": {
+    "enabled": true,
+    "contract_version": "v2.60",
+    "static_symbols_policy": "baseline_and_survival_fallback_only",
+    "market_mood_sentiment_pool_shape_required": true,
+    "must_rebuild_when_market_atmosphere_or_sentiment_changes": true,
+    "must_build_before_kline_strategy_scan": true,
+    "dynamic_pool_invalid_without": [
+      "market_regime",
+      "market_atmosphere",
+      "short_term_state",
+      "sentiment_state",
+      "pool_width_policy",
+      "pool_shape_policy",
+      "selected_symbols",
+      "top_dynamic_candidates"
+    ],
+    "required_on_live_market_runs": [
+      "validation_progress_runner",
+      "fast_crypto_paper_auto_trader",
+      "daily_crypto_paper_auto_trader",
+      "sunday_crypto_realistic_paper_loop"
+    ],
+    "market_atmosphere_inputs": [
+      "binance_usdt_spot_24h_breadth",
+      "btc_eth_24h_direction",
+      "btc_eth_sol_bnb_1h_4h_anchor_changes",
+      "quote_volume",
+      "trade_count",
+      "price_change_24h",
+      "open_paper_symbols",
+      "strategy_recovery_queue"
+    ],
+    "sentiment_inputs": [
+      "fresh_crypto_key_person_handoff",
+      "confirmed_social_catalysts",
+      "risk_alert_clusters",
+      "trending_or_news_context_when_verified"
+    ],
+    "mood_to_pool_behavior": {
+      "risk_off_rebound_watch": "contract width, keep open symbols monitored, raise liquid core floor, cap high-beta/meme/new-mover exposure, allow only small paper rebound watch after all gates",
+      "risk_on_momentum": "expand width, increase high-beta/liquid momentum/new-mover slots, preserve core anchors, allow fresh confirmed catalysts into watch/paper evaluation",
+      "selective_high_beta_rotation": "modestly expand width toward volume acceleration, high-beta dynamic movers, recovery queue, and confirmed narratives while preserving liquid anchors",
+      "mixed_selective": "keep balanced width across core, large-cap/infra, high-beta, market movers, and confirmed catalyst names"
+    },
+    "atmosphere_to_scan_rebalance": {
+      "risk_appetite_accelerating": "increase effective width and high-beta/liquid momentum quota only when 24h breadth is not risk-off",
+      "risk_appetite_fading": "reduce effective width, cut meme/high-beta quota, and require stronger independent current-signal evidence",
+      "rebound_attempt": "keep rebound candidates visible but classify them as watch or minimum-size paper only until 4h confirmation improves",
+      "pullback_after_strength": "avoid late-chase expansion; preserve leaders and raise liquidity/current-signal thresholds"
+    },
+    "sentiment_to_pool_behavior": {
+      "positive_catalyst_cluster": "reserve social-catalyst watch slots and boost social-long ranking only when handoff is fresh",
+      "risk_alert_cluster": "contract high-beta/meme/social-catalyst slots, raise core/liquid floors, and downgrade affected names unless price/liquidity/current-signal evidence independently passes",
+      "light_positive_context": "small ranking boost only; no width expansion",
+      "neutral_or_missing_social": "ignore social expansion and rank from market breadth, liquidity, movement, participation, and recovery queue"
+    },
+    "freshness_and_safety": {
+      "social_max_age_hours": 12,
+      "stale_social_policy": "neutral_or_missing_social_no_pool_expansion",
+      "market_data_failure_policy": "fallback_to_open_explicit_queue_core_baseline_and_mark_fallback_static",
+      "fallback_static_policy": "allowed_only_when_binance_market_breadth_unavailable_or_offline_fixture",
+      "stale_or_missing_social_policy": "continue_market_breadth_scan_but_forbid_sentiment_width_expansion",
+      "paper_only": true,
+      "live_orders_enabled": false,
+      "cannot_bypass_gates": [
+        "current_signal",
+        "kline_freshness",
+        "liquidity",
+        "spread_depth_friction",
+        "cross_source_validation",
+        "capacity",
+        "validation_recovery",
+        "learning"
+      ]
+    },
+    "report_required": [
+      "market_regime",
+      "market_atmosphere",
+      "short_term_state",
+      "sentiment_state",
+      "sentiment_overlay",
+      "configured_max_symbols",
+      "effective_max_symbols",
+      "width_multiplier",
+      "bucket_min_max_slots",
+      "selected_counts",
+      "top_dynamic_candidates",
+      "fallback_or_degradation_reason",
+      "why_pool_changed_from_static_baseline"
+    ]
+  },
+  "new_chain_event_discovery": {
+    "enabled": true,
+    "contract_version": "event-to-asset-v1",
+    "script": "scripts/new_chain_opportunity_radar.py",
+    "registry": "config/new_chain_event_registry.json",
+    "policy": "references/NEW_CHAIN_EVENT_TO_ASSET_DISCOVERY_POLICY.md",
+    "run_before_crypto_candidate_ranking_when_event_watch_active": true,
+    "ecosystem_watch_hours": 72,
+    "cex_pair_not_required_for_observation": true,
+    "cross_venue_sources": [
+      "official_newsroom_and_docs",
+      "geckoterminal_new_and_trending_pools",
+      "dexscreener_pair_data",
+      "official_chain_explorer",
+      "canonical_dex_bridge_wallet_launchpad"
+    ],
+    "required_derivation_fields": [
+      "originating_official_event",
+      "ecosystem_transmission",
+      "asset_selection_reason",
+      "market_confirmation",
+      "narrative_or_utility_link",
+      "affiliation_status",
+      "security_capacity_status",
+      "why_now",
+      "what_invalidates",
+      "discovery_latency"
+    ],
+    "missing_security_or_holder_data_max_action": "watch",
+    "complete_gate_max_action": "paper_only",
+    "live_orders_enabled": false,
+    "human_confirmation_required": true
+  },
+  "research_committee": {
+    "enabled": true,
+    "required_before_handoff": true,
+    "orchestration_runbook": "references/SUBAGENT_ORCHESTRATION_RUNBOOK.md",
+    "force_real_subagents_when_tool_available": true,
+    "default_coverage": "full_8_roles_even_when_scan_scope_is_narrow",
+    "required_external_roles_policy": "all_8_default_roles_must_be_present; at_least_6_must_be_successful; non_applicable_roles_return_asset_scope_not_applicable",
+    "external_outputs_path_pattern": "/private/tmp/{monitor_run_id}-external-subagent-outputs.json",
+    "research_subagent_task_package_path_pattern": "/private/tmp/{monitor_run_id}-research-subagent-task-package.json",
+    "handoff_field": "research_panel",
+    "missing_field": "research_panel_missing",
+    "min_successful_roles": 6,
+    "degrade_if_unavailable": true,
+    "degraded_max_monitor_recommendation": "watch_or_paper_only_no_small_probe_review",
+    "roles": [
+      "prior_thesis_challenge_agent",
+      "portfolio_state_agent",
+      "macro_regime_agent",
+      "crypto_market_agent",
+      "onchain_defi_agent",
+      "social_news_agent",
+      "us_equity_alpha_agent",
+      "backtest_validation_agent"
+    ],
+    "required_agent_output_fields": [
+      "agent_id",
+      "asset_scope",
+      "sources_used",
+      "signals",
+      "confidence_pct",
+      "data_quality",
+      "missing_data",
+      "failed_gates",
+      "recommended_max_action",
+      "what_would_change_my_mind"
+    ],
+    "research_panel_fields": [
+      "run_id",
+      "agent_outputs",
+      "researcher_votes",
+      "bull_case",
+      "bear_case",
+      "base_case",
+      "disconfirming_evidence",
+      "prior_thesis_status",
+      "arbiter_decision",
+      "old_thesis_reuse_allowed",
+      "missing_data_summary",
+      "max_allowed_action",
+      "research_committee_degraded",
+      "research_panel_missing_reason",
+      "external_roles_used",
+      "local_fallback_roles",
+      "missing_external_roles",
+      "required_external_roles",
+      "research_method",
+      "external_agent_validation"
+    ],
+    "external_agent_outputs_json": {
+      "enabled": true,
+      "input_is_optional": true,
+      "source": "runtime_cli_argument_or_external_orchestrator",
+      "validation_requires_min_successful_roles": 6,
+      "validation_requires_min_evidence_verified_roles": 6,
+      "validation_requires_min_roles_with_ok_sources": 6,
+      "missing_input_sets_research_panel_missing": true
+    },
+    "evidence_backlog": {
+      "enabled": true,
+      "policy": "references/RESEARCH_EVIDENCE_BACKLOG_POLICY.md",
+      "builder": "manual-investment-strategy-operator/scripts/research_evidence_backlog_builder.py",
+      "task_packager": "manual-investment-strategy-operator/scripts/research_subagent_task_packager.py",
+      "output_collector": "manual-investment-strategy-operator/scripts/research_subagent_output_collector.py",
+      "task_package_field": "research_subagent_task_package",
+      "required_when_quality_audit_fails": true,
+      "task_package_is_upstream_of_external_agent_outputs": true,
+      "does_not_authorize_real_trades": true
+    },
+    "active_monitor_arbitration_limits": {
+      "does_not_authorize_real_trades": true,
+      "social_news_max_action_without_price_volume_confirmation": "watch",
+      "missing_or_degraded_research_panel_blocks_small_probe_review": true,
+      "manual_skill_must_recheck_before_any_real_action": true
+    }
+  },
+  "research_committee_gate": {
+    "enabled": true,
+    "alias_of": "research_committee",
+    "required_before_handoff": true,
+    "position_in_workflow": "before_handoff_generation",
+    "force_real_subagents_when_tool_available": true,
+    "min_successful_roles": 6,
+    "degrade_if_unavailable": true,
+    "missing_research_panel_handling": "set_research_panel_missing_and_research_committee_degraded",
+    "degraded_max_allowed_actions": [
+      "watch",
+      "paper_only",
+      "risk_alert",
+      "no_deploy"
+    ],
+    "manual_skill_must_rearbitrate": true
+  },
+  "paper_portfolio": {
+    "enabled": true,
+    "initial_capital_usd": 500,
+    "ledger_path": "paper_trades/paper_portfolio_ledger.json",
+    "default_single_trade_notional_usd": 150,
+    "max_single_trade_notional_usd": 150,
+    "max_open_positions": 8,
+    "default_stop_pct": -8,
+    "default_take_profit_pct": 20,
+    "default_max_holding_window": "7d",
+    "short_horizon_max_holding_hours": 36,
+    "one_hour_max_holding_hours": 96,
+    "four_hour_max_holding_hours": 168,
+    "execution_mode": "auto_paper_only_when_signal_confirmed",
+    "live_orders_enabled": false
+  },
+  "paper_exit_management": {
+    "enabled": true,
+    "purpose": "simulate API-like sell decisions quickly enough to test monthly-double paper target without real orders",
+    "historical_barrier_replay_enabled": true,
+    "historical_barrier_interval": "5m",
+    "historical_barrier_request_timeout_seconds": 8,
+    "historical_barrier_max_pages": 100,
+    "historical_barrier_extra_slippage_bps": 12,
+    "historical_barrier_intrabar_policy": "conservative_stop_first_when_stop_and_take_touch_same_bar",
+    "profit_protection_trigger_pct": 6,
+    "profit_trailing_giveback_pct": 3.5,
+    "profit_break_even_floor_pct": 0.6,
+    "profit_protection_min_hold_minutes": 30,
+    "exploratory_profit_protection_enabled": true,
+    "exploratory_profit_protection_trigger_pct": 3,
+    "exploratory_profit_trailing_giveback_pct": 1.25,
+    "exploratory_break_even_floor_pct": 0.5,
+    "exploratory_profit_protection_min_hold_minutes": 15,
+    "short_horizon_profit_protection_trigger_pct": 3.5,
+    "short_horizon_profit_trailing_giveback_pct": 1.5,
+    "short_horizon_break_even_floor_pct": 0.4,
+    "short_horizon_profit_protection_min_hold_minutes": 15,
+    "time_decay_exit_enabled": true,
+    "time_decay_exit_hours": 96,
+    "time_decay_exit_max_pnl_pct": 0,
+    "time_decay_min_info_score": 25,
+    "exploratory_capital_protection_enabled": true,
+    "exploratory_capital_protection_min_hold_minutes": 30,
+    "exploratory_capital_protection_loss_cut_pct": -3.25,
+    "exploratory_capital_protection_max_favorable_pnl_pct": 1,
+    "post_loss_reentry_cooldown_enabled": true,
+    "post_loss_reentry_cooldown_hours": 6,
+    "post_loss_reentry_cooldown_modes": [
+      "info_exploratory_probe"
+    ],
+    "post_loss_reentry_cooldown_exit_reasons": [
+      "exploratory_capital_protection_loss_cut"
+    ],
+    "short_horizon_time_decay_exit_hours": 24,
+    "short_horizon_time_decay_exit_max_pnl_pct": 1,
+    "short_horizon_time_decay_min_info_score": 30,
+    "paper_order_lifecycle_enabled": true,
+    "simulated_api_order_record_required": true,
+    "live_orders_enabled": false
+  },
+  "paper_recent_loss_quality_gate": {
+    "enabled": true,
+    "purpose": "after a recent same-symbol paper loss, require materially stronger evidence before reopening the same exploratory or validation mode",
+    "lookback_hours": 48,
+    "modes": [
+      "info_exploratory_probe",
+      "validation_probe"
+    ],
+    "exit_reasons": [
+      "exploratory_capital_protection_loss_cut",
+      "post_loss_reentry_cooldown_violation",
+      "stop"
+    ],
+    "min_info_score": 45,
+    "min_oos_trades": 8,
+    "min_oos_win_rate_pct": 60,
+    "min_oos_net_return_pct": 50,
+    "min_oos_drawdown_pct": -20,
+    "min_train_final_capital": 500,
+    "live_orders_enabled": false
+  },
+  "validation_recovery_plan_gate": {
+    "enabled": true,
+    "purpose": "consume validation_recovery_plan before future paper entries so retired/cooldown groups cannot keep damaging the monthly-double paper ledger",
+    "block_statuses": [
+      "retire_from_new_samples",
+      "cooldown_until_retested"
+    ],
+    "block_groups": [
+      "entry_mode",
+      "strategy_family",
+      "interval",
+      "symbol"
+    ],
+    "allow_quality_scout_weak_interval_retest": true,
+    "quality_scout_weak_interval_retest_note": "Only current_signal_quality_scout_probe may retest a weak interval at minimum paper size; weak symbols, retired entry modes, and retired strategy families still block and take priority over the weak-interval exception.",
+    "live_orders_enabled": false
+  },
+  "paper_recent_loss_rotation": {
+    "enabled": true,
+    "purpose": "turn recent failed paper trades into candidate-ranking penalties so idle cash rotates toward different high-liquidity symbols instead of repeatedly probing the same loser",
+    "lookback_hours": 72,
+    "penalty_points_per_loss": 35,
+    "max_penalty_points": 120,
+    "idle_cash_ratio_pct": 70,
+    "unfailed_symbol_bonus_points": 18,
+    "prefer_unfailed_symbols_when_cash_idle": true,
+    "exit_reasons": [
+      "stop",
+      "exploratory_capital_protection_loss_cut",
+      "post_loss_reentry_cooldown_violation",
+      "target_sprint_loss_cut",
+      "scale_in_loss_cut"
+    ],
+    "live_orders_enabled": false
+  },
+  "paper_recent_strategy_loss_rotation": {
+    "enabled": true,
+    "purpose": "penalize candidate ranking when the same strategy family, interval, and paper entry mode recently failed, even on a different symbol",
+    "lookback_hours": 96,
+    "exact_family_interval_mode_penalty_points": 45,
+    "family_interval_penalty_points": 28,
+    "family_mode_penalty_points": 22,
+    "family_penalty_points": 10,
+    "max_penalty_points": 150,
+    "exit_reasons": [
+      "stop",
+      "exploratory_capital_protection_loss_cut",
+      "post_loss_reentry_cooldown_violation",
+      "target_sprint_loss_cut",
+      "scale_in_loss_cut"
+    ],
+    "live_orders_enabled": false
+  },
+  "paper_position_exit_monitor": {
+    "enabled": true,
+    "schedule": {
+      "timezone": "Asia/Shanghai",
+      "frequency": "hourly",
+      "purpose": "fast review of open paper positions so exits can be simulated without waiting for full strategy scans"
+    },
+    "review_open_positions_only": true,
+    "allow_new_paper_positions": false,
+    "accepts_external_agent_outputs_json": true,
+    "valid_external_research_panel_still_caps_max_action": "paper_only",
+    "write_report_each_run": true,
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "validation_progress_runner": {
+    "enabled": true,
+    "script": "scripts/validation_progress_runner.py",
+    "purpose": "orchestrate pre-audit, paper exit review, fast paper scan, optional daily deep scan, and post-audit so validation evidence gaps are tracked run by run",
+    "default_cycles": 1,
+    "default_include_daily": false,
+    "recommended_deep_pass": "run with --include-daily when time/network budget allows",
+    "pre_validation_required": true,
+    "post_validation_required": true,
+    "child_steps": [
+      "validation_sample_auditor_pre",
+      "binance_kline_cache_builder_optional",
+      "paper_position_exit_monitor",
+      "fast_crypto_paper_auto_trader",
+      "daily_crypto_paper_auto_trader_optional",
+      "weekly_goal_strategy_lab_optional",
+      "current_signal_probe_optional",
+      "current_signal_quality_scout_sampler_auto_when_sampling_paused",
+      "strategy_recovery_optimizer_auto_when_sampling_paused",
+      "validation_sample_auditor_post"
+    ],
+    "optional_refresh_steps": {
+      "include_dynamic_kline_cache": "fetches public Binance spot klines for high-liquidity/high-movement USDT pairs before walk-forward/current-signal refresh",
+      "include_walkforward_refresh": "persists a fresh weekly-goal evidence JSON before post-audit",
+      "include_current_signal_probe": "persists a fresh current-signal evidence JSON before post-audit",
+      "include_strategy_recovery_optimizer": "persists a paper-only recovery queue after retired/cooldown strategy groups are filtered out"
+    },
+        "auto_strategy_recovery_optimizer_when_sampling_paused": true,
+        "auto_quality_scout_sampler_when_sampling_paused": true,
+        "current_signal_timeout_seconds": 300,
+        "quality_scout_sampler_mode": "quality_scout_only_no_legacy_near_miss_or_validation_probe",
+        "quality_scout_sampler_note": "When validation capacity pauses ordinary new samples, the runner may still call current_signal_near_miss_sampler.py --quality-scout-only to collect minimum-size forward evidence for strict current-signal quality scouts. Duplicate sample keys, weak symbols, retired entry modes, retired strategy families, liquidity, cash, and live-order safety gates still block entries.",
+    "pause_resume_guard": {
+      "enabled": true,
+      "max_ledger_age_hours_with_open_positions": 2.0,
+      "expiry_lookahead_hours": 0.0,
+      "action_when_triggered": "skip_new_sampling_and_run_exit_review_first",
+      "purpose": "after paused automation or stale open positions, force a review-first runner pass before any new paper entries so stale ledger data cannot drive fresh risk",
+      "live_orders_enabled": false
+    },
+    "dynamic_kline_cache_builder": {
+      "enabled": true,
+      "script": "scripts/binance_kline_cache_builder.py",
+      "default_top_symbols": 30,
+      "default_intervals": "1m,5m,15m,1h,4h,1d",
+      "required_operational_intervals": [
+        "1m",
+        "5m",
+        "15m",
+        "1h",
+        "4h"
+      ],
+      "optional_research_intervals": [
+        "1d"
+      ],
+      "interval_target_bars": {
+        "1m": 1440,
+        "5m": 2016,
+        "15m": 2016,
+        "1h": 2160,
+        "4h": 1440,
+        "1d": 900
+      },
+      "default_max_kline_requests": 525,
+      "request_budget_action": "trim_symbol_universe_and_report_degradation_before_fetch",
+      "coverage_action": "missing_or_short_required_interval_blocks_replay",
+      "default_cache_dir_pattern": "active-alpha-paper-monitor/cache/binance_klines/dynamic_YYYYMMDD",
+      "durable_storage_required": true,
+      "physical_file_presence_required_for_replay": true,
+      "manifest_required_for_replay": true,
+      "manifest_name": "kline-cache-manifest.json",
+      "manifest_fields": [
+        "path",
+        "size_bytes",
+        "sha256",
+        "bars",
+        "first_open_time_ms",
+        "last_open_time_ms",
+        "status"
+      ],
+      "manifest_integrity_action": "missing_tampered_untracked_or_schema_invalid_file_blocks_replay",
+      "missing_storage_action": "mark_storage_missing_refresh_required_and_do_not_replay",
+      "public_market_data_only": true,
+      "live_orders_enabled": false,
+      "private_api_keys_logged": false
+    },
+    "strategy_research_validation": {
+      "protocol": "train_50_validation_25_final_holdout_25",
+      "holdout_used_for_selection": false,
+      "capital_fraction_per_trade": 0.25,
+      "commission_bps_per_side": 10,
+      "slippage_bps_per_side": 8,
+      "round_trip_spread_bps": 10,
+      "entry_timing": "next_bar_open_after_signal_close",
+      "same_bar_stop_take_policy": "conservative_stop_first",
+      "overlapping_positions_per_strategy": false,
+      "benchmark_alignment": "exact_timestamp_no_forward_fill",
+      "legacy_two_segment_candidate_action": "block_from_paper_entry_and_research_promotion"
+    },
+    "safety_checks": [
+      "child_live_orders_enabled_must_be_false",
+      "recursive_child_json_must_not_contain_private_api_or_live_order_true",
+      "child_json_output_required",
+      "progress_delta_must_include_sample_gaps",
+      "runner_does_not_mutate_recommendation_history"
+    ],
+    "max_allowed_action": "paper_only",
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "paper_capital_allocation_authorization": {
+    "enabled": true,
+    "research_capacity_is_not_current_authorization": true,
+    "current_deployable_requires": [
+      "single_automation_status_active",
+      "pipeline_current_market_readiness_fresh",
+      "durable_kline_cache_replay_available",
+      "durable_kline_cache_fresh",
+      "ledger_safety_flags_false"
+    ],
+    "blocked_state_max_deployable_now_usd": 0,
+    "retain_conditional_research_sizing_when_blocked": true,
+    "live_orders_enabled": false
+  },
+  "automation_recovery_planner": {
+    "enabled": true,
+    "script": "scripts/automation_recovery_planner.py",
+    "expected_automation_id": "active-alpha-hourly-crypto-paper-loop",
+    "expected_count": 1,
+    "missing_action": "propose_single_paused_paper_only_automation_and_require_explicit_user_approval",
+    "duplicate_action": "review_and_consolidate_before_any_create",
+    "unsafe_action": "keep_inactive_and_require_review",
+    "may_mutate_automation": false,
+    "proposed_initial_status": "PAUSED",
+    "live_orders_enabled": false
+  },
+  "resume_preflight": {
+    "enabled": true,
+    "script": "scripts/resume_preflight.py",
+    "purpose": "read-only preflight before resuming paused hourly paper automation",
+    "runs_market_scan": false,
+    "mutates_ledger": false,
+    "default_checks": [
+      "automation_status",
+      "ledger_readability",
+      "ledger_age_with_open_positions",
+      "expired_or_near_expiry_open_positions",
+      "monthly_compounding_target_state",
+      "automation_contract_hourly_paper_only",
+      "safety_invariant_auditor",
+      "sunday_loop_self_test",
+      "weekly_goal_strategy_lab_self_test",
+      "kline_research_reproducibility_self_test",
+      "current_signal_probe_self_test",
+      "strategy_recovery_optimizer_self_test",
+      "pipeline_freshness_self_test",
+      "automation_recovery_planner_self_test",
+      "validation_sample_auditor"
+    ],
+    "max_ledger_age_hours": 2,
+    "near_expiry_hours": 24,
+    "requires_user_confirmation_before_resume": true,
+    "self_test": "scripts/resume_preflight.py --self-test",
+    "safety_invariant_auditor": "scripts/safety_invariant_auditor.py --compact-output",
+    "automation_contract": {
+      "required_kind": "cron",
+      "required_rrule": "FREQ=HOURLY;INTERVAL=1",
+      "required_execution_environment": "local",
+      "required_cwd": "/Users/vincentpan/Documents/investing",
+      "required_prompt_markers": [
+        "active-alpha-paper-monitor",
+        "paper-only",
+        "read-only",
+        "never place real orders",
+        "private trading APIs",
+        "withdraw",
+        "margin/futures/perpetual",
+        "expose API keys"
+      ],
+      "forbidden_literals": [
+        "live_orders_enabled=true",
+        "allow_real_orders=true",
+        "private_api_keys_used=true"
+      ]
+    },
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "safety_invariant_auditor": {
+    "enabled": true,
+    "script": "scripts/safety_invariant_auditor.py",
+    "purpose": "offline scan for live order flags, private Binance endpoints, signing/private API markers, and known API key leaks before resuming automation",
+    "runs_market_scan": false,
+    "mutates_ledger": false,
+    "checks": [
+      "live_orders_enabled_true",
+      "allow_real_orders_true",
+      "private_api_used_true",
+      "private_api_keys_used_true",
+      "binance_private_order_account_withdraw_margin_endpoints",
+      "binance_private_signing_markers",
+      "known_api_key_literal_leaks"
+    ],
+    "self_test": "scripts/safety_invariant_auditor.py --self-test",
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "strategy_recovery_optimizer": {
+    "enabled": true,
+    "script": "scripts/strategy_recovery_optimizer.py",
+    "purpose": "when validation losses retire or cooldown old entry modes, combine latest walk-forward evidence with validation_recovery_plan to produce a research-only queue of future small-paper retest candidates",
+    "auto_run_when_validation_capacity_pauses_new_samples": true,
+    "filters": [
+      "retired_entry_modes",
+      "cooldown_entry_modes",
+      "retired_strategy_families",
+      "cooldown_strategy_families",
+      "retired_intervals",
+      "cooldown_intervals",
+      "retired_symbols",
+      "cooldown_symbols"
+    ],
+    "allowed_output_actions": [
+      "paper_retest_watch",
+      "research_watch"
+    ],
+    "feed_queue_to_scanner": true,
+    "allow_queue_symbols_outside_default_universe": true,
+    "max_queue_symbols_for_scan": 8,
+    "selection_symbol_interval_family_bonus_points": 28,
+    "selection_exact_mode_bonus_points": 12,
+    "selection_current_signal_bonus_points": 8,
+    "selection_score_scale": 0.05,
+    "selection_max_bonus_points": 55,
+    "does_not_open_paper_positions": true,
+    "does_not_authorize_live_trades": true,
+    "allow_real_orders": false,
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "current_signal_near_miss_sampler": {
+    "enabled": true,
+    "script": "scripts/current_signal_near_miss_sampler.py",
+    "purpose": "open tiny paper-only forward samples for current-signal near misses when validation sample size is still insufficient",
+    "default_notional_usd": 25,
+    "base_max_open_positions": 8,
+    "target_sprint_open_boost_enabled": true,
+    "target_sprint_open_boost_conditions": {
+      "closed_paper_trades_needed_gt": 0,
+      "high_cash_ratio_threshold_pct": 45,
+      "max_total_open_exposure_pct": 85,
+      "min_cash_reserve_usd": 50
+    },
+    "boosted_max_open_positions": 12,
+    "base_max_symbol_open_notional_usd": 75,
+    "dynamic_max_symbol_open_notional_pct_of_equity": 22,
+    "max_new_positions_per_run": 1,
+    "include_top_current_signals_when_near_miss_is_crowded": true,
+    "top_current_signal_probe_floor": {
+      "min_oos_trades": 4,
+      "min_oos_win_rate_pct": 65,
+      "min_oos_net_return_pct": 25,
+      "max_oos_drawdown_pct": -15
+    },
+    "quality_scout_floor": {
+      "requires_current_signal": true,
+      "requires_no_promotion_blockers": true,
+      "min_train_trades": 12,
+      "min_train_win_rate_pct": 55,
+      "min_train_net_return_pct": 20,
+      "max_train_drawdown_pct": -25,
+      "min_oos_trades": 10,
+      "min_oos_win_rate_pct": 65,
+      "min_oos_net_return_pct": 80,
+      "max_oos_drawdown_pct": -15,
+      "paper_entry_mode": "current_signal_quality_scout_probe"
+    },
+    "does_not_authorize_live_trades": true,
+    "live_orders_enabled": false
+  },
+  "kline_cache_freshness": {
+    "enabled": true,
+    "purpose": "prevent hourly paper scans from treating stale Binance kline cache files as current signals",
+    "max_lag_minutes_by_interval": {
+      "1m": 15,
+      "5m": 30,
+      "15m": 90,
+      "30m": 150,
+      "1h": 240,
+      "2h": 360,
+      "4h": 720,
+      "1d": 2880
+    },
+    "stale_or_missing_sets_data_status_degraded": true,
+    "public_market_data_only": true,
+    "live_orders_enabled": false
+  },
+  "paper_dynamic_sizing": {
+    "enabled": true,
+    "purpose": "increase simulated capital utilization only when evidence, liquidity, and risk gates support it",
+    "min_trade_notional_usd": 25,
+    "mid_probe_notional_usd": 50,
+    "accelerated_probe_notional_usd": 75,
+    "strict_default_notional_usd": 75,
+    "strict_max_notional_usd": 150,
+    "max_single_position_pct_of_equity": 30,
+    "max_total_open_exposure_pct_of_equity": 85,
+    "min_cash_reserve_usd": 50,
+    "high_cash_ratio_threshold_pct": 55,
+    "mid_probe_min_info_score": 30,
+    "mid_probe_min_oos_win_rate_pct": 60,
+    "mid_probe_min_oos_final_capital": 650,
+    "mid_probe_min_oos_drawdown_pct": -25,
+    "accelerated_probe_min_info_score": 40,
+    "accelerated_probe_min_oos_win_rate_pct": 70,
+    "accelerated_probe_min_oos_final_capital": 800,
+    "accelerated_probe_min_oos_drawdown_pct": -15,
+    "strict_full_size_min_train_net_return_pct": 20,
+    "strict_full_size_min_oos_win_rate_pct": 60,
+    "strict_full_size_min_oos_drawdown_pct": -20,
+    "target_pressure_enabled": true,
+    "target_pressure_notional_usd": 75,
+    "target_pressure_min_gap_to_target_pct": 40,
+    "target_pressure_min_cash_ratio_pct": 70,
+    "target_pressure_allowed_entry_modes": [
+      "info_exploratory_probe",
+      "strict_strategy_gate"
+    ],
+    "target_pressure_min_entry_mode_win_rate_pct": 60,
+    "target_pressure_min_entry_mode_return_pct": 5,
+    "target_pressure_min_info_score": 50,
+    "target_pressure_min_oos_win_rate_pct": 50,
+    "target_pressure_min_oos_net_return_pct": 80,
+    "target_pressure_min_oos_drawdown_pct": -30,
+    "target_pressure_min_train_net_return_pct": 20,
+    "live_orders_enabled": false
+  },
+  "paper_scale_in": {
+    "enabled": true,
+    "purpose": "paper-only controlled pyramiding into existing winners when cash is idle and the same symbol remains the only fast signal",
+    "max_notional_usd": 50,
+    "min_info_score": 45,
+    "min_existing_pnl_pct": 4,
+    "min_existing_max_pnl_pct": 5,
+    "max_symbol_exposure_pct_of_equity": 20,
+    "max_open_positions_per_symbol": 2,
+    "loss_cut_pct": -7,
+    "target_sprint_enabled": true,
+    "target_sprint_notional_usd": 50,
+    "target_sprint_min_cash_ratio_pct": 65,
+    "target_sprint_min_info_score": 35,
+    "target_sprint_min_best_pnl_pct": 6,
+    "target_sprint_max_symbol_exposure_pct_of_equity": 30,
+    "target_sprint_max_open_positions_per_symbol": 3,
+    "target_sprint_loss_cut_pct": -5.5,
+    "requires_existing_profit_or_profit_protection": true,
+    "live_orders_enabled": false
+  },
+  "paper_entry_mode_learning_guard": {
+    "enabled": true,
+    "purpose": "auto-learn from realized paper outcomes and block entry modes that are currently hurting the monthly-double paper objective",
+    "global_min_closed_count": 3,
+    "global_min_win_rate_pct": 45,
+    "global_min_realized_return_on_notional_pct": 0,
+    "report_only": false,
+    "modes": {
+      "validation_probe": {
+        "min_closed_count": 1,
+        "min_win_rate_pct": 40,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "latest validation_probe sample failed after realistic spread/slippage/fee costs"
+      },
+      "current_signal_validation_probe": {
+        "min_closed_count": 1,
+        "min_win_rate_pct": 40,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "current signal validation samples are 0% win rate in the latest audit"
+      },
+      "current_signal_quality_scout_probe": {
+        "min_closed_count": 3,
+        "min_win_rate_pct": 50,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "quality scout requires its own realized paper history before larger sizing"
+      },
+      "current_signal_near_miss_probe": {
+        "min_closed_count": 3,
+        "min_win_rate_pct": 45,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "near-miss samples are 0% win rate in the latest audit"
+      },
+      "winner_scale_in_probe": {
+        "min_closed_count": 3,
+        "min_win_rate_pct": 45,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "scale-in samples currently reduce expectancy and need fresh proof before reuse"
+      },
+      "info_exploratory_probe": {
+        "min_closed_count": 5,
+        "min_win_rate_pct": 45,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "info exploratory mode remains allowed only while realized paper evidence stays positive"
+      },
+      "strict_strategy_gate": {
+        "min_closed_count": 3,
+        "min_win_rate_pct": 45,
+        "min_realized_return_on_notional_pct": 0,
+        "cooldown_reason": "strict gate remains allowed unless realized evidence turns negative"
+      }
+    },
+    "live_orders_enabled": false
+  },
+  "us_open_dynamic_scanner": {
+    "enabled": true,
+    "schedule": {
+      "timezone": "Asia/Shanghai",
+      "weekdays_only": true,
+      "window_start": "22:00",
+      "window_end": "24:00"
+    },
+    "candidate_sources": [
+      "market_movers",
+      "most_actives",
+      "unusual_volume",
+      "relative_strength",
+      "news_catalysts",
+      "sector_rotation",
+      "active_monitor_handoff"
+    ],
+    "max_candidates": 3,
+    "fixed_symbol_pool_required": false,
+    "handoff_candidate_type": "us_open_scan",
+    "required_handoff_fields": [
+      "candidate_symbol",
+      "entry_zone",
+      "target_price",
+      "target_time_window",
+      "stop_loss",
+      "latest_exit_date",
+            "discovery_score",
+            "setup_quality_score",
+            "reward_risk_ratio",
+            "risk_adjusted_path",
+            "why_better_than_current_tactical_position",
+            "candidate_cash_relay_priority",
+            "research_panel_or_research_panel_missing_reason"
+        ],
+    "live_orders_enabled": false
+  },
+  "risk_adjusted_path_quality": {
+    "enabled": true,
+    "calculation_version": "risk-adjusted-path-v1",
+    "script": "scripts/risk_adjusted_path_quality.py",
+    "strategy_role": "secondary_path_quality_factor",
+    "promotion_status": "research_only_paper_only",
+    "hard_sharpe_gt_3_gate": false,
+    "daily_windows": [
+      20,
+      60,
+      126
+    ],
+    "crypto_4h_windows": [
+      42,
+      126
+    ],
+    "annualization": {
+      "us_equity_daily": 252,
+      "crypto_daily": 365,
+      "crypto_4h": 2190
+    },
+    "trend_continuation": {
+      "score_weights": {
+        "sharpe_20d": 0.25,
+        "sharpe_60d": 0.25,
+        "relative_strength_60d": 0.2,
+        "sortino_60d": 0.15,
+        "max_drawdown_60d": 0.15
+      },
+      "max_ranking_adjustment_points": 7.5,
+      "sharpe_20_gt_3_and_sharpe_60_lt_1_label": "short_spike_not_persistent",
+      "persistent_strong_requires": {
+        "sharpe_20_gt": 3,
+        "sharpe_60_gte": 1.5,
+        "information_ratio_60_gte": 1
+      }
+    },
+    "value_repair": {
+      "requires_value_catalyst_gate_pass": true,
+      "recent_sharpe_positive_required": false,
+      "max_ranking_adjustment_points": 4,
+      "pending_value_catalyst_gate_adjustment_points": 0
+    },
+    "risk_free_rate": {
+      "preferred_source": "current_3m_us_treasury_in_EvidenceSnapshotV2",
+      "missing_fallback_annual_pct": 0,
+      "missing_fallback_data_quality": "degraded_risk_free_fallback_zero"
+    },
+    "promotion_gate": {
+      "min_independent_non_overlapping_windows": 3,
+      "min_closed_paper_trades": 20,
+      "min_win_rate_pct": 55,
+      "min_net_return_pct": 5,
+      "max_drawdown_floor_pct": -15,
+      "max_drawdown_ablation_worsening_pct_points": 2
+    },
+    "probability_mapping_forbidden": true,
+    "fair_value_mapping_forbidden": true,
+    "live_gate_effect": "none_until_promotion",
+    "live_orders_enabled": false
+  },
+  "crypto_key_person_intelligence": {
+    "enabled": true,
+    "scope": "crypto_only",
+    "script": "scripts/social_key_person_monitor.py",
+    "registry_path": "config/crypto_key_person_registry.json",
+    "handoff_candidate_type": "social_key_person_intel",
+    "default_symbols": "BTC,ETH,SOL,ADA,NIGHT,USDC,COIN,CRCL",
+    "lookback_hours": 48,
+    "stale_hours": 72,
+    "source_priority": [
+      "official_project_blog_or_rss",
+      "x_recent_search_optional",
+      "bluesky_search_posts",
+      "farcaster_neynar_optional",
+      "reddit_crypto_search"
+    ],
+    "env_only_api_keys": [
+      "X_BEARER_TOKEN",
+      "NEYNAR_API_KEY"
+    ],
+    "private_api_keys_logged": false,
+    "allowed_recommended_max_actions": [
+      "watch",
+      "paper_only",
+      "conditional_action",
+      "risk_alert"
+    ],
+    "never_allowed_actions": [
+      "execute_now",
+      "live_order"
+    ],
+    "event_types": [
+      "roadmap_upgrade",
+      "tokenomics_unlock",
+      "listing_delisting",
+      "security_risk",
+      "regulatory_policy",
+      "staking_policy",
+      "ecosystem_partnership",
+      "fund_flow",
+      "founder_confirm_denial",
+      "market_rumor",
+      "general_commentary"
+    ],
+    "required_handoff_fields": [
+      "intel_id",
+      "platform",
+      "person_or_entity",
+      "role",
+      "verified_identity_status",
+      "post_url",
+      "posted_at",
+      "captured_at",
+      "asset_tags",
+      "event_type",
+      "summary",
+      "source_credibility_score",
+      "market_relevance_score",
+      "social_intel_score_points",
+      "confirmation_status",
+      "price_reaction_window",
+      "recommended_max_action",
+      "risk_flags"
+    ],
+    "manual_review_required": true,
+    "live_orders_enabled": false
+  },
+  "sunday_crypto_realistic_paper_loop": {
+    "enabled": true,
+    "schedule": {
+      "timezone": "Asia/Shanghai",
+      "weekday": "Sunday",
+      "window_start": "10:00",
+      "window_end": "18:00",
+      "frequency": "hourly"
+    },
+    "symbols": "BTCUSDT,ETHUSDT,SOLUSDT,ADAUSDT,TRXUSDT,RENDERUSDT,NEARUSDT,LINKUSDT,SUIUSDT,INJUSDT,SEIUSDT,WLDUSDT,FETUSDT,AVAXUSDT,AAVEUSDT,BNBUSDT,XRPUSDT,DOGEUSDT,PEPEUSDT,NIGHTUSDT",
+    "dynamic_scan_pool_enabled": true,
+    "dynamic_scan_pool_max_symbols": 30,
+    "dynamic_scan_pool_min_quote_volume_usd": 5000000,
+    "dynamic_scan_pool_social_max_age_hours": 12,
+    "dynamic_scan_pool_mood_state_machine_required": true,
+    "dynamic_scan_pool_report_required_fields": [
+      "market_regime",
+      "market_atmosphere",
+      "short_term_state",
+      "sentiment_state",
+      "pool_width_policy",
+      "pool_shape_policy",
+      "selected_symbols",
+      "top_dynamic_candidates"
+    ],
+    "dynamic_scan_pool_policy": "configured symbols are baseline/fallback; each run must rebuild the effective scan pool from Binance market breadth, liquidity, 24h movement, 1h/4h anchor market atmosphere, asset bucket bias, recovery queue, latest social sentiment and market-mood bucket quotas",
+    "dynamic_scan_pool_mood_policy": {
+      "risk_off": "contract width, raise core/liquid large-cap floor, cap high-beta and meme exposure, only watch rebound candidates with liquidity",
+      "risk_on": "expand width, raise high-beta/liquid momentum floor, keep core liquidity anchors, allow confirmed social catalysts",
+      "selective_rotation": "favor volume acceleration plus confirmed social narratives while preserving core anchors",
+      "risk_alert_sentiment_overlay": "contract high-beta and meme caps, remove social-catalyst minimum, raise core and large-cap/infra minimum slots",
+      "positive_catalyst_sentiment_overlay": "expand confirmed social-catalyst watch slots; in risk-off this remains limited and does not override liquidity/recovery gates"
+    },
+    "intervals": "1h,4h,1d",
+    "top_train": 25,
+    "max_new_positions_per_run": 1,
+    "candidate_max_per_symbol": 6,
+    "candidate_max_per_symbol_interval": 3,
+    "max_strategies_per_frame": 0,
+    "adaptive_scan_budget": {
+      "enabled": true,
+      "target_max_strategies_per_run": 100000,
+      "min_strategies_per_frame": 800,
+      "purpose": "keep Sunday stress scans broad while preventing unbounded full-grid latency"
+    },
+    "kline_days_by_interval": {
+      "1h": 90,
+      "4h": 240,
+      "1d": 900
+    },
+    "kline_fetch_wall_clock_seconds": 360,
+    "market_fetch_wall_clock_seconds": 240,
+    "market_request_timeout_seconds": 8,
+    "market_fetch_attempts": 1,
+    "info_fetch_wall_clock_seconds": 180,
+    "info_request_timeout_seconds": 8,
+    "commission_bps": 10,
+    "base_slippage_bps": 8,
+    "max_dynamic_impact_bps": 50,
+    "min_quote_volume_usd": 5000000,
+    "min_depth_1pct_usd": 25000,
+    "min_depth_to_notional": 5,
+    "max_spread_bps": 35,
+    "max_cross_source_deviation_bps": 200,
+    "default_notional_usd": 75,
+    "exploratory_probe_enabled": true,
+    "exploratory_notional_usd": 25,
+    "exploratory_allowed_stages": [
+      "paper_only",
+      "research_watch"
+    ],
+    "exploratory_min_info_score": 30,
+    "exploratory_min_oos_trades": 5,
+    "exploratory_min_oos_drawdown_pct": -35,
+    "validation_probe_enabled": true,
+    "validation_probe_allowed_stages": [
+      "paper_only"
+    ],
+    "validation_probe_notional_usd": 25,
+    "validation_probe_min_oos_trades": 10,
+    "validation_probe_min_oos_win_rate_pct": 45,
+    "validation_probe_min_oos_final_capital": 500,
+    "validation_probe_min_oos_net_return_pct": 20,
+    "validation_probe_min_oos_drawdown_pct": -35,
+    "validation_probe_min_train_final_capital": 500,
+    "info_prefilter_min_score": 25,
+    "info_prefilter_max_symbols": 12,
+    "info_signal_sources": [
+      "binance_spot_24h",
+      "binance_funding",
+      "binance_open_interest",
+      "coingecko_trending",
+      "reddit_search_24h",
+      "crypto_key_person_intel"
+    ],
+    "allow_auto_strategy_evolution_in_paper": true,
+    "allow_real_orders": false,
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "daily_crypto_paper_auto_trader": {
+    "enabled": true,
+    "schedule": {
+      "timezone": "Asia/Shanghai",
+      "frequency": "hourly",
+      "recommended_interval_hours": 4,
+      "purpose": "daily market scan, paper review, and virtual order simulation for monthly-double validation"
+    },
+    "symbols": "BTCUSDT,ETHUSDT,SOLUSDT,ADAUSDT,TRXUSDT,RENDERUSDT,NEARUSDT,LINKUSDT,SUIUSDT,INJUSDT,SEIUSDT,WLDUSDT,FETUSDT,AVAXUSDT,AAVEUSDT,BNBUSDT,XRPUSDT,DOGEUSDT,PEPEUSDT,NIGHTUSDT",
+    "dynamic_scan_pool_enabled": true,
+    "dynamic_scan_pool_max_symbols": 34,
+    "dynamic_scan_pool_min_quote_volume_usd": 5000000,
+    "dynamic_scan_pool_social_max_age_hours": 12,
+    "dynamic_scan_pool_mood_state_machine_required": true,
+    "dynamic_scan_pool_report_required_fields": [
+      "market_regime",
+      "market_atmosphere",
+      "short_term_state",
+      "sentiment_state",
+      "pool_width_policy",
+      "pool_shape_policy",
+      "selected_symbols",
+      "top_dynamic_candidates"
+    ],
+    "dynamic_scan_pool_policy": "configured symbols are baseline/fallback; daily scan must expand or narrow the universe by 24h breadth, 1h/4h anchor market atmosphere, sentiment and bucket quotas before info prefilter and K-line strategy scan",
+    "dynamic_scan_pool_mood_policy": {
+      "risk_off": "contract width, raise core/liquid large-cap floor, cap high-beta and meme exposure, only watch rebound candidates with liquidity",
+      "risk_on": "expand width, raise high-beta/liquid momentum floor, keep core liquidity anchors, allow confirmed social catalysts",
+      "selective_rotation": "favor volume acceleration plus confirmed social narratives while preserving core anchors",
+      "risk_alert_sentiment_overlay": "contract high-beta and meme caps, remove social-catalyst minimum, raise core and large-cap/infra minimum slots",
+      "positive_catalyst_sentiment_overlay": "expand confirmed social-catalyst watch slots; in risk-off this remains limited and does not override liquidity/recovery gates"
+    },
+    "intervals": "15m,1h,4h,1d",
+    "top_train": 35,
+    "max_new_positions_per_run": 3,
+    "scale_in_enabled": true,
+    "candidate_max_per_symbol": 3,
+    "candidate_max_per_symbol_interval": 2,
+    "max_strategies_per_frame": 2200,
+    "adaptive_scan_budget": {
+      "enabled": true,
+      "target_max_strategies_per_run": 75000,
+      "min_strategies_per_frame": 900,
+      "purpose": "make daily deep scans feasible for regular automation while preserving broad strategy coverage"
+    },
+    "kline_days_by_interval": {
+      "15m": 21,
+      "1h": 90,
+      "4h": 240,
+      "1d": 900
+    },
+    "kline_fetch_wall_clock_seconds": 300,
+    "market_fetch_wall_clock_seconds": 180,
+    "market_request_timeout_seconds": 8,
+    "market_fetch_attempts": 1,
+    "info_fetch_wall_clock_seconds": 150,
+    "info_request_timeout_seconds": 8,
+    "commission_bps": 10,
+    "base_slippage_bps": 8,
+    "max_dynamic_impact_bps": 50,
+    "min_quote_volume_usd": 5000000,
+    "min_depth_1pct_usd": 25000,
+    "min_depth_to_notional": 5,
+    "max_spread_bps": 35,
+    "max_cross_source_deviation_bps": 200,
+    "default_notional_usd": 75,
+    "exploratory_probe_enabled": true,
+    "exploratory_notional_usd": 25,
+    "exploratory_allowed_stages": [
+      "paper_only",
+      "research_watch"
+    ],
+    "exploratory_min_info_score": 25,
+    "exploratory_min_oos_trades": 5,
+    "exploratory_min_oos_drawdown_pct": -35,
+    "validation_probe_enabled": true,
+    "validation_probe_allowed_stages": [
+      "paper_only"
+    ],
+    "validation_probe_notional_usd": 25,
+    "validation_probe_min_oos_trades": 10,
+    "validation_probe_min_oos_win_rate_pct": 45,
+    "validation_probe_min_oos_final_capital": 500,
+    "validation_probe_min_oos_net_return_pct": 20,
+    "validation_probe_min_oos_drawdown_pct": -35,
+    "validation_probe_min_train_final_capital": 500,
+    "info_prefilter_min_score": 25,
+    "info_prefilter_max_symbols": 14,
+    "info_signal_sources": [
+      "binance_spot_24h",
+      "binance_funding",
+      "binance_open_interest",
+      "coingecko_trending",
+      "reddit_search_24h",
+      "crypto_key_person_intel"
+    ],
+    "monthly_double_target": {
+      "target_model": "monthly_compounding_double",
+      "target_return_pct": 100,
+      "baseline_policy": "persist ledger monthly_goal_baselines once per Asia/Shanghai month; never overwrite an existing month baseline; fallback to first ledger event in month; fallback to initial capital only during the ledger creation month",
+      "baseline_persistence": "shared paper ledger save path stamps missing current-month baseline before writing any paper ledger mutation",
+      "tracking_only_not_guaranteed": true,
+      "paper_success_gate": "sustained positive expectancy with drawdown, slippage, spread, and liquidity included"
+    },
+    "allow_auto_strategy_evolution_in_paper": true,
+    "allow_real_orders": false,
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "fast_crypto_paper_auto_trader": {
+    "enabled": true,
+    "schedule": {
+      "timezone": "Asia/Shanghai",
+      "frequency": "hourly",
+      "purpose": "fast 15m/1h paper entry scan and virtual order simulation for timely monthly-double validation"
+    },
+    "symbols": "BTCUSDT,ETHUSDT,SOLUSDT,ADAUSDT,TRXUSDT,RENDERUSDT,NEARUSDT,LINKUSDT,SUIUSDT,INJUSDT,SEIUSDT,WLDUSDT,FETUSDT,AVAXUSDT,AAVEUSDT,BNBUSDT,XRPUSDT,DOGEUSDT,PEPEUSDT,NIGHTUSDT",
+    "dynamic_scan_pool_enabled": true,
+    "dynamic_scan_pool_max_symbols": 18,
+    "dynamic_scan_pool_min_quote_volume_usd": 5000000,
+    "dynamic_scan_pool_social_max_age_hours": 12,
+    "dynamic_scan_pool_mood_state_machine_required": true,
+    "dynamic_scan_pool_report_required_fields": [
+      "market_regime",
+      "market_atmosphere",
+      "short_term_state",
+      "sentiment_state",
+      "pool_width_policy",
+      "pool_shape_policy",
+      "selected_symbols",
+      "top_dynamic_candidates"
+    ],
+    "dynamic_scan_pool_policy": "configured symbols are baseline/fallback; hourly fast scan must prioritize live market mood, 1h/4h anchor market atmosphere, high-liquidity movers, core leaders, recovery queue, confirmed social catalysts and mood-specific bucket quotas",
+    "dynamic_scan_pool_mood_policy": {
+      "risk_off": "contract width, raise core/liquid large-cap floor, cap high-beta and meme exposure, only watch rebound candidates with liquidity",
+      "risk_on": "expand width, raise high-beta/liquid momentum floor, keep core liquidity anchors, allow confirmed social catalysts",
+      "selective_rotation": "favor volume acceleration plus confirmed social narratives while preserving core anchors",
+      "risk_alert_sentiment_overlay": "contract high-beta and meme caps, remove social-catalyst minimum, raise core and large-cap/infra minimum slots",
+      "positive_catalyst_sentiment_overlay": "expand confirmed social-catalyst watch slots; in risk-off this remains limited and does not override liquidity/recovery gates"
+    },
+    "intervals": "15m,1h",
+    "top_train": 18,
+    "max_new_positions_per_run": 2,
+    "scale_in_enabled": true,
+    "candidate_max_per_symbol": 2,
+    "candidate_max_per_symbol_interval": 1,
+    "max_strategies_per_frame": 650,
+    "adaptive_scan_budget": {
+      "enabled": true,
+      "target_max_strategies_per_run": 30000,
+      "min_strategies_per_frame": 400,
+      "purpose": "keep hourly fast scans responsive while preserving every strategy family"
+    },
+    "kline_days_by_interval": {
+      "15m": 10,
+      "1h": 45
+    },
+    "kline_fetch_wall_clock_seconds": 150,
+    "market_fetch_wall_clock_seconds": 150,
+    "market_request_timeout_seconds": 8,
+    "market_fetch_attempts": 1,
+    "info_fetch_wall_clock_seconds": 90,
+    "info_request_timeout_seconds": 8,
+    "commission_bps": 10,
+    "base_slippage_bps": 8,
+    "max_dynamic_impact_bps": 50,
+    "min_quote_volume_usd": 5000000,
+    "min_depth_1pct_usd": 25000,
+    "min_depth_to_notional": 5,
+    "max_spread_bps": 35,
+    "max_cross_source_deviation_bps": 200,
+    "default_notional_usd": 75,
+    "exploratory_probe_enabled": true,
+    "exploratory_notional_usd": 25,
+    "exploratory_allowed_stages": [
+      "paper_only",
+      "research_watch"
+    ],
+    "exploratory_min_info_score": 25,
+    "exploratory_min_oos_trades": 2,
+    "exploratory_min_oos_drawdown_pct": -35,
+    "validation_probe_enabled": true,
+    "validation_probe_allowed_stages": [
+      "paper_only"
+    ],
+    "validation_probe_notional_usd": 25,
+    "validation_probe_min_oos_trades": 10,
+    "validation_probe_min_oos_win_rate_pct": 45,
+    "validation_probe_min_oos_final_capital": 500,
+    "validation_probe_min_oos_net_return_pct": 20,
+    "validation_probe_min_oos_drawdown_pct": -35,
+    "validation_probe_min_train_final_capital": 500,
+    "info_prefilter_min_score": 25,
+    "info_prefilter_max_symbols": 12,
+    "info_signal_sources": [
+      "binance_spot_24h",
+      "binance_funding",
+      "binance_open_interest",
+      "coingecko_trending",
+      "reddit_search_24h",
+      "crypto_key_person_intel"
+    ],
+    "monthly_double_target": {
+      "target_model": "monthly_compounding_double",
+      "target_return_pct": 100,
+      "baseline_policy": "persist ledger monthly_goal_baselines once per Asia/Shanghai month; never overwrite an existing month baseline; fallback to first ledger event in month; fallback to initial capital only during the ledger creation month",
+      "baseline_persistence": "shared paper ledger save path stamps missing current-month baseline before writing any paper ledger mutation",
+      "tracking_only_not_guaranteed": true,
+      "paper_success_gate": "fast entries must improve realized/unrealized expectancy after spread, slippage and fees"
+    },
+    "allow_auto_strategy_evolution_in_paper": true,
+    "allow_real_orders": false,
+    "live_orders_enabled": false,
+    "private_api_keys_logged": false
+  },
+  "handoff_target": "manual-investment-strategy-operator",
+  "impulse_capture_engine": {
+    "enabled": true,
+    "contract_version": "v3-fast-funnel",
+    "mode": "paper_and_alert_only",
+    "live_orders_enabled": false,
+    "private_api_used": false,
+    "purpose": "detect NIGHT-style short-window impulse setups from market microstructure before manual review",
+    "script": "scripts/impulse_capture_scanner.py",
+    "scan_universe_policy": {
+      "crypto_primary": "binance_usdt_spot_dynamic_plus_current_holdings",
+      "crypto_current_holding_symbols": [
+        "NIGHTUSDT",
+        "SOLUSDT",
+        "ADAUSDT",
+        "ETHUSDT",
+        "BTCUSDT"
+      ],
+      "dynamic_top_by_quote_volume": 40,
+      "default_parallel_workers": 12,
+      "discovery_1m_baseline_bars": 60,
+      "bulk_payload_compression_required": true,
+      "top_of_book_scope": "selected_dynamic_pool",
+      "full_depth_scope": "top3_only",
+      "tokenized_security_suffix_policy": "exclude suspicious B/ON asset identities unless known native crypto or separately verified",
+      "exclude_stablecoin_pairs": true,
+      "us_equity_extension": "use_us_open_dynamic_scanner_then_manual_review"
+    },
+    "feature_windows": {
+      "micro": "1m",
+      "short": "5m",
+      "confirmation": "15m",
+      "baseline_minutes": 60,
+      "post_trigger_validation_candles": 5
+    },
+    "crypto_required_features": [
+      "return_1m_pct",
+      "return_5m_pct",
+      "return_15m_pct",
+      "quote_volume_1m",
+      "quote_volume_5m",
+      "quote_volume_15m",
+      "volume_multiple_vs_median",
+      "volume_multiple_vs_average",
+      "taker_buy_quote_ratio",
+      "trade_count_multiple",
+      "bid_ask_spread_bps",
+      "depth_1pct_bid_usd",
+      "depth_1pct_ask_usd",
+      "depth_2pct_bid_usd",
+      "depth_2pct_ask_usd",
+      "btc_eth_sol_bnb_anchor_state",
+      "social_or_news_freshness_status"
+    ],
+    "stage_thresholds": {
+      "early_watch": {
+        "min_5m_quote_volume_multiple_vs_median": 3,
+        "min_1m_quote_volume_multiple_vs_median": 8,
+        "min_taker_buy_quote_ratio": 0.58,
+        "max_spread_bps": 25,
+        "recommended_max_action": "watch"
+      },
+      "pre_breakout": {
+        "min_5m_quote_volume_multiple_vs_median": 8,
+        "min_taker_buy_quote_ratio": 0.62,
+        "requires_higher_lows": true,
+        "max_spread_bps": 25,
+        "recommended_max_action": "paper_only"
+      },
+      "trigger": {
+        "min_5m_quote_volume_multiple_vs_median": 12,
+        "min_1m_quote_volume_multiple_vs_median": 20,
+        "min_taker_buy_quote_ratio": 0.65,
+        "requires_breakout_close": true,
+        "max_spread_bps": 20,
+        "recommended_max_action": "conditional_action"
+      },
+      "fakeout_or_exhaustion": {
+        "buy_ratio_weak_below": 0.45,
+        "breakout_failure_candles": 5,
+        "risk_off_anchor_blocks_chase": true,
+        "recommended_max_action": "risk_alert"
+      }
+    },
+    "cannot_bypass_gates": [
+      "data_freshness",
+      "spread_depth_liquidity",
+      "fakeout_filter",
+      "cross_asset_anchor",
+      "paper_validation",
+      "manual_review"
+    ],
+    "output_fields": [
+      "impulse_id",
+      "symbol",
+      "stage",
+      "current_price",
+      "support_zone",
+      "breakout_level",
+      "invalidation_level",
+      "volume_multiple",
+      "taker_buy_ratio",
+      "spread_bps",
+      "depth_1pct_usd",
+      "anchor_state",
+      "social_news_status",
+      "recommended_max_action",
+      "why_now",
+      "what_would_invalidate"
+    ]
+  },
+  "handoff_validator": {
+    "enabled": true,
+    "script": "scripts/validate_handoff.py",
+    "requires_research_panel_or_missing_reason": true,
+    "requires_live_orders_disabled": true,
+    "requires_manual_review": true,
+    "missing_research_panel_allowed_actions": [
+      "watch",
+      "paper_only",
+      "risk_alert",
+      "no_deploy",
+      "hold",
+      "trim_review"
+    ],
+    "degraded_recommendation_above_max_action_is_error": true,
+    "pre_research_candidate_grade_field": "pre_research_candidate_grade"
+  },
+  "live_trade_policy": "handoff_only_no_auto_orders"
+}

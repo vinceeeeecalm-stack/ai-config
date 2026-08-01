@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#17201d">
+    <title>Codex Bridge Pairing</title>
+    <link rel="manifest" href="/relay-chat.webmanifest">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/relay-chat.css">
+  </head>
+  <body>
+    <main class="app-shell pairing-shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">Codex Bridge</p>
+          <h1>桌面配对台</h1>
+          <p class="subhead">在电脑本机打开，用来给手机配对。配对码只从本机 loopback 接口读取。</p>
+        </div>
+        <span id="pairingState" class="state-pill">checking</span>
+      </header>
+
+      <section id="pairingNotice" class="notice" role="status">正在读取本机 relay 状态...</section>
+
+      <section class="pairing-board">
+        <article class="pairing-tile qr-tile">
+          <span>扫码打开手机页</span>
+          <div id="lanQr" class="qr-box" aria-label="LAN URL QR code">等待地址</div>
+          <small id="qrCaption">手机扫码后再输入配对码。</small>
+        </article>
+        <article class="pairing-tile">
+          <span>手机打开 LAN 地址</span>
+          <strong id="lanUrl">--</strong>
+          <button data-copy-target="lanUrl" class="secondary-action" type="button">复制 LAN 地址</button>
+        </article>
+        <article class="pairing-tile">
+          <span>Relay 配对码</span>
+          <strong id="pairingCodeText">--</strong>
+          <button data-copy-target="pairingCodeText" class="secondary-action" type="button">复制配对码</button>
+        </article>
+        <article class="pairing-tile">
+          <span>稳定公网入口</span>
+          <strong id="publicUrl">--</strong>
+          <small id="publicUrlHelp">建议收藏这个地址。</small>
+          <button data-copy-target="publicUrl" class="secondary-action" type="button">复制稳定地址</button>
+        </article>
+        <article class="pairing-tile">
+          <span>临时直连隧道</span>
+          <strong id="tunnelUrl">--</strong>
+          <small id="tunnelUrlHelp">会随 tunnel 重连变化，只适合临时排障。</small>
+          <button data-copy-target="tunnelUrl" class="secondary-action" type="button">复制临时地址</button>
+        </article>
+        <article class="pairing-tile">
+          <span>入口版本</span>
+          <strong id="versionSummary">--</strong>
+          <small id="versionHelp">正在检查页面版本。</small>
+        </article>
+      </section>
+
+      <section class="setup-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Steps</p>
+            <h2>手机连接流程</h2>
+          </div>
+          <a class="text-link" href="/relay-chat.html">打开手机页</a>
+        </div>
+        <ol class="pairing-steps">
+          <li>手机和电脑连同一个 Wi-Fi 时，优先打开 LAN 地址。</li>
+          <li>在手机页输入上方 Relay 配对码。</li>
+          <li>连接后点手机页里的“运行自检”。</li>
+          <li>离开 Wi-Fi 时优先用稳定公网入口；临时直连隧道只作为备用。</li>
+        </ol>
+      </section>
+
+      <section class="status-grid" aria-label="Relay status">
+        <article>
+          <span>本机 API</span>
+          <strong id="apiStatus">--</strong>
+        </article>
+        <article>
+          <span>桌面 token</span>
+          <strong id="desktopStatus">--</strong>
+        </article>
+        <article>
+          <span>设备数</span>
+          <strong id="deviceCount">--</strong>
+        </article>
+        <article>
+          <span>安全边界</span>
+          <strong id="safetyStatus">禁用下单</strong>
+        </article>
+      </section>
+
+      <footer>Open this page from 127.0.0.1 on the Mac. Do not publish pairing codes.</footer>
+    </main>
+    <script src="/vendor/qrcode-generator.js"></script>
+    <script src="/pairing.js"></script>
+  </body>
+</html>

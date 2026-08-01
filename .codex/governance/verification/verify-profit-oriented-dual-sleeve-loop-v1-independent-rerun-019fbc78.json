@@ -1,0 +1,58 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-profit-oriented-dual-sleeve-loop-v1-independent-rerun-019fbc78",
+  "goal_id": "profit-oriented-dual-sleeve-loop-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "profit-target-tests-14",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "manual-tests-163",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "price-evidence-negative-gate",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "cross-period-cost-basis",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "missing-ending-mark-blocks",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "biweekly-change-type-gate",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "status-next-step-alignment",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    },
+    {
+      "id": "installed-skill-manifest-parity",
+      "result": "PASS",
+      "evidence_sha256": "4b350e2ab58b4474135293d6c0d5e0046759cb8431f3f5ffe9ba08048dff96b8"
+    },
+    {
+      "id": "live-orders-disabled",
+      "result": "PASS",
+      "evidence_sha256": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T08:49:48Z"
+}

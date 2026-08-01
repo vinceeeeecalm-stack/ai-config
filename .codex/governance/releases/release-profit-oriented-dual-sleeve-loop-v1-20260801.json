@@ -1,0 +1,32 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-profit-oriented-dual-sleeve-loop-v1-20260801",
+  "project_id": "investing-monorepo",
+  "goal_id": "profit-oriented-dual-sleeve-loop-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": true,
+  "blockers": [
+    "缺少本月月初战术资金池本金与真实最小成交回执",
+    "缺少用户最新确认的长期持仓、现金、成本和质押快照，以及90天可归因利润时间序列"
+  ],
+  "git": {
+    "available": true,
+    "commit": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f",
+  "build_version": "skill-manifest-4b350e2ab58b4474135293d6c0d5e0046759cb8431f3f5ffe9ba08048dff96b8",
+  "runtime_version": "source-a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f",
+  "database_version": "external-profit-ledgers-not-initialized",
+  "last_verification_id": "verify-profit-oriented-dual-sleeve-loop-v1-runtime_verified-d382df15",
+  "independent_verification_id": "verify-profit-oriented-dual-sleeve-loop-v1-independent-rerun-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T08:51:58.361379Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

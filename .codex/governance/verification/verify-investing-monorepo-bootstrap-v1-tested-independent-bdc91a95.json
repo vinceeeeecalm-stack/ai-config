@@ -1,0 +1,43 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-investing-monorepo-bootstrap-v1-tested-independent-bdc91a95",
+  "goal_id": "investing-monorepo-bootstrap-v1",
+  "level": "TESTED",
+  "source_digest": "bdc91a95b357c5338b5b987476051cb321be8e5841ac320e30c2c7124456d1ca",
+  "verifier_thread_id": "019fb810-c4fb-7010-b88d-18468cf6e29b",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "source_digest",
+      "result": "PASS",
+      "evidence_sha256": "8fd44b6397cac9b6d10ff9397a738f4e45a6d158fb336601e3f495b937beb4b0"
+    },
+    {
+      "id": "monorepo_policy_script",
+      "result": "PASS",
+      "evidence_sha256": "dbb7b15a301f5f5a29bb6bcde75dd95638d8f6ddabaa2f5c16cefc70ec34621c"
+    },
+    {
+      "id": "private_state_disk_retention_and_head_exclusion",
+      "result": "PASS",
+      "evidence_sha256": "867cda98a229012176d81c474c5390e5cd2717292ee3afacb4c2f3d0f7684fbb"
+    },
+    {
+      "id": "excluded_inventory_coverage",
+      "result": "PASS",
+      "evidence_sha256": "c2304abd398b2b5bfd5b66f9e9e150edacd86588bb8e9528f89fba1b7d84cb30"
+    },
+    {
+      "id": "append_only_p1_deviation_closure",
+      "result": "PASS",
+      "evidence_sha256": "6af4f3f22d470bbf7f7d05e4110be79851e0f643a68b084fc90ec86e8a747f0a"
+    },
+    {
+      "id": "history_and_mobile_backup",
+      "result": "PASS",
+      "evidence_sha256": "bca3e0b8192fd296e8988988d39fa4ddaf52abacd7af74fb6d8be249c3b496e0"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-07-31T12:18:33Z"
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "fast-funnel-multi-horizon-investment-v2",
+  "title": "补齐美股实时快速漏斗并恢复跨市场完整交付",
+  "business_outcome": "在保留已交付的加密、日内、长期和决策隔离能力基础上，让美股动态扫描也在公开只读数据上按十五秒、四十五秒、一百二十秒阶段预算交付唯一 Top1 完整决策卡",
+  "scope": [
+    "保留 fast-funnel-multi-horizon-investment-v1 的十四项验收行为",
+    "把美股筛选源的候选发现改为真正批量和有界并发，避免逐候选网络请求阻塞 Top3",
+    "在市场关闭时如实使用最近交易时段数据并禁止伪装成盘中即时信号",
+    "美股扫描无论晋级或降级都生成完整 Top1 决策卡与阶段计时",
+    "增加美股二十五候选三十轮性能回归和公开只读运行证据"
+  ],
+  "non_goals": [
+    "自动真实下单、撤单、转账、融资、卖空、期权、期货或永续",
+    "为满足延迟预算而删除财报、融资、历史、风险或人工确认缺口",
+    "承诺月度百分之五十收益或把扫描分数伪装成概率"
+  ],
+  "constraints": [
+    "只使用公开或授权只读数据且 live_orders_enabled 始终为 false",
+    "发现阶段不运行概率、委员会、账户现金或完整融资审计",
+    "网络源失败只能局部降级，不能清空其他成功来源的候选",
+    "高风险 BUSINESS_READY 必须在新源码摘要上由不同 CODEX_THREAD_ID 只读复验"
+  ],
+  "acceptance_scenario_ids": [
+    "fast-funnel-probability-no-deadlock",
+    "fast-funnel-top3-risk-scope",
+    "fast-funnel-30-crypto-performance",
+    "fast-funnel-ineligible-assets-excluded",
+    "fast-funnel-source-failure-resilience",
+    "decision-zero-cash-research-preserved",
+    "decision-realtime-price-authority",
+    "intraday-scalp-same-day-exit",
+    "leveraged-etf-underlying-required",
+    "gap-report-null-safe",
+    "committee-degraded-discovery-preserved",
+    "longterm-dynamic-next-dollar-ranking",
+    "longterm-risk-off-cash-winner",
+    "safety-live-orders-disabled",
+    "fast-funnel-us-equity-live-performance"
+  ],
+  "required_level": "BUSINESS_READY",
+  "risk": "high",
+  "supersedes_id": "fast-funnel-multi-horizon-investment-v1",
+  "frozen_at": "2026-08-01T03:05:48.828698Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "28552440f6bfea5d826f9b45f05b122a9c2ff6abf8542ff91821f0631235b603"
+}

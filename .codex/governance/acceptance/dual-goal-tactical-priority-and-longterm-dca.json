@@ -1,0 +1,27 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "dual-goal-tactical-priority-and-longterm-dca",
+  "title": "短期战术月度翻倍与长期五年十倍目标严格分轨",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "读取最新权威持仓、现金通道和每月 DCA 配置",
+    "用户请求同时涉及短期战术机会和长期价值配置"
+  ],
+  "steps": [
+    "分别建立 tactical sleeve 和 longterm DCA request_mode",
+    "计算短期战术月度目标路径与长期五年/十年目标路径",
+    "生成分轨推荐和资金说明"
+  ],
+  "expected": [
+    "短期业务目标是仅针对战术资金和已确认闲置资金的月度 ROI 100% 进攻目标，不适用于全账户或长期保护仓",
+    "长期业务目标是五年十倍进攻路径、十年十倍兜底路径，并按月 DCA",
+    "短期机会发现和研究排序优先于长期增量排名，但不得借用长期保护仓或跨资金通道假设购买力",
+    "长期 DCA 使用最新持仓权威和下一美元边际排名，不因短期扫描失败而自动成为兜底买入",
+    "已实现且对账后的短期净利润可以形成长期 DCA 资金转移草案，但必须人工确认"
+  ],
+  "evidence": [
+    "objective coverage audit",
+    "dual-horizon recommendation fixture",
+    "portfolio authority and cash-rail test"
+  ]
+}

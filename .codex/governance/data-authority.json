@@ -1,0 +1,69 @@
+{
+  "schema_version": "DataAuthorityV1",
+  "authorities": [
+    {
+      "field_group": "maintainable_source_and_contracts",
+      "authority": "统一仓库中已评审的 Skill、脚本、配置、Schema、测试与维护文档",
+      "writer": "持有治理锁的唯一写入任务",
+      "freshness_seconds": 0,
+      "fallback": "锁冲突时只生成提案，不直接修改",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "runtime_market_cache_and_reports",
+      "authority": "Git 外的运行目录与独立哈希/备份清单",
+      "writer": "受控自动化或运行服务",
+      "freshness_seconds": 0,
+      "fallback": "不得回填进 Git 历史",
+      "formal_use_allowed": false
+    },
+    {
+      "field_group": "account_ledgers_and_private_state",
+      "authority": "各业务链声明的用户确认账户与专用持久化层",
+      "writer": "对应账户适配器或人工确认流程",
+      "freshness_seconds": 86400,
+      "fallback": "历史、Demo 和估算数据只作参考",
+      "formal_use_allowed": false
+    },
+    {
+      "field_group": "short_tactical_profit_inputs",
+      "authority": "用户确认的月初战术资金池本金与 MinimalExecutionReceiptV1 追加账本",
+      "writer": "人工确认流程；系统不得推断、覆盖或自动成交",
+      "freshness_seconds": 0,
+      "fallback": "缺少月初本金时仅计算单笔 ROI，月度利润状态必须 BLOCKED；Demo 不得进入正式分母",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "longterm_portfolio_state",
+      "authority": "用户确认且带时间戳的 LongTermHoldingSnapshotV1，包括持仓、现金、成本和质押",
+      "writer": "人工确认流程或授权只读账户适配器",
+      "freshness_seconds": 86400,
+      "fallback": "较旧 ledger 只补历史字段；不得覆盖较新的用户确认数量或现金",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "valuation_and_candidate_evidence",
+      "authority": "同一 EvidenceSnapshotV2 内的实时行情、官方/一手基本面或网络数据与无前视历史样本",
+      "writer": "只读扫描和研究链",
+      "freshness_seconds": 60,
+      "fallback": "证据不完整时可保留研究 Top1，但 TradePlan 与业务状态必须 BLOCKED",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "profit_outcome_status",
+      "authority": "profit_oriented_dual_sleeve.py 对冻结合同、最小回执和权威快照的确定性计算",
+      "writer": "持有治理锁的唯一写入任务或受控运行服务",
+      "freshness_seconds": 0,
+      "fallback": "状态未变化时返回 NO_UPDATE；不得用测试或报告数量替代利润",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "mobile_console_history",
+      "authority": "mobile-investment-console Git bundle 与统一仓库中的继承提交历史",
+      "writer": "统一仓库集成负责人",
+      "freshness_seconds": 0,
+      "fallback": "迁移前工作区副本用于恢复，不作为并行写入源",
+      "formal_use_allowed": true
+    }
+  ]
+}

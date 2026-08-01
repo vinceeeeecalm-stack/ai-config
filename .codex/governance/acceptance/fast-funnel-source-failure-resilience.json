@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-source-failure-resilience",
+  "title": "单一数据源失败不会清空候选池",
+  "level": "TESTED",
+  "preconditions": ["至少一个批量行情源失败且仍有可用公开源或基线池"],
+  "steps": ["注入一个源异常并执行发现"],
+  "expected": ["候选池继续产生或明确使用 fallback_static", "数据缺口和每个源状态可见", "不得把源失败表述为市场没有机会"],
+  "evidence": ["故障注入测试", "来源状态审计"]
+}

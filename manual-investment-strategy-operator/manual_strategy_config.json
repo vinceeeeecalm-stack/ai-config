@@ -1,0 +1,6 @@
+{
+  "schema_version": "deprecated-config-pointer-v1",
+  "deprecated": true,
+  "authoritative_config": "config/manual_strategy_config.json",
+  "reason": "The root-level duplicate was retired because it contained obsolete probability/readiness gates. Runtime code must use the authoritative config path above."
+}

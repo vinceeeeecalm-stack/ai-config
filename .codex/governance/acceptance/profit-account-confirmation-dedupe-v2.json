@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-account-confirmation-dedupe-v2",
+  "title": "语义重复账户确认只产生一个有效状态",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["追加账本包含多条 rail 与规范化 payload 相同但 ID/时间不同的记录"],
+  "steps": ["读取重复确认", "检查有效状态与 duplicate_count", "再次追加相同确认", "追加真实变化确认"],
+  "expected": ["重复记录保留审计但只产生一个有效状态", "相同确认返回 NO_UPDATE", "真实变化返回 APPENDED 并成为最新权威值"],
+  "evidence": ["账户状态去重单元测试", "现有 36 条记录只读回放"]
+}

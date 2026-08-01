@@ -1,0 +1,35 @@
+{
+  "schema_version": "ProjectGovernanceV1",
+  "project_id": "investing-monorepo",
+  "name": "统一投资系统仓库",
+  "canonical_root": "/Users/vincentpan/Documents/investing",
+  "default_risk": "high",
+  "test_commands": [
+    "python3 scripts/verify-monorepo-policy.py",
+    "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
+    "python3 closed-loop-delivery-governor/scripts/test_governance.py",
+    "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --self-test",
+    "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts"
+  ],
+  "runtime_checks": [
+    "python3 scripts/verify-monorepo-policy.py",
+    "python3 active-alpha-paper-monitor/scripts/fast_candidate_funnel.py --self-test --iterations 30 --candidate-count 30",
+    "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --self-test --iterations 30 --candidate-count 25",
+    "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --count 25 --top 3 --max-symbols 30 --request-timeout 12 --request-mode intraday_scalp --json-only --assert-runtime-contract",
+    "python3 active-alpha-paper-monitor/scripts/impulse_capture_scanner.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/longterm_next_dollar_ranker.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+    "python3 -m unittest -v manual-investment-strategy-operator/tests/test_profit_oriented_dual_sleeve.py",
+    "python3 -m unittest -v manual-investment-strategy-operator/tests/test_longterm_next_dollar_ranker.py manual-investment-strategy-operator/tests/test_us_open_dynamic_scanner.py",
+    "python3 manual-investment-strategy-operator/scripts/v3_manual_dispatch.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/recommendation_execution_calendar_gate.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --shadow-suite manual-investment-strategy-operator/runtime/universal_investment_core_v3",
+    "python3 manual-investment-strategy-operator/scripts/sync_installed_skill.py --check --with-smoke",
+    "python3 scripts/scan-public-repo.py"
+  ],
+  "command_timeout_seconds": 900,
+  "digest_excludes": [],
+  "business_ready_requires_external_inputs": true,
+  "created_at": "2026-07-31T11:59:42.678388Z"
+}

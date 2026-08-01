@@ -1,0 +1,14 @@
+# Copy this file to .env.local, then fill values locally.
+# .env.local is ignored by .gitignore. Never commit real keys.
+#
+# The report runner only logs whether each variable exists, not the value.
+
+COINMARKETCAP_API_KEY=
+TWELVEDATA_API_KEY=
+ALPHA_VANTAGE_API_KEY=
+FINNHUB_API_KEY=
+BINANCE_API_KEY=
+
+# Optional social/crypto intelligence keys.
+X_BEARER_TOKEN=
+NEYNAR_API_KEY=

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-longterm-legacy-degraded-v2",
+  "title": "旧估算持仓仅支持降级研究结论",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["只有 current override 或 legacy ledger", "没有完整用户确认快照"],
+  "steps": ["构建长期研究状态", "运行下一美元排名", "尝试计算正式 CAGR 和在轨状态"],
+  "expected": ["long path 为 DATA_DEGRADED", "可输出 RESEARCH_ONLY 排名", "正式基线、CAGR 和 ON_PATH 字段为空", "不得伪造 human_confirmed=true"],
+  "evidence": ["长期降级状态测试", "当前 legacy 组合只读回放"]
+}

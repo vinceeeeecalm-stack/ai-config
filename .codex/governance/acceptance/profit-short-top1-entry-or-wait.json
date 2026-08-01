@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-short-top1-entry-or-wait",
+  "title": "Crypto 1–7 日始终有唯一 Top1 和明确当前动作",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["使用同一快照的确定性候选夹具", "候选不包含真实下单许可"],
+  "steps": ["运行合格当前入场场景", "运行无合格当前入场场景", "运行日内候选混入场景"],
+  "expected": ["合格场景输出唯一 ENTER_NOW", "不合格场景输出唯一 WAIT_FOR_ENTRY 及价格、时间、失效条件", "日内候选不能进入 1–7 日正式排名"],
+  "evidence": ["排名与交易计划单元测试", "profit_loop self-test 输出"]
+}

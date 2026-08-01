@@ -1,0 +1,45 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "profit-oriented-dual-sleeve-loop-v1",
+  "title": "建立赚钱导向的短期战术区与长期复利区闭环",
+  "business_outcome": "让投资系统围绕可归因净利润运行：短期 Crypto 1–7 日始终产出唯一 Top1 与明确入场或等待计划，长期按用户确认持仓衡量 5 年 10 倍主路径和 10 年 10 倍兜底，并把成交、退出、利润和规则复盘连接起来。",
+  "scope": [
+    "新增 ProfitObjectiveV1、ValuationCaseV1、CandidateRankingV1、TradePlanV1、MinimalExecutionReceiptV1、ProfitAttributionV1、LongTermHoldingSnapshotV1、LongTermReUnderwriteV1、ProfitReviewV1 与 BusinessOutcomeStatusV1 的确定性合同和校验器",
+    "实现短期最小成交回执、资金加权月度净 ROI、缺少战术池本金时 BLOCKED 和 15% 紧急暂停状态",
+    "实现 Crypto 1–7 日唯一 Top1、ENTER_NOW 或 WAIT_FOR_ENTRY 完整卡片与短期转长期独立重估门",
+    "实现长期 5 年 10 倍主路径、10 年 10 倍兜底、下一美元主方向和最多一个次方向状态",
+    "实现双周单假设变更门、三轴业务状态和无状态变化不重复产出",
+    "将 manual-investment-strategy-operator 固化为唯一用户入口并同步安装版本与唤起卡"
+  ],
+  "non_goals": [
+    "不承诺或伪造月度翻倍、5 年 10 倍或 10 年 10 倍已经实现",
+    "不自动下单、撤单、转账、提现、质押、换仓、融资、卖空、期货、永续或期权",
+    "不导入、提交或发布完整真实账户隐私数据",
+    "不把日内、美股短线或旧策略样本混入首期 Crypto 1–7 日正式分母",
+    "不等待 90 天结果才交付本轮机制，也不把机制运行证明冒充盈利证明",
+    "不重写当前大批未提交策略改动，只在本轮范围内叠加兼容实现"
+  ],
+  "constraints": [
+    "同一工作树只有本任务可以写入并保留全部既有用户改动",
+    "不同标的 ROI 必须按实际投入金额加权，不能直接相加百分比",
+    "每轮必须有唯一 Top1，但无合格当前入场时只能输出带价格、时间和失效条件的 WAIT_FOR_ENTRY",
+    "置信度必须来自样本、保守概率下界、期望值、回撤和数据质量，不能由模型主观自报",
+    "短期亏损不得自动转长期；必须独立重估并要求用户确认",
+    "真实动作始终需要人工确认且 live_orders_enabled=false",
+    "高风险结果需要不同 CODEX_THREAD_ID 的只读独立复验"
+  ],
+  "acceptance_scenario_ids": [
+    "profit-contracts-and-three-axis-status",
+    "profit-short-top1-entry-or-wait",
+    "profit-weighted-roi-and-blocking",
+    "profit-short-to-long-independent-reunderwrite",
+    "profit-biweekly-single-hypothesis",
+    "profit-skill-invocation-and-install-sync"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "ranked-tactical-shortterm-refocus-v5-1",
+  "frozen_at": "2026-08-01T08:23:58.987522Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "fb11d6225286c91c17fb8ad1fa78a95d11174e4173d89d123428042a9064dfc6"
+}

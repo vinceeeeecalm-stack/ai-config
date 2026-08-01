@@ -1,0 +1,10 @@
+{
+  "schema_version": "binance-paper-baseline-v1",
+  "as_of": "2026-07-11",
+  "closed_trades": 26,
+  "win_rate_pct": 34.62,
+  "net_roi_pct": -6.26,
+  "comparison_status": "legacy_starting_baseline_not_same_window",
+  "note": "This initializes the comparison contract only. Final acceptance requires same-capital, same-window, same-friction 30-day windows.",
+  "windows": []
+}

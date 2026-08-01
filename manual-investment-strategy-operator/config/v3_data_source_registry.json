@@ -1,0 +1,67 @@
+{
+  "schema_version": "evidence-source-registry-v2",
+  "timezone": "Asia/Shanghai",
+  "categories": {
+    "spot": {
+      "primary": ["exchange_or_venue_public_trade_quote"],
+      "cross_check": ["independent_market_data_aggregator"],
+      "max_age_seconds": 300,
+      "local_degrade_if_missing": "block_price_dependent_execution_only"
+    },
+    "options": {
+      "primary": ["exchange_or_broker_option_chain"],
+      "cross_check": ["listed_exchange_statistics"],
+      "max_age_seconds": 1800,
+      "local_degrade_if_missing": "remove_options_adjustment_and_block_options_claims"
+    },
+    "funding_oi": {
+      "primary": ["exchange_public_derivatives_endpoint"],
+      "cross_check": ["independent_derivatives_aggregator"],
+      "max_age_seconds": 900,
+      "local_degrade_if_missing": "degrade_crypto_tactical_confidence_only"
+    },
+    "onchain": {
+      "primary": ["protocol_or_chain_indexer"],
+      "cross_check": ["independent_onchain_analytics"],
+      "max_age_seconds": 21600,
+      "local_degrade_if_missing": "remove_onchain_adjustment_only"
+    },
+    "sec_ir": {
+      "primary": ["sec_edgar_or_company_ir"],
+      "cross_check": ["exchange_company_news"],
+      "max_age_seconds": 86400,
+      "local_degrade_if_missing": "block_event_trade_execution"
+    },
+    "earnings": {
+      "primary": ["company_ir_or_sec_filing"],
+      "cross_check": ["exchange_calendar"],
+      "max_age_seconds": 86400,
+      "local_degrade_if_missing": "block_earnings_event_trade_execution"
+    },
+    "macro": {
+      "primary": ["federal_reserve_bls_bea_treasury"],
+      "cross_check": ["official_calendar_or_fred"],
+      "max_age_seconds": 86400,
+      "local_degrade_if_missing": "degrade_macro_adjustment_only"
+    },
+    "us_crypto_legislation": {
+      "primary": [
+        "house_clerk_and_floor_schedule",
+        "senate_floor_vote_schedule",
+        "relevant_congressional_committee"
+      ],
+      "cross_check": [
+        "congress_bill_status",
+        "named_lawmaker_official_release",
+        "reputable_legislative_reporting"
+      ],
+      "max_age_seconds": 21600,
+      "weekend_lookahead_hours": 72,
+      "local_degrade_if_missing": "block_confirmed_vote_claim_and_legislative_probability_only"
+    }
+  },
+  "paid_or_account_adapters": {
+    "enabled_by_default": false,
+    "policy": "optional_read_only_adapter; absence only degrades dependent fields"
+  }
+}

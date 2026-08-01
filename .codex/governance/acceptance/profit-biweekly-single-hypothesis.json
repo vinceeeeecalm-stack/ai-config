@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-biweekly-single-hypothesis",
+  "title": "每 14 天最多批准一个核心赚钱假设变化",
+  "level": "TESTED",
+  "preconditions": ["使用隔离的追加式变更账本"],
+  "steps": ["批准第一项变化", "在同一 14 天窗口批准第二项变化", "提交安全暂停变化", "进入下一个窗口批准普通变化"],
+  "expected": ["第一项通过", "第二项普通变化被阻断", "安全暂停可立即记录但不算策略晋升", "下一窗口可批准新变化"],
+  "evidence": ["双周门单元测试", "追加式账本不变量"]
+}

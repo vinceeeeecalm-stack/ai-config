@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-ranked-tactical-shortterm-refocus-v5-20260801",
+  "project_id": "investing-monorepo",
+  "goal_id": "ranked-tactical-shortterm-refocus-v5",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "cb0842a0974bb81fabe99c116af3d8d8081368bf81e6e4e1e6bbadf955751e6e",
+  "build_version": "ranked-tactical-v5",
+  "runtime_version": "investment-skills-v3-ranked-v5",
+  "database_version": null,
+  "last_verification_id": "verify-ranked-tactical-shortterm-refocus-v5-runtime_verified-977be59c",
+  "independent_verification_id": null,
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T05:37:41.400150Z",
+  "created_by": "019fbbb1-664d-7f30-a605-83eb0f406c33"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-profit-outcome-status-separation-v2-coded-8c7c4cfd",
+  "goal_id": "profit-outcome-status-separation-v2",
+  "level": "CODED",
+  "source_digest": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-01T13:57:38.188837Z"
+}

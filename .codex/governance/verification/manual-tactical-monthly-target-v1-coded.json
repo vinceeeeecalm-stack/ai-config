@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-manual-tactical-monthly-target-v1-coded-b3d2e828",
+  "goal_id": "manual-tactical-monthly-target-v1",
+  "level": "CODED",
+  "source_digest": "223530787aee5a0e84e760f1f55918ce6bbaba104d52e79ee834b02084a80081",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-07-31T13:09:08.373541Z"
+}

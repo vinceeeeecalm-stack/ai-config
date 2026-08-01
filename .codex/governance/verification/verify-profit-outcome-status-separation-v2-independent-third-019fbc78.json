@@ -1,0 +1,38 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-profit-outcome-status-separation-v2-independent-third-019fbc78",
+  "goal_id": "profit-outcome-status-separation-v2",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "current-trade-plan-rebuild",
+      "result": "PASS",
+      "evidence_sha256": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4"
+    },
+    {
+      "id": "paper-point-in-time-and-live-isolation",
+      "result": "PASS",
+      "evidence_sha256": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4"
+    },
+    {
+      "id": "account-confirmation-dedupe-36-to-1",
+      "result": "PASS",
+      "evidence_sha256": "95c312e5fd0ea41f5f612034dce1906ea44d2e3a792754233a51aa5c6e6df5ba"
+    },
+    {
+      "id": "full-tests-173",
+      "result": "PASS",
+      "evidence_sha256": "15a375b8c8279b7165984f54a8bdb01828d8e0858bb9be93302ae2094ff969c4"
+    },
+    {
+      "id": "installed-mirror-parity",
+      "result": "PASS",
+      "evidence_sha256": "6c151ae5d3eb1a9ba13b32ba72afcfb03184e6a85045a3131e4920e598f9a765"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T13:59:14Z"
+}

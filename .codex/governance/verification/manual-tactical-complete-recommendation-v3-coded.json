@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-manual-tactical-complete-recommendation-v3-coded-d44f31e8",
+  "goal_id": "manual-tactical-complete-recommendation-v3",
+  "level": "CODED",
+  "source_digest": "bbd79ec50c52a1770e9badd29b2b97a7bd7d8005cf0154ad7e1e15d04b7b94b8",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-07-31T14:28:33.997800Z"
+}

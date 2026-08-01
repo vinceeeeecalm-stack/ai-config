@@ -1,0 +1,11 @@
+{
+  "schema_version": "polymarket-paper-strategy-overlay-v1",
+  "base_policy_version": "polymarket-alpha-v1.0",
+  "overlay_version": "paper-overlay-v1",
+  "paper_only": true,
+  "live_orders_enabled": false,
+  "private_api_used": false,
+  "active_changes": [],
+  "decision_history": [],
+  "updated_at": "2026-07-19T08:37:31.119628+00:00"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-profit-oriented-dual-sleeve-loop-v1-coded-2aa02a2d",
+  "goal_id": "profit-oriented-dual-sleeve-loop-v1",
+  "level": "CODED",
+  "source_digest": "a235bf89f34d7c4a0c1e7f8d2604aee12c069cdbe65200478c2f993dde61b43f",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-01T08:48:14.168294Z"
+}

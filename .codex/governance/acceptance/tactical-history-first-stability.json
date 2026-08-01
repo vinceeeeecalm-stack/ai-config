@@ -1,0 +1,27 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-history-first-stability",
+  "title": "短期推荐以历史时点样本外回归先行并保持排名稳定",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "候选存在可读取的 point-in-time 历史特征、目标/止损和交易摩擦数据",
+    "历史模拟、forward paper 与真实成交样本使用独立标签和分母"
+  ],
+  "steps": [
+    "运行历史周期和事件条件校验",
+    "运行 walk-forward、untouched holdout、成本压力和参数扰动测试",
+    "比较现任候选与挑战者并生成排名解释"
+  ],
+  "expected": [
+    "首次推荐不以等待未来数周为前置条件",
+    "历史回归无前视偏差且报告有效样本、样本外胜率区间、保守 EV、Profit Factor、回撤和目标先于止损概率",
+    "历史模拟不得覆盖或混入负面的 paper 或真实结果",
+    "挑战者只有在风险调整后证据实质优于现任时才能升为主推荐",
+    "未来 paper 只用于并行校准、失效检测和策略降级"
+  ],
+  "evidence": [
+    "historical conditioning validator output",
+    "walk-forward deterministic fixture",
+    "incumbent-versus-challenger stability test"
+  ]
+}

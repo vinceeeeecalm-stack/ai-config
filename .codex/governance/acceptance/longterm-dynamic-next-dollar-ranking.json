@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "longterm-dynamic-next-dollar-ranking",
+  "title": "长期 next-dollar 在跨资产池中动态排名且无固定角色依赖",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["候选池含当前持仓、美股、普通 ETF、BTC、ETH、SOL 和其他合格资产"],
+  "steps": ["分别以 capital_preservation、compound_15_25 和 aggressive_10x 运行独立长期工作流"],
+  "expected": ["每轮重新比较基本面或网络、护城河与价值捕获、资产负债或供应稀释、估值、五年十年情景、生存回撤、相关性和边际贡献", "只输出一个 next-dollar 目标和最多两个拒绝说明", "不存在固定 SOL、ADA、BTC 或 ETH 结论"],
+  "evidence": ["长期排名测试", "固定跨资产夹具", "实时只读样本"]
+}

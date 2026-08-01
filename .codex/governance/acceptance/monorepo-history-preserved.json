@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "monorepo-history-preserved",
+  "title": "移动端 Git 历史与未提交工作均可恢复",
+  "level": "TESTED",
+  "preconditions": ["原移动端仓库可读取", "迁移备份目录位于统一仓库之外"],
+  "steps": ["验证 Git bundle", "验证工作区副本", "检查原 main 提交是新分支祖先"],
+  "expected": ["bundle 可列出全部 refs", "工作区副本保留原 .git 与未提交文件", "原提交 1d169c1 在新仓库历史中可追溯"],
+  "evidence": ["bundle 哈希", "git merge-base --is-ancestor", "备份目录存在性"]
+}

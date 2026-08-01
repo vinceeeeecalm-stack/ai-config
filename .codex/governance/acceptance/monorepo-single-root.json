@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "monorepo-single-root",
+  "title": "投资目录成为唯一独立仓库且无嵌套移动端 Git",
+  "level": "TESTED",
+  "preconditions": ["移动端 .git 已完成外部备份"],
+  "steps": ["解析统一仓库顶层", "检查 mobile-investment-console/.git", "检查当前分支"],
+  "expected": ["顶层精确为 /Users/vincentpan/Documents/investing", "不存在嵌套 .git", "当前分支为 codex/investing-monorepo-bootstrap"],
+  "evidence": ["git rev-parse --show-toplevel", "仓库策略验证脚本"]
+}

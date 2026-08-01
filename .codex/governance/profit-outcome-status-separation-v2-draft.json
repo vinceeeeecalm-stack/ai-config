@@ -1,0 +1,39 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "profit-outcome-status-separation-v2",
+  "title": "拆分投资交付、执行、利润与长期路径状态并建立独立 Paper 闭环",
+  "business_outcome": "让系统可运行、账户可执行、Paper/真钱利润证据和长期路径分别可审计，消除混合 BLOCKED，同时保持真钱与 Paper 严格隔离。",
+  "scope": [
+    "新增 BusinessOutcomeStatusV2 四轴状态与 V1 兼容投影",
+    "新增 tactical_1_7d 专用 Paper 本金、成交回执和利润归因合同",
+    "对用户确认账户状态进行语义去重并提供幂等追加保护",
+    "将 legacy 持仓估算标记为 DATA_DEGRADED 且禁止正式 CAGR/在轨结论",
+    "对当前行情、双源价格一致性、扫描总时限和过期 TradePlan 建立硬门",
+    "更新唯一入口 Skill、测试、运行验收和发布证据"
+  ],
+  "non_goals": [
+    "不删除或覆盖历史账户、Paper、治理或发布记录",
+    "不把旧期限未知 Paper 交易迁入 tactical_1_7d 正式分母",
+    "不自动下单、充值、卖出、换仓或把现有持仓作为战术资金",
+    "不把 Paper 收益或测试通过冒充真钱利润或 BUSINESS_READY",
+    "不重构与本轮状态闭环无关的候选发现和估值模型"
+  ],
+  "constraints": [
+    "沿用现有 500 美元虚拟 Paper 本金但使用新隔离账本",
+    "实时价格不超过 60 秒且至少两个公共来源差异不超过 1%",
+    "单数据源超时 12 秒且单次当前扫描总期限 120 秒",
+    "旧估算只允许研究用途且正式长期收益字段必须为空",
+    "同一工作树仅本任务写入并保留所有既有用户修改",
+    "高风险运行结果需要不同 CODEX_THREAD_ID 的只读独立复验"
+  ],
+  "acceptance_scenario_ids": [
+    "profit-four-axis-status-v2",
+    "profit-paper-tactical-ledger-isolation-v2",
+    "profit-account-confirmation-dedupe-v2",
+    "profit-market-evidence-freshness-v2",
+    "profit-longterm-legacy-degraded-v2"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "profit-oriented-dual-sleeve-loop-v1"
+}

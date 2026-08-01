@@ -1,0 +1,27 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-monthly-target-not-single-trade",
+  "title": "月度组合目标不被误作单笔收益门槛",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "用户的战术组合月度目标为正收益 50%",
+    "用户允许美股、普通 ETF、杠杆 ETF 与加密货币",
+    "候选交易的计划持有期为 1 至 7 日"
+  ],
+  "steps": [
+    "按候选自身波动、催化与 1 至 7 日路径设定目标和止损",
+    "验证当前价格、流动性、动量、历史 target-first 与 stop-first 路径",
+    "将单笔预期收益解释为对月度组合目标的贡献，而非要求单笔上涨 50%",
+    "仅在即时入场门槛通过时给出 small_entry_now，否则明确 no_deploy"
+  ],
+  "expected": [
+    "不因单笔达不到正收益 50% 而自动降级全部候选",
+    "推荐只暴露一个最优候选并给出可执行的入场区间、目标、止损和时间止损",
+    "账户可用现金未知或为零时，不虚构可下单金额"
+  ],
+  "evidence": [
+    "新的 1 至 7 日候选研究快照",
+    "新的独立执行决策报告",
+    "历史路径与实时价格证据"
+  ]
+}

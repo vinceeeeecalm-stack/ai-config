@@ -1,0 +1,36 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "manual-tactical-complete-recommendation-v3",
+  "title": "按 Active 与 Manual V3 交付唯一完整当前短线推荐",
+  "business_outcome": "让用户获得由实时全市场扫描、完整证据与明确当前动作组成的一张可执行决策卡，而不是只有候选或未来条件",
+  "scope": [
+    "更新全部未关闭观察后动态扫描美股、ETF、杠杆 ETF 与加密货币",
+    "完成真实研究委员会与 Active V3 handoff",
+    "由 Manual V3 独立仲裁唯一一至七日候选",
+    "分离研究决策、当前直接决策和账户执行决策",
+    "输出并验证完整候选卡与用户决策卡"
+  ],
+  "non_goals": [
+    "自动下单、撤单、转账、融资、期权、期货或永续交易",
+    "承诺确定性收益或保证月度正收益 50%",
+    "为迎合输出而伪造概率、现金、样本或催化"
+  ],
+  "constraints": [
+    "同一轮所有数字必须共享同一个 EvidenceSnapshotV2 截止时间",
+    "公司与产品证据优先使用 SEC、公司 IR、发行人和交易所官方来源",
+    "当前直接决策必须基于冻结当前价，未来触发仅作为下一轮观察",
+    "只有目标先达高于止损先达、收益风险达标且证据门完整时才可理论入场",
+    "权威美股现金仍为零，除非用户提供更新且带时间戳的账户证据"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-monthly-target-not-single-trade",
+    "tactical-single-candidate-composite-evidence",
+    "tactical-complete-current-recommendation"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "manual-tactical-composite-evidence-v2",
+  "frozen_at": "2026-07-31T13:49:18.682300Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "f672c61ff962327850db643976c5bc8cbd8ceee2c85ea244d33d283d42c39771"
+}

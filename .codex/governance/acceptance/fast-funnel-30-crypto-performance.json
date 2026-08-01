@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-30-crypto-performance",
+  "title": "三十个 crypto 候选的 Top3 发现满足十五秒 P95",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["存在三十个确定性 crypto 市场夹具或公开只读市场候选"],
+  "steps": ["批量执行至少三十轮发现基准", "计算 Top3 返回延迟分位数"],
+  "expected": ["Top3 P95 小于等于十五秒", "Top1 验证小于等于四十五秒", "完整 Top1 卡小于等于一百二十秒且端到端小于等于一百八十秒"],
+  "evidence": ["性能基准 JSON", "阶段计时字段"]
+}

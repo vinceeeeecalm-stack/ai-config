@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Codex Bridge">
+  <rect width="512" height="512" rx="96" fill="#17201d"/>
+  <path d="M128 178c0-39 32-71 71-71h58v61h-58c-6 0-10 4-10 10v156c0 6 4 10 10 10h58v61h-58c-39 0-71-32-71-71V178z" fill="#f6f2e8"/>
+  <path d="M384 334c0 39-32 71-71 71h-58v-61h58c6 0 10-4 10-10V178c0-6-4-10-10-10h-58v-61h58c39 0 71 32 71 71v156z" fill="#0a7a68"/>
+  <path d="M211 256h90" stroke="#bd6a1f" stroke-width="44" stroke-linecap="round"/>
+</svg>

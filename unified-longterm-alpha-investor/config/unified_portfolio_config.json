@@ -1,0 +1,1504 @@
+{
+  "version": "unified-2026-05-17-v2.18",
+  "strategy_version": "v2.18-multi-source-alpha-intelligence",
+  "currency": "USD",
+  "phase": {
+    "current": "phase_1_actionable_reports_with_api_priced_ledger_explicit_allocation_paper_simulation_target_directed_dynamic_positioning_walk_forward_backtest_expanded_data_strict_consistency_gates_multi_source_alpha",
+    "auto_trading_enabled": false,
+    "api_rebalancing_enabled": false,
+    "requires_human_confirmation_for_trades": true,
+    "requires_human_confirmation_for_strategy_changes": true
+  },
+  "api_data_sources": {
+    "enabled": true,
+    "mode": "api_first_web_fallback",
+    "store_keys_in": "environment_variables_only",
+    "never_log_real_keys": true,
+    "sample_env_file": "config/api_keys.env.example",
+    "us_equity": {
+      "price_priority": [
+        {
+          "name": "Alpha Vantage",
+          "env_var": "ALPHA_VANTAGE_API_KEY",
+          "role": "quote_daily_adjusted_indicators",
+          "official_docs": "https://www.alphavantage.co/documentation/"
+        },
+        {
+          "name": "Twelve Data",
+          "env_var": "TWELVE_DATA_API_KEY",
+          "role": "quote_price_time_series",
+          "official_docs": "https://twelvedata.com/docs"
+        },
+        {
+          "name": "Finnhub",
+          "env_var": "FINNHUB_API_KEY",
+          "role": "quote_news_fundamentals",
+          "official_docs": "https://finnhub.io/docs/api"
+        },
+        {
+          "name": "Financial Modeling Prep",
+          "env_var": "FMP_API_KEY",
+          "role": "quote_eod_profile_fundamentals",
+          "official_docs": "https://site.financialmodelingprep.com/developer/docs/quickstart"
+        }
+      ],
+      "fundamental_priority": [
+        {
+          "name": "SEC EDGAR APIs",
+          "env_var": "SEC_USER_AGENT",
+          "role": "filings_original_source",
+          "official_docs": "https://www.sec.gov/edgar/sec-api-documentation"
+        },
+        {
+          "name": "Financial Modeling Prep",
+          "env_var": "FMP_API_KEY",
+          "role": "fundamentals_profile_calendar"
+        },
+        {
+          "name": "Finnhub",
+          "env_var": "FINNHUB_API_KEY",
+          "role": "company_news_metrics_profile"
+        },
+        {
+          "name": "Alpha Vantage",
+          "env_var": "ALPHA_VANTAGE_API_KEY",
+          "role": "overview_earnings_indicators"
+        }
+      ],
+      "min_price_sources_for_verified": 3,
+      "web_fallback_policy": "research_observation_only_if_api_sources_insufficient"
+    },
+    "crypto": {
+      "price_priority": [
+        {
+          "name": "CoinGecko Demo API",
+          "env_var": "COINGECKO_DEMO_API_KEY",
+          "role": "aggregated_price_market_cap_volume",
+          "official_docs": "https://www.coingecko.com/en/api"
+        },
+        {
+          "name": "CoinMarketCap Basic",
+          "env_var": "COINMARKETCAP_API_KEY",
+          "role": "aggregated_price_market_cap_volume",
+          "official_docs": "https://coinmarketcap.com/api/pricing/"
+        },
+        {
+          "name": "Binance market data",
+          "env_var": "BINANCE_API_KEY",
+          "role": "spot_symbol_discovery_ticker_24h_klines_order_book_recent_trades",
+          "official_docs": "https://github.com/binance/binance-spot-api-docs"
+        },
+        {
+          "name": "Kraken public ticker",
+          "env_var": null,
+          "role": "exchange_spot_ticker",
+          "official_docs": "https://docs.kraken.com/api/docs/rest-api/get-ticker-information/"
+        }
+      ],
+      "binance_market_data": {
+        "enabled": true,
+        "module_reference": "references/BINANCE_MARKET_DATA_POLICY.md",
+        "key_storage": "environment_variable_only",
+        "env_var": "BINANCE_API_KEY",
+        "never_log_real_key": true,
+        "market_data_only": true,
+        "private_account_api_enabled": false,
+        "trading_api_enabled": false,
+        "live_order_api_enabled": false,
+        "paper_or_testnet_only_if_trading_key_provided": true,
+        "withdrawal_api_enabled": false,
+        "endpoints_allowed": [
+          "spot_exchange_info",
+          "spot_ticker_price",
+          "spot_24h_ticker",
+          "spot_klines",
+          "spot_order_book",
+          "spot_recent_trades"
+        ],
+        "night_symbol_candidates": [
+          "NIGHTUSDT",
+          "NIGHTUSD",
+          "NIGHTBTC",
+          "NIGHTFDUSD",
+          "NIGHTUSDC"
+        ],
+        "risk_labels": [
+          "verified",
+          "pair_missing",
+          "low_liquidity",
+          "stale",
+          "disputed"
+        ],
+        "futures_or_perpetual_policy": "sentiment_background_only_no_derivatives_advice"
+      },
+      "onchain_defi_priority": [
+        {
+          "name": "DeFiLlama",
+          "env_var": null,
+          "role": "tvl_protocol_context",
+          "official_docs": "https://defillama.com/docs/api"
+        }
+      ],
+      "staking_policy_priority": [
+        {
+          "name": "Account export or user screenshot",
+          "env_var": null,
+          "role": "account_mark_redeemable_amount_actual_apy_rewards",
+          "official_docs": null
+        },
+        {
+          "name": "Coinbase staking and Prime LsETH docs",
+          "env_var": null,
+          "role": "coinbase_eth_lseth_unlock_conversion_fee_policy",
+          "official_docs": "https://help.coinbase.com/en/coinbase/coinbase-staking/staking/ethereum"
+        },
+        {
+          "name": "Ledger staking support",
+          "env_var": null,
+          "role": "ledger_ada_sol_staking_reward_cadence_unlock_policy",
+          "official_docs": "https://support.ledger.com/article/staking-crypto-with-ledger-live"
+        },
+        {
+          "name": "CoinGecko or CoinMarketCap receipt-token pages",
+          "env_var": null,
+          "role": "liquid_staking_receipt_public_market_proxy",
+          "official_docs": "https://www.coingecko.com/en/coins/liquid-staked-eth"
+        }
+      ],
+      "min_price_sources_for_verified": 2,
+      "web_fallback_policy": "downgrade_if_less_than_two_api_or_exchange_sources"
+    },
+    "macro": {
+      "priority": [
+        {
+          "name": "FRED",
+          "env_var": "FRED_API_KEY",
+          "role": "rates_cpi_unemployment_liquidity",
+          "official_docs": "https://fred.stlouisfed.org/docs/api/api_key.html"
+        },
+        {
+          "name": "Alpha Vantage",
+          "env_var": "ALPHA_VANTAGE_API_KEY",
+          "role": "economic_indicators"
+        }
+      ],
+      "missing_key_policy": "downgrade_regime_confidence"
+    }
+  },
+  "api_priced_ledger": {
+    "enabled": true,
+    "module_reference": "references/API_PRICED_LEDGER_POLICY.md",
+    "screenshot_fields_allowed": [
+      "quantity",
+      "avg_cost",
+      "account_rail",
+      "staking_status",
+      "reward_quantity",
+      "provider",
+      "source_files"
+    ],
+    "api_fields_required": [
+      "current_price",
+      "market_value",
+      "portfolio_weight",
+      "entry_range",
+      "stop_or_invalid",
+      "take_profit_plan"
+    ],
+    "valuation_basis": "api_composite_price",
+    "screenshot_price_policy": "reconciliation_only_not_for_action",
+    "composite_price_method": {
+      "crypto": "median_of_verified_sources_with_binance_as_execution_reference",
+      "us_equity": "latest_verified_close_or_quote_from_api_sources"
+    },
+    "reporting": {
+      "show_quantity_source": true,
+      "show_api_price": true,
+      "show_api_market_value": true,
+      "show_screenshot_value_if_available": true,
+      "show_valuation_delta_pct": true
+    }
+  },
+  "cash_rails": {
+    "enabled": true,
+    "model": "separated_cash_rails",
+    "do_not_assume_cross_rail_fungibility": true,
+    "global_cash_floor_target": 0.05,
+    "global_cash_target_range": [
+      0.03,
+      0.1
+    ],
+    "crypto_rail": {
+      "software_scope": "crypto_exchange_or_wallet",
+      "reserve_assets": [
+        "USD",
+        "USDT",
+        "USDC",
+        "DAI"
+      ],
+      "normal_cash_min_pct_of_rail": 0.03,
+      "caution_cash_min_pct_of_rail": 0.05,
+      "emergency_cash_min_pct_of_rail": 0.1,
+      "can_fund": [
+        "crypto_spot",
+        "crypto_dca",
+        "crypto_staking_actions"
+      ],
+      "cannot_fund_without_transfer": [
+        "us_equity_spot",
+        "leveraged_etf_tactical"
+      ],
+      "cash_deficit_policy": "maintain_minimum_opportunity_reserve_then_deploy_excess_by_dca"
+    },
+    "us_equity_rail": {
+      "software_scope": "brokerage_account",
+      "reserve_assets": [
+        "settled_usd_cash"
+      ],
+      "normal_cash_min_pct_of_rail": 0.02,
+      "caution_cash_min_pct_of_rail": 0.05,
+      "emergency_cash_min_pct_of_rail": 0.1,
+      "can_fund": [
+        "us_equity_spot",
+        "non_levered_plain_etf_spot",
+        "leveraged_etf_tactical"
+      ],
+      "cannot_fund_without_transfer": [
+        "crypto_spot",
+        "crypto_dca",
+        "staking_actions"
+      ],
+      "cash_deficit_policy": "maintain_settled_cash_floor_and_deploy_excess_to_spot_or_cash_like_nonlevered_etf_after_review"
+    },
+        "cross_rail_transfer": {
+            "allowed": true,
+            "mode": "manual_confirmed_only",
+            "assume_available_before_settlement": false,
+      "required_fields": [
+        "source_rail",
+        "target_rail",
+        "amount",
+        "asset",
+        "estimated_time",
+        "fees_or_spread",
+        "tax_note",
+                "approval_status"
+            ]
+        },
+        "external_tactical_cash_pool": {
+            "enabled": true,
+            "amount_usd": 3000,
+            "module_reference": "references/TACTICAL_ALPHA_SLEEVE.md",
+            "rail_assignment_status": "pending_dynamic_assignment",
+            "confirmed_rail": null,
+            "count_as_available_cash_until_confirmed": false,
+            "deployment_tiers": [
+                "no_deploy",
+                "paper_only",
+                "small_probe",
+                "partial_deploy",
+                "full_deploy"
+            ],
+            "default_deployment_tier": "no_deploy",
+            "dynamic_assignment_policy": "choose_crypto_or_us_equity_rail_by_validated_ev_probability_liquidity_and_risk_model",
+            "human_confirmation_required": true
+        },
+        "reporting": {
+            "show_per_rail_cash": true,
+            "show_cash_gap_by_rail": true,
+            "show_transfer_dependency": true,
+            "show_external_tactical_cash_pool": true
+        }
+    },
+  "experiment_registry": {
+    "enabled": true,
+    "run_id_format": "YYYYMMDD-run-type-seq",
+    "recommendation_id_format": "YYYYMMDD-symbol-bucket-seq",
+    "proposed_change_id_format": "pc-YYYYMM-seq",
+    "required_experiment_fields": [
+      "run_id",
+      "run_type",
+      "created_at",
+      "strategy_version",
+      "config_hash",
+      "data_sources",
+      "data_quality_summary",
+      "report_path",
+      "recommendation_ids",
+      "errors",
+      "degradations"
+    ],
+    "config_hash_required": true,
+    "traceability_required_for_strong_recommendations": true
+  },
+  "validation_pipeline": {
+    "enabled": true,
+    "default_validation_status": "not_tested",
+    "default_promotion_status": "research_only",
+    "stages": [
+      "backtest",
+      "lookahead_bias_check",
+      "recursive_indicator_stability_check",
+      "out_of_sample_check",
+      "stale_data_check",
+      "dry_run_or_paper_validation",
+      "human_confirmation"
+    ],
+    "validation_statuses": [
+      "not_tested",
+      "backtested",
+      "bias_checked",
+      "paper_validated",
+      "human_confirmed"
+    ],
+    "promotion_statuses": [
+      "research_only",
+      "paper_validated",
+      "human_confirmed_live_candidate",
+      "api_ready_candidate"
+    ],
+    "strategy_defaults": {
+      "crypto_core_dca": "research_only",
+            "crypto_staking_enhancement": "research_only",
+            "crypto_growth_satellite": "research_only",
+            "crypto_tactical_spot": "research_only",
+            "crypto_tactical_alpha_sleeve": "research_only",
+            "us_equity_core_spot": "research_only",
+            "us_equity_growth_spot": "research_only",
+            "us_equity_tactical_spot": "research_only",
+            "us_equity_tactical_leveraged_etf": "research_only",
+            "external_tactical_cash_pool": "research_only"
+        },
+    "strong_recommendation_requires": [
+      "data_quality_verified_or_explained",
+      "risk_decision_allow",
+      "promotion_status_human_confirmed_live_candidate",
+      "human_confirmation_for_trade"
+    ]
+  },
+  "risk_model_order": [
+        "ledger_integrity",
+        "api_priced_ledger",
+        "instrument_scope",
+        "data_quality",
+        "binance_market_data_gate",
+        "multi_source_alpha_intelligence_gate",
+        "historical_or_paper_simulation_gate",
+        "walk_forward_backtest_gate",
+        "tactical_alpha_sleeve_gate",
+        "expected_value_gate",
+        "target_directed_dynamic_positioning",
+        "existing_asset_tactical_gate",
+        "portfolio_drawdown",
+    "cash_rail_integrity",
+    "cash_floor",
+    "exposure_limits",
+    "bucket_drift",
+    "staking_valuation_and_btc_size_gate",
+    "staking_liquidity",
+    "leveraged_etf_tactical_gate",
+    "market_regime",
+    "forecast_calibration_gate",
+    "simulation_friction",
+    "promotion_gate",
+    "actionability_gate"
+  ],
+  "promotion_gates": {
+    "research_only": {
+      "allowed_output": "research_observation_only",
+      "can_generate_trade_action": false,
+      "can_enter_api_roadmap": false
+    },
+    "paper_validated": {
+      "allowed_output": "candidate_recommendation_after_risk_model",
+      "can_generate_trade_action": false,
+      "requires_human_confirmation_to_promote": true
+    },
+    "human_confirmed_live_candidate": {
+      "allowed_output": "report_action_candidate_after_risk_model",
+      "can_generate_trade_action": true,
+      "trade_still_requires_human_confirmation": true
+    },
+    "api_ready_candidate": {
+      "allowed_output": "future_roadmap_candidate_only",
+      "can_generate_trade_action": false,
+      "requires_minimum_complete_months": 3,
+      "api_rebalancing_enabled": false
+    }
+  },
+  "simulation_friction": {
+    "enabled": true,
+    "required_fields": [
+      "commission_bps",
+      "slippage_bps",
+      "spread_bps",
+      "tax_note",
+      "liquidity_discount_pct",
+      "staking_unlock_delay_days",
+      "market_hours_note"
+    ],
+    "defaults": {
+      "us_equity": {
+        "commission_bps": 0,
+        "slippage_bps": 5,
+        "spread_bps": 5,
+        "tax_note": "record dividends and capital gains; not tax advice",
+        "market_hours_note": "respect US regular session and liquidity"
+      },
+      "crypto": {
+        "commission_bps": 10,
+        "slippage_bps": 20,
+        "spread_bps": 20,
+        "tax_note": "record spot trades, staking rewards, and stablecoin conversions; not tax advice",
+        "staking_unlock_delay_days": null,
+        "market_hours_note": "24/7 market, but liquidity and venue risk vary"
+      }
+    },
+    "missing_friction_policy": "downgrade_and_block_strategy_promotion"
+  },
+  "paper_trading_simulation": {
+    "enabled": true,
+    "module_reference": "references/PAPER_TRADING_SIMULATION_POLICY.md",
+    "default_mode": "historical_backtest_then_paper_forward_test",
+    "binance_api_policy": {
+      "use_market_data_public_or_env_key": true,
+      "read_only_or_testnet_only_if_private_key_provided": true,
+      "live_order_api_enabled": false,
+      "withdrawal_api_enabled": false,
+      "margin_futures_perpetuals_enabled": false,
+      "never_log_real_keys": true
+    },
+    "required_outputs": [
+      "simulation_id",
+      "data_window",
+      "kline_interval",
+      "strategy_rules",
+      "trade_count",
+      "win_rate_pct",
+      "average_win_pct",
+      "average_loss_pct",
+      "max_drawdown_pct",
+      "net_return_pct_after_friction",
+      "deployment_tier"
+    ],
+    "deployment_mapping": {
+      "negative_or_unstable_ev": "no_deploy",
+      "few_trades_or_high_drawdown": "paper_only",
+      "positive_ev_but_sample_limited": "small_probe_candidate",
+      "positive_ev_with_sufficient_sample_and_oos": "partial_deploy_candidate"
+    }
+  },
+  "walk_forward_backtest": {
+    "enabled": true,
+    "module_reference": "references/WALK_FORWARD_BACKTEST_POLICY.md",
+    "script": "scripts/crypto/binance_walkforward_backtest.py",
+    "data_source": "Binance public spot klines",
+    "uses_private_api_keys": false,
+    "live_orders_enabled": false,
+    "default_initial_capital_usd": 500,
+    "default_train_pct": 0.7,
+    "default_test_pct": 0.3,
+    "entry_execution": "signal_on_closed_kline_entry_next_kline_open",
+    "drop_unclosed_kline": true,
+    "deployment_gates": {
+      "win_rate_gate_80pct": {
+        "oos_win_rate_pct_min": 80,
+        "oos_trade_count_min": 30,
+        "final_capital_min_multiple": 1.25,
+        "max_drawdown_floor_pct": -25,
+        "final_capital_must_exceed_initial": true
+      },
+      "double_capital_gate": {
+        "oos_final_capital_min_multiple": 2,
+        "oos_trade_count_min": 20,
+        "max_drawdown_floor_pct": -30
+      },
+      "train_consistency_gate": {
+        "train_net_return_pct_min": 0,
+        "train_trade_count_min": 15,
+        "required_for_strict_pass": true,
+        "failed_policy": "downgrade_to_paper_or_research_even_if_oos_doubled"
+      },
+      "small_probe_gate": {
+        "oos_trade_count_min": 25,
+        "final_capital_min_multiple": 1.3,
+        "max_drawdown_floor_pct": -30
+      },
+      "current_signal_required_for_action": true,
+      "paper_required_before_live": true,
+      "human_confirmation_required": true
+    },
+    "no_pass_policy": "no_deploy_or_paper_only_do_not_force_overfit",
+    "ten_x_one_week_policy": "research_goal_only_not_deployable_without_oos_paper_risk_and_human_confirmation"
+  },
+  "multi_source_alpha_intelligence": {
+    "enabled": true,
+    "module_reference": "references/MULTI_SOURCE_ALPHA_INTELLIGENCE.md",
+    "script": "scripts/crypto/multisource_alpha_snapshot.py",
+    "private_api_keys_used": false,
+    "live_orders_enabled": false,
+    "sources": [
+      "alternative_me_fear_greed",
+      "binance_spot_24hr",
+      "binance_funding_open_interest",
+      "coingecko_trending",
+      "defillama_chains",
+      "reddit_public_headline_context"
+    ],
+    "score_policy": {
+      "score_field": "multi_source_alpha_score_points",
+      "can_rank_candidates": true,
+      "can_trigger_paper": true,
+      "can_trigger_live_trade_without_walk_forward": false,
+      "can_override_risk_model": false,
+      "social_signal_single_source_max_action": "paper_only"
+    },
+    "required_for_active_tactical_report": true
+  },
+    "forecast_calibration": {
+    "enabled": true,
+    "module_reference": "references/FORECAST_CALIBRATION.md",
+    "pct_wording_policy": "percentage_numbers_refer_to_forecast_probability_only",
+    "execution_readiness_unit": "points",
+    "high_conviction_threshold_pct": 80,
+    "maximum_market_direction_probability_pct": 90,
+    "required_fields": [
+      "forecast_event",
+      "forecast_window",
+      "forecast_probability_pct",
+      "forecast_base_rate",
+      "forecast_evidence_adjustment",
+      "forecast_invalid_if",
+      "execution_readiness_score"
+    ],
+    "probability_buckets": [
+      {
+        "name": "high_conviction",
+        "min_pct": 80,
+        "max_pct": 90
+      },
+      {
+        "name": "constructive",
+        "min_pct": 70,
+        "max_pct": 79
+      },
+      {
+        "name": "leaning",
+        "min_pct": 55,
+        "max_pct": 69
+      },
+      {
+        "name": "balanced",
+        "min_pct": 45,
+        "max_pct": 54
+      }
+    ],
+    "monthly_review_metrics": [
+      "hit_rate_by_probability_bucket",
+      "brier_score",
+      "average_return_by_probability_bucket",
+      "max_drawdown_by_probability_bucket",
+      "calibration_error_by_asset_class_and_regime"
+    ],
+    "overconfidence_guardrail": {
+      "bucket": "80_to_90_pct",
+      "minimum_predictions": 5,
+      "trigger_if_actual_hit_rate_below": 0.65,
+      "consecutive_periods": 2,
+            "action": "propose_probability_downgrade_or_signal_weight_rollback"
+        }
+    },
+    "expected_value_policy": {
+        "enabled": true,
+        "module_reference": "references/EXPECTED_VALUE_POLICY.md",
+        "required_for_tactical_alpha": true,
+        "formula": "EV = p_up * upside_target_pct - p_down * downside_stop_pct - friction_pct",
+        "required_fields": [
+            "upside_target_pct",
+            "downside_stop_pct",
+            "payoff_ratio",
+            "expected_value_pct",
+            "friction_adjusted_ev_pct",
+            "historical_sample_count",
+            "historical_hit_rate_pct",
+            "out_of_sample_hit_rate_pct",
+            "max_adverse_excursion_pct"
+        ],
+        "minimum_sample_count_for_80pct_probability": 20,
+        "insufficient_sample_policy": "cap_probability_to_constructive_and_allow_only_paper_or_small_probe",
+        "full_deploy_requires_positive_friction_adjusted_ev": true
+    },
+    "target_directed_dynamic_positioning": {
+        "enabled": true,
+        "module_reference": "references/TARGET_DIRECTED_DYNAMIC_POSITIONING.md",
+        "principle": "position_targets_are_risk_pressure_not_mechanical_trade_triggers",
+        "do_not_trade_only_because": [
+            "current_weight_above_target",
+            "current_weight_below_target",
+            "short_term_unrealized_loss",
+            "short_term_unrealized_gain"
+        ],
+        "required_scores": [
+            "short_term_score_points",
+            "long_term_thesis_score_points",
+            "position_pressure_score_points",
+            "exit_plan_quality_score_points"
+        ],
+        "dynamic_actions": [
+            "hold_core",
+            "conditional_hold",
+            "hold_until_trigger",
+            "add_candidate",
+            "small_probe_candidate",
+            "trim_on_strength",
+            "trim_on_invalidation",
+            "sell_or_exit",
+            "watch_no_add"
+        ],
+        "existing_over_limit_policy": {
+            "block_new_same_direction_risk": true,
+            "allow_conditional_hold_if": [
+                "short_term_score_points_gte_60",
+                "exit_plan_quality_score_points_gte_75",
+                "market_regime_not_emergency",
+                "data_quality_not_missing_or_stale",
+                "risk_decision_not_block_for_existing_hold",
+                "human_confirmation_for_hold_plan"
+            ],
+            "force_trim_only_if": [
+                "thesis_broken",
+                "short_term_invalidated",
+                "time_window_expired",
+                "cash_rail_survival_requires_liquidity",
+                "better_ev_after_friction_confirmed"
+            ]
+        },
+        "soxl_rule": {
+            "new_add_allowed_when_over_limit": false,
+            "conditional_hold_allowed": true,
+            "requires_underlying": "SOXX_or_semiconductor_index_trend",
+            "default_review_window_trading_days": 1,
+            "max_conditional_hold_trading_days": 5,
+            "absolute_max_holding_trading_days": 10,
+            "must_define": [
+                "stop",
+                "take_profit",
+                "planned_exit_time",
+                "underlying_confirmation",
+                "maximum_planned_loss"
+            ]
+        },
+        "night_rule": {
+            "new_add_requires": [
+                "binance_pair_or_two_non_binance_sources_verified",
+                "quote_volume_above_new_add_threshold",
+                "spread_and_depth_verified",
+                "second_source_price_confirmation",
+                "historical_or_paper_validation_support"
+            ],
+            "conditional_hold_allowed_when": [
+                "pair_exists",
+                "spread_allows_exit",
+                "depth_covers_current_position",
+                "invalidation_price_defined"
+            ],
+            "full_deploy_allowed_by_default": false
+        }
+    },
+    "target": {
+        "primary_goal": "5-year 10x+",
+        "secondary_goal": "10-year 10x+",
+        "monthly_double_goal_scope": "tactical_alpha_sleeve_only",
+        "target_mode": "dca_total_contribution",
+        "target_multiplier": 10.0,
+        "target_years": 5,
+        "secondary_target_years": 10,
+        "monthly_contribution": 1000,
+        "total_contribution_target": 60000,
+        "terminal_value_target": 600000,
+        "lump_sum_required_monthly_return": 0.0391,
+        "dca_annuity_required_monthly_return": 0.0628,
+        "ten_year_required_annual_return": 0.2589,
+        "ten_year_required_monthly_return": 0.0194
+    },
+  "actionable_report_policy": {
+    "enabled": true,
+    "required_top_level_sections": [
+      "current_holdings_status",
+      "short_term_trend_and_actions",
+      "long_term_dca_plan"
+    ],
+    "required_dimensions_per_section": [
+      "crypto",
+      "us_equity",
+      "cash_rails"
+    ],
+    "required_panels": [
+      "data_quality",
+            "cash_rails",
+            "binance_market_data",
+            "api_priced_ledger",
+            "forecast_probability_calibration",
+            "expected_value_and_history_validation",
+            "historical_or_paper_simulation",
+            "walk_forward_backtest",
+            "target_directed_dynamic_positioning",
+            "tactical_alpha_sleeve",
+            "existing_asset_tactical_gate",
+            "staking_valuation_and_dynamic_btc_sizing",
+      "risk_model",
+      "execution_readiness",
+      "learning_loop"
+    ],
+    "explicit_action_plan_required": true,
+    "external_tactical_cash_allocation_fields": [
+      "deploy_now",
+      "conditional_deploy",
+      "cash_rail_repair",
+      "paper_only",
+      "pending",
+      "maximum_wait_until"
+    ],
+    "price_source_policy": "screenshot_quantities_api_prices",
+    "operation_advice_requires_fresh_data": true,
+    "us_equity_when_market_closed": "use_latest_trading_day_close_and_state_date",
+    "execution_readiness": {
+      "minimum_for_main_action": 80,
+      "meaning": "actionability_points_not_probability",
+      "weights": {
+        "data_quality": 0.25,
+        "risk_model": 0.25,
+        "cash_rail_fit": 0.2,
+        "strategy_alignment": 0.15,
+        "execution_clarity": 0.15
+      },
+      "below_threshold_policy": "observation_or_data_request_only"
+    },
+        "forecast_probability": {
+            "enabled": true,
+      "minimum_for_high_conviction_directional_action_pct": 80,
+      "meaning": "true_subjective_forecast_probability_for_specific_event",
+      "required_fields": [
+        "forecast_event",
+        "forecast_window",
+        "forecast_probability_pct",
+        "forecast_base_rate",
+        "forecast_evidence_adjustment",
+        "forecast_invalid_if"
+      ],
+      "directional_main_action_requires": [
+        "forecast_probability_pct_gte_80",
+        "execution_readiness_score_gte_80_points",
+        "risk_decision_not_block",
+        "human_confirmation_for_trade"
+            ],
+            "risk_reduction_exception": "risk_reduction_actions_may_have_no_directional_probability_but_must_be_labeled_as_risk_control"
+        },
+        "tactical_alpha_sleeve": {
+            "enabled": true,
+            "module_reference": "references/TACTICAL_ALPHA_SLEEVE.md",
+            "external_cash_pool_usd": 3000,
+            "cash_pool_is_maximum_not_default_deployment": true,
+            "full_deploy_requires": [
+                "forecast_probability_pct_gte_80",
+                "execution_readiness_score_gte_80_points",
+                "friction_adjusted_ev_pct_positive",
+                "historical_sample_count_sufficient",
+                "out_of_sample_not_failed",
+                "walk_forward_gate_passed_or_paper_only",
+                "data_quality_verified",
+                "liquidity_verified",
+                "cash_rail_confirmed",
+                "risk_decision_not_block",
+                "human_confirmation_for_trade"
+            ],
+            "deployment_tiers": {
+                "no_deploy": {
+                    "max_amount_usd": 0
+                },
+                "paper_only": {
+                    "max_amount_usd": 0
+                },
+                "small_probe": {
+                    "max_amount_usd_range": [
+                        300,
+                        750
+                    ]
+                },
+                "partial_deploy": {
+                    "max_amount_usd_range": [
+                        750,
+                        1500
+                    ]
+                },
+                "full_deploy": {
+                    "max_amount_usd": 3000
+                }
+            },
+            "risk_budget": {
+                "single_trade_max_planned_loss_usd_range": [
+                    240,
+                    300
+                ],
+                "monthly_stop_loss_usd_range": [
+                    450,
+                    600
+                ],
+                "pause_after_failed_trades": 2,
+                "stop_for_month_after_failed_trades": 3
+            }
+        },
+        "long_term_dca": {
+      "cash_floor_first": true,
+      "do_not_dca_into_overweight_assets": true,
+      "leveraged_etf_excluded_from_dca": true,
+      "crypto_priority_when_eth_like_overweight": [
+        "stablecoin_reserve",
+        "BTC_3_to_5_pct_initial_anchor",
+        "high_quality_yielding_pos_after_staking_validation"
+      ],
+      "us_equity_priority": [
+        "settled_cash_reserve",
+        "plain_non_levered_etf_or_quality_common_stock"
+      ]
+    }
+    },
+    "existing_asset_tactical_gate": {
+        "enabled": true,
+        "module_reference": "references/EXISTING_ASSET_TACTICAL_GATE.md",
+        "default_policy": "do_not_move_or_trim_existing_assets_without_target_directed_dynamic_review",
+        "current_asset_rules": {
+            "lcETH": "default_no_tactical_source_until_unlock_conversion_fee_tax_lots_verified",
+            "ADA": "trim_on_strength_candidate_if_low_apy_and_over_target_but_not_default_tactical_source",
+            "SOL": "hold_or_small_growth_candidate_only_after_cash_floor_and_risk_on",
+            "NIGHT": "block_new_add_until_binance_or_multisource_liquidity_verified_but_allow_conditional_hold_if_exit_liquidity_and_invalidation_defined",
+            "SOXL": "block_new_leveraged_etf_when_over_limit_but_allow_conditional_hold_if_soxx_trend_exit_plan_and_window_pass",
+            "CRCL": "no_new_tactical_add_unless_catalyst_and_risk_revalidated",
+            "COIN": "no_new_tactical_add_unless_catalyst_and_risk_revalidated"
+        },
+        "requires_for_existing_asset_reallocation": [
+            "liquid_quantity_verified",
+            "thesis_not_broken_or_reallocation_is_risk_reduction",
+            "target_directed_dynamic_positioning_completed",
+            "friction_adjusted_ev_advantage",
+            "tax_and_fee_note",
+            "risk_decision_not_block",
+            "human_confirmation"
+        ]
+    },
+    "productive_liquidity_policy": {
+    "enabled": true,
+    "principle": "keep_minimum_cash_idle_and_keep_excess_capital_working",
+    "cash_meaning": "opportunity_liquidity_not_long_term_idle_cash",
+    "normal_idle_cash_target": 0.03,
+    "caution_opportunity_liquidity_target": 0.05,
+    "emergency_liquidity_target": 0.1,
+    "allowed_cash_like_vehicles": {
+      "crypto_rail": [
+        "USDT",
+        "USDC",
+        "USD_balance"
+      ],
+      "us_equity_rail": [
+        "settled_usd_cash",
+        "plain_non_levered_short_duration_treasury_etf_after_data_check"
+      ]
+    },
+    "btc_role": {
+      "native_yield": false,
+      "role": "long_term_crypto_core_and_liquidity_anchor_not_highest_beta_asset",
+      "not_best_for": [
+        "max_short_term_explosion",
+        "native_staking_yield"
+      ],
+      "best_for": [
+        "cycle_survival",
+        "long_term_core_diversification",
+        "reducing_eth_like_concentration"
+      ],
+      "initial_target_weight_range": [
+        0.03,
+        0.05
+      ],
+      "mature_target_weight_range": [
+        0.05,
+        0.08
+      ],
+      "risk_off_target_weight_range": [
+        0.08,
+        0.12
+      ],
+      "maximum_without_new_thesis": 0.15,
+      "dca_priority_when_eth_like_overweight": "after_minimum_liquidity_floor_btc_has_priority_over_eth_like_adds_until_3_to_5pct_then_reassess_yielding_pos_and_core_assets"
+    }
+  },
+  "staking_valuation_policy": {
+    "enabled": true,
+    "module_reference": "references/STAKING_VALUATION_AND_DYNAMIC_BTC.md",
+    "run_when": [
+      "staked_assets_present",
+      "crypto_dca_recommendation",
+      "btc_sizing_recommendation",
+      "staking_reward_or_unlock_change",
+      "eth_like_weight_gt_35pct",
+      "user_questions_btc_vs_yielding_pos"
+    ],
+    "account_mark_priority": "account_export_or_user_screenshot_before_public_market_proxy",
+    "liquid_staking_receipt_policy": {
+      "requires_conversion_ratio_for_strong_action": true,
+      "requires_redeemable_underlying_quantity_for_unstake_or_rebalance": true,
+      "public_market_proxy_low_liquidity_policy": "background_only_downgrade",
+      "do_not_use_underlying_spot_only_for_receipt_token_trade_sizing": true
+    },
+    "btc_dynamic_targets": {
+      "initial_when_eth_like_overweight": [
+        0.03,
+        0.05
+      ],
+      "mature_normal": [
+        0.05,
+        0.08
+      ],
+      "risk_off_or_staking_uncertain": [
+        0.08,
+        0.12
+      ],
+      "hard_cap": 0.15
+    },
+    "yield_asset_rules": {
+      "pause_new_eth_like_when_weight_above_target_or_unlock_unverified": true,
+      "ada_trim_candidate_when_actual_apy_below": 0.02,
+      "ada_target_when_yield_weak": [
+        0.03,
+        0.05
+      ],
+      "sol_scale_candidate_when_risk_on_and_cash_floor_met": [
+        0.02,
+        0.03
+      ]
+    },
+    "reporting": {
+      "show_account_mark_spot_proxy_public_proxy": true,
+      "show_annual_reward_estimate": true,
+      "show_unlock_fee_and_delay": true,
+      "show_btc_target_amounts_and_units": true
+    }
+  },
+  "pullback_liquidity_policy": {
+    "enabled": true,
+    "probability_wording_policy": "80pct_means_true_forecast_probability_not_execution_readiness",
+    "minimum_pullback_forecast_probability_pct_for_larger_liquidity": 80,
+    "larger_liquidity_allowed_only_when": [
+      "data_quality_verified",
+      "forecast_event_defined",
+      "forecast_window_defined",
+      "forecast_base_rate_defined",
+      "market_regime_caution_or_transitioning_lower",
+      "target_asset_not_yet_at_planned_entry_zone",
+      "entry_time_nodes_defined",
+      "price_trigger_nodes_defined",
+      "maximum_wait_window_defined",
+      "cash_rail_source_defined"
+    ],
+    "max_wait_windows": {
+      "crypto_days": 7,
+      "us_equity_trading_days": 5,
+      "leveraged_etf_trading_days": 3
+    },
+    "temporary_liquidity_caps": {
+      "risk_on": 0.05,
+      "neutral": 0.08,
+      "caution": 0.15,
+      "emergency": 0.25
+    },
+    "required_entry_plan_fields": [
+      "asset",
+      "rail",
+      "forecast_event",
+      "forecast_window",
+      "forecast_probability_pct",
+      "forecast_base_rate",
+      "forecast_evidence_adjustment",
+      "target_allocation_amount",
+      "entry_node_1_time_or_price",
+      "entry_node_2_time_or_price",
+      "entry_node_3_time_or_price",
+      "maximum_wait_until",
+      "invalidation_condition",
+      "fallback_deploy_plan"
+    ],
+    "cash_drag_policy": "if_entry_nodes_do_not_trigger_by_max_wait_window_deploy_by_dca_or_reclassify_as_strategy_change",
+    "reporting": {
+      "show_pullback_forecast_probability_pct": true,
+      "show_entry_calendar": true,
+      "show_price_triggers": true,
+      "show_why_not_hold_larger_cash_when_probability_below_80pct": true
+    }
+  },
+  "allowed_instruments": {
+    "crypto": [
+      "spot",
+      "dca",
+      "staking_for_long_term_core",
+      "unstaking_after_human_confirmation"
+    ],
+    "us_equity": [
+      "common_stock_spot",
+      "non_levered_plain_etf_spot",
+      "leveraged_etf_tactical_short_term_only"
+    ],
+    "cash": [
+      "usd_cash",
+      "stablecoin_reserve",
+      "short_duration_cash_like_instruments"
+    ]
+  },
+  "forbidden_instruments": [
+    "options",
+    "0dte_options",
+    "leveraged_etf_long_term_holding",
+    "leveraged_etf_without_exit_plan",
+    "inverse_etf",
+    "margin",
+    "short_selling",
+    "futures",
+    "perpetuals",
+    "structured_notes",
+    "auto_trading_without_confirmation"
+  ],
+  "restricted_instruments": {
+    "leveraged_etf_tactical": {
+      "enabled": true,
+      "scope": "us_equity_tactical_spot_only",
+      "human_confirmation_required": true,
+      "default_max_holding_trading_days": 5,
+      "absolute_max_holding_trading_days": 10,
+      "single_position_target_max": 0.03,
+      "single_position_hard_max": 0.04,
+      "total_leveraged_etf_target_max": 0.05,
+      "total_tactical_spot_max": 0.1,
+      "allowed_regimes_for_new_risk": [
+        "risk_on"
+      ],
+      "conditional_regimes_for_small_candidate": [
+        "neutral"
+      ],
+      "blocked_regimes_for_new_risk": [
+        "caution",
+        "emergency"
+      ],
+      "default_stop_loss_pct_range": [
+        0.08,
+        0.1
+      ],
+      "requires": [
+        "leverage_factor",
+        "underlying_index",
+        "market_regime_at_entry",
+        "max_holding_trading_days",
+        "planned_exit_time",
+        "hard_stop_pct",
+        "take_profit_plan",
+        "data_quality_status",
+        "risk_decision"
+      ],
+      "disallowed_uses": [
+        "core",
+        "long_term_core",
+        "growth_satellite",
+        "dca",
+        "buy_and_hold",
+        "cash_substitute"
+      ],
+      "inverse_leveraged_etf_allowed": false,
+      "single_stock_leveraged_etf_allowed": false,
+      "position_limits_are_mechanical_sell_triggers": false,
+      "existing_over_limit_policy": "block_new_add_but_allow_target_directed_conditional_hold_with_exit_plan",
+      "conditional_hold_requires": [
+        "underlying_trend_not_broken",
+        "market_regime_not_caution_or_emergency",
+        "max_holding_trading_days_defined",
+        "planned_exit_time_defined",
+        "hard_stop_defined",
+        "take_profit_plan_defined",
+        "maximum_planned_loss_defined",
+        "human_confirmation_for_hold_plan"
+      ],
+      "over_limit_force_trim_triggers": [
+        "underlying_trend_invalidated",
+        "hard_stop_triggered",
+        "holding_window_expired",
+        "event_risk_unreviewed",
+        "cash_rail_survival_requires_liquidity"
+      ]
+    }
+  },
+  "capital_buckets": {
+    "crypto_long_term_core": {
+      "target_weight": 0.45,
+      "allowed_range": [
+        0.4,
+        0.55
+      ],
+      "default_components": {
+        "BTC": 0.06,
+        "ETH_or_staked_ETH_like": 0.29,
+        "high_quality_yielding_pos_l1_l2": 0.1
+      },
+      "notes": "Yield-aware long-term crypto core. BTC is a smaller dynamic diversification anchor: 3-5% initial, 5-8% mature, 8-12% only in risk-off/staking uncertainty, hard cap 15%. ETH-like and high-quality PoS assets can carry larger long-term weight when staking/liquidity risks are verified."
+    },
+    "us_equity_long_term_core": {
+      "target_weight": 0.15,
+      "allowed_range": [
+        0.1,
+        0.2
+      ],
+      "notes": "US common stocks and non-levered ETFs only."
+    },
+    "growth_satellite": {
+      "target_weight": 0.2,
+      "allowed_range": [
+        0.15,
+        0.25
+      ],
+      "default_components": {
+        "crypto_growth": 0.12,
+        "us_equity_spot_growth": 0.08
+      },
+      "notes": "3-10x medium-term opportunities; no leverage."
+    },
+    "tactical_spot": {
+      "target_weight": 0.1,
+      "allowed_range": [
+        0.05,
+        0.1
+      ],
+      "default_components": {
+        "crypto_spot": 0.06,
+        "us_equity_spot": 0.04
+      },
+      "notes": "Short-term tactical opportunities. Leveraged ETFs are allowed only under the restricted tactical policy; no options, inverse ETFs, margin, or shorting."
+    },
+    "cash_and_stablecoin_reserve": {
+      "target_weight": 0.05,
+      "allowed_range": [
+        0.03,
+        0.1
+      ],
+      "notes": "Minimum opportunity liquidity, not long-term idle cash. Excess capital should work in DCA assets or reviewed cash-like spot instruments."
+    }
+  },
+  "regime_allocation": {
+    "risk_on": {
+      "crypto_total_range": [
+        0.65,
+        0.7
+      ],
+      "us_equity_total_range": [
+        0.2,
+        0.25
+      ],
+      "cash_min": 0.03,
+      "tactical_spot_max": 0.1
+    },
+    "neutral": {
+      "crypto_total": 0.6,
+      "us_equity_total": 0.3,
+      "cash": 0.05,
+      "tactical_spot_max": 0.1
+    },
+    "caution": {
+      "crypto_total_range": [
+        0.5,
+        0.55
+      ],
+      "us_equity_total_range": [
+        0.3,
+        0.35
+      ],
+      "cash_range": [
+        0.05,
+        0.1
+      ],
+      "tactical_spot_max": 0.05
+    },
+    "emergency": {
+      "cash_min": 0.1,
+      "new_risk_allowed": false,
+      "new_tactical_spot_allowed": false
+    }
+  },
+  "risk_limits": {
+    "risk_decisions": [
+      "allow",
+      "downgrade",
+      "block",
+      "manual_review_required"
+    ],
+    "kill_switch_reporting_only": true,
+    "balance_limits_reporting_only": true,
+    "portfolio_circuit_breaker": {
+      "emergency_ratio": 0.5,
+      "defensive_ratio": 0.7,
+      "cautious_ratio": 0.85
+    },
+    "rebalance_thresholds": {
+      "use_new_capital_only_deviation": 0.05,
+      "pause_overweight_new_buys_deviation": 0.1,
+      "force_rebalance_plan_deviation": 0.1,
+      "position_targets_are_mechanical_trade_triggers": false,
+      "overweight_existing_position_policy": "increase_position_pressure_and_block_new_adds_not_automatic_sell"
+    },
+    "position_limits": {
+      "single_crypto_core_max": 0.35,
+      "single_us_equity_core_max": 0.15,
+      "single_growth_satellite_max": 0.12,
+      "single_tactical_spot_max": 0.04,
+      "btc_initial_target_max": 0.05,
+      "btc_mature_target_max": 0.08,
+      "btc_risk_off_target_max": 0.12,
+      "btc_hard_max": 0.15,
+      "single_eth_like_staking_soft_max": 0.55,
+      "single_eth_like_staking_hard_review": 0.65,
+            "single_leveraged_etf_target_max": 0.03,
+            "single_leveraged_etf_hard_max": 0.04,
+            "total_leveraged_etf_target_max": 0.05,
+            "total_tactical_spot_max": 0.1,
+            "external_tactical_alpha_cash_pool_usd": 3000,
+            "tactical_alpha_single_trade_max_planned_loss_usd": 300,
+            "tactical_alpha_monthly_stop_loss_usd": 600
+        },
+    "cash_limits": {
+      "cash_and_stablecoin_min": 0.03,
+      "emergency_cash_min": 0.1,
+      "crypto_rail_cash_min": 0.03,
+      "crypto_rail_emergency_cash_min": 0.1,
+      "us_equity_rail_cash_min": 0.02,
+      "us_equity_rail_emergency_cash_min": 0.1
+    }
+  },
+  "staking_policy": {
+    "enabled": true,
+    "scope": "long_term_core_only",
+    "human_confirmation_required": true,
+    "btc_staking_allowed": false,
+    "max_staked_pct_of_portfolio": 0.55,
+    "existing_staked_pct_hard_review": 0.7,
+    "max_staked_pct_per_asset": 1.0,
+    "min_liquid_crypto_pct_of_portfolio": 0.1,
+    "max_unknown_unlock_days": 30,
+    "required_fields": [
+      "estimated_apy",
+      "lock_status",
+      "unlock_available_at",
+      "slash_risk",
+      "provider_risk",
+      "liquid_quantity",
+      "staked_quantity",
+      "reward_quantity",
+      "tax_note",
+      "receipt_conversion_ratio",
+      "redeemable_underlying_quantity",
+      "account_mark_value",
+      "spot_proxy_value",
+      "public_market_proxy_value",
+      "instant_unstake_fee_pct_if_available",
+      "staking_valuation_status"
+    ],
+    "disallow_as_immediate_liquidity_when": [
+      "locked",
+      "unlocking",
+      "unknown_unlock_time"
+    ]
+  },
+  "data_validation": {
+    "default_policy": "conservative_downgrade",
+    "status_labels": [
+      "verified",
+      "disputed",
+      "stale",
+      "missing"
+    ],
+    "us_equity": {
+      "min_price_sources": 3,
+      "preferred_sources": [
+        "Yahoo Finance",
+        "CNBC",
+        "MarketWatch"
+      ],
+      "verified_max_price_deviation_pct": 0.5,
+      "disputed_max_price_deviation_pct": 1.5,
+      "intraday_price_stale_minutes": 15
+    },
+    "crypto": {
+      "min_price_sources": 2,
+            "preferred_sources": [
+                "CoinGecko",
+                "CoinMarketCap",
+                "Binance market data",
+                "major_exchange",
+                "DeFiLlama_or_project_source"
+            ],
+            "verified_max_price_deviation_pct": 1.0,
+            "disputed_max_price_deviation_pct": 3.0,
+            "min_daily_volume_new_asset_usd": 1000000,
+            "exit_daily_volume_usd": 200000,
+            "binance_market_data_validation": {
+                "enabled": true,
+                "pair_missing_policy": "do_not_use_binance_to_support_action",
+                "verified_max_price_deviation_pct": 1.0,
+                "disputed_max_price_deviation_pct": 3.0,
+                "min_quote_volume_new_tactical_usd": 1000000,
+                "below_threshold_quote_volume_usd": 500000,
+                "exit_or_no_add_quote_volume_usd": 200000,
+                "max_spread_for_tactical_pct": 0.5,
+                "block_new_add_if_spread_gt_pct": 2.0,
+                "night_requires_pair_or_two_non_binance_sources": true
+            },
+            "staking_receipt_validation": {
+        "requires_account_mark": true,
+        "requires_underlying_spot_proxy": true,
+        "requires_conversion_ratio_for_strong_action": true,
+        "requires_redeemable_underlying_for_unstake": true,
+        "public_market_proxy_low_liquidity_policy": "background_only"
+      }
+    }
+  },
+  "learning_governance": {
+    "mode": "human_confirmed",
+    "auto_update_strategy_weights": false,
+    "record_every_recommendation": true,
+    "write_only_proposed_changes": true,
+    "required_outcome_statuses": [
+      "pending",
+      "hit",
+      "failed",
+      "not_triggered",
+      "expired",
+      "invalidated"
+    ],
+    "error_attribution_categories": [
+      "data_error",
+      "timing_error",
+      "regime_error",
+      "fundamental_error",
+      "onchain_error",
+      "catalyst_error",
+      "position_sizing_error",
+      "risk_rule_error",
+      "execution_assumption_error",
+      "validation_error",
+      "overfit_error",
+            "staking_valuation_error",
+            "btc_sizing_error",
+            "forecast_calibration_error",
+            "overconfidence_error",
+            "binance_data_error",
+            "expected_value_error",
+            "tactical_sleeve_error",
+            "existing_asset_gate_error",
+            "dynamic_positioning_error"
+        ],
+    "promotion_statuses": [
+      "research_only",
+      "paper_validated",
+      "human_confirmed_live_candidate",
+      "api_ready_candidate"
+    ],
+    "overfit_guardrails": {
+      "minimum_recommendations_for_stability_review": 20,
+      "minimum_monthly_windows_for_stability_review": 3,
+      "require_out_of_sample_review": true,
+      "group_by_market_regime": true,
+      "group_by_asset_class": true,
+      "group_by_capital_bucket": true,
+      "rollback_candidate_after_deteriorating_periods": 2,
+      "max_single_weight_change_pct_points": 5
+    },
+    "auto_apply_proposed_changes": false,
+    "rollback_requires_human_confirmation": true
+  },
+  "research_validation": {
+    "no_paper_validation_policy": "research_only",
+    "lookahead_bias_policy": "block_promotion",
+    "recursive_indicator_instability_policy": "downgrade_or_research_only",
+    "stale_data_policy": "block_strong_recommendations",
+    "minimum_paper_validation_months_for_api_candidate": 3,
+    "api_candidate_requires": [
+      "complete_experiment_records",
+      "complete_recommendation_history",
+      "risk_model_tests",
+      "approval_log",
+      "rollback_plan",
+      "api_withdrawals_disabled"
+    ]
+  },
+  "error_recovery": {
+    "mode": "continue_with_degradation",
+    "single_data_source_failure": "switch_to_backup_source_and_log",
+    "module_failure": "use_rule_fallback_and_mark_degraded",
+    "ledger_parse_failure": "stop_trade_recommendations_and_report_repair",
+    "total_value_failure": "stop_trade_recommendations_and_report_repair"
+  },
+  "report_cadence": {
+    "default_full_report": "weekly_report",
+    "daily_monitor": {
+      "enabled": true,
+      "scope": "risk_and_event_summary_only"
+    },
+    "weekly_report": {
+      "enabled": true,
+      "format": "readable_markdown"
+    },
+    "monthly_review": {
+      "enabled": true,
+      "includes_learning_loop": true
+    },
+    "quarterly_thesis_review": {
+      "enabled": true,
+      "scope": "long_term_core_thesis_and_whitelist"
+    },
+    "event_triggered": {
+      "enabled": true,
+      "triggers": [
+        "regulatory_event",
+        "security_event",
+        "staking_slash",
+        "major_earnings_change",
+        "position_invalidated",
+        "portfolio_deviation_gt_10pct",
+                "cash_below_minimum",
+                "staking_valuation_or_unlock_change",
+                "btc_dynamic_target_breach",
+                "repeated_data_quality_failure",
+                "binance_pair_or_liquidity_status_change",
+                "night_data_quality_change",
+                "tactical_alpha_candidate_status_change"
+            ]
+        }
+    },
+  "profit_routing": {
+    "crypto_take_profit": {
+      "stablecoin_reserve": 0.4,
+      "next_month_dca": 0.3,
+      "catchup_reserve": 0.3
+    },
+        "tactical_spot_profit": {
+            "long_term_core": 0.5,
+            "reserve": 0.3,
+            "next_tactical_budget": 0.2
+        },
+        "tactical_alpha_profit": {
+            "recover_principal_first": true,
+            "long_term_core": 0.5,
+            "reserve_or_cash_floor": 0.3,
+            "next_tactical_budget": 0.2,
+            "pause_redeployment_after_failed_trades": 2
+        },
+    "staking_rewards": {
+      "record_as_reward_lot": true,
+      "compound_by_default": false,
+      "requires_review_before_compounding": true
+    }
+  }
+}

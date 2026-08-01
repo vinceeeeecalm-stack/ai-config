@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-short-to-long-independent-reunderwrite",
+  "title": "短期亏损不能自动转长期持有",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["短期交易已触发止损或失效", "长期底账为隔离夹具"],
+  "steps": ["尝试无重估转换", "提交不通过重估", "提交通过重估但缺少用户确认", "提交通过且用户确认的重估"],
+  "expected": ["前三种情况全部阻断转换", "只有独立长期重估通过且用户确认才生成转换候选", "原短期交易历史不可修改"],
+  "evidence": ["转换门单元测试", "追加式审计事件"]
+}

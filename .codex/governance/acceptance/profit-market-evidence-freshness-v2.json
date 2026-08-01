@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-market-evidence-freshness-v2",
+  "title": "过期或来源冲突的行情不能生成当前 TradePlan",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["准备新鲜、过期、双源冲突和超时四类行情夹具"],
+  "steps": ["验证 60 秒 freshness", "验证双源 1% 一致性", "触发单源 12 秒和总计 120 秒超时", "尝试复用已过期 TradePlan"],
+  "expected": ["只有新鲜且双源一致的证据可生成当前计划", "其余输出 NO_FRESH_DECISION", "历史证据可复用但当前价格、触发和有效期必须重建"],
+  "evidence": ["行情硬门单元测试", "超时和过期信号运行测试"]
+}
