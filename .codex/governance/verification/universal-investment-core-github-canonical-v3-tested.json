@@ -1,9 +1,9 @@
 {
   "schema_version": "VerificationResultV1",
-  "id": "verify-universal-investment-core-github-canonical-v3-tested-d19bbe94",
+  "id": "verify-universal-investment-core-github-canonical-v3-tested-0cdbb37a",
   "goal_id": "universal-investment-core-github-canonical-v3",
   "level": "TESTED",
-  "source_digest": "9cd5f1bf508d00f62ee3880735a0e2b80034fcd2068cbb9da7d7d6e7bd3eb044",
+  "source_digest": "3a3270b9b851d4a8ef3bbe64f5ced260a6a472c085bcd5d6e6ede171eaf46e26",
   "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "result": "PASS",
@@ -11,23 +11,23 @@
     {
       "command": "python3 scripts/verify-monorepo-policy.py",
       "exit_code": 0,
-      "duration_ms": 277,
-      "stdout_sha256": "806102850333cb054a9a24981b87b1fbf90a133e27a5fe22696064f518989155",
+      "duration_ms": 261,
+      "stdout_sha256": "d692fd6f93490200443c699b1aae952ac321cf0bb031859ae8f2c704adfae106",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
       "exit_code": 0,
-      "duration_ms": 309,
+      "duration_ms": 284,
       "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
-      "stderr_sha256": "aa0445bcb34edce9de45718d59ad262581c01287051db890997104e53e9f4346"
+      "stderr_sha256": "70aaaf31e2105884af1a4b35dbe1be41f12ebed9bdf747f715763026c2a15b17"
     },
     {
       "command": "python3 closed-loop-delivery-governor/scripts/test_governance.py",
       "exit_code": 0,
-      "duration_ms": 7543,
+      "duration_ms": 7407,
       "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stderr_sha256": "657185bd78c587b3fb5b66f6bf5d941b37fd6f20045032ec239a6397d3f5042c"
+      "stderr_sha256": "211b4c74def08c9e43933e846111b635b1d9bb4bf1151623b9973ededaf97192"
     },
     {
       "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
@@ -52,5 +52,5 @@
     }
   ],
   "findings": [],
-  "created_at": "2026-08-01T17:36:20.429917Z"
+  "created_at": "2026-08-01T17:41:57.927782Z"
 }

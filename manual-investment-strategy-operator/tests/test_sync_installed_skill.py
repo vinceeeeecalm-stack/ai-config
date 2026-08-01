@@ -57,6 +57,26 @@ class SyncInstalledSkillTest(unittest.TestCase):
                 / MODULE.MANUAL_SKILL
                 / "performance"
                 / "us_tactical_performance.json",
+                root
+                / MODULE.MANUAL_SKILL
+                / "config"
+                / "current_position_overrides.json",
+                root
+                / MODULE.MANUAL_SKILL
+                / "config"
+                / "user_strategy_memory.json",
+                root
+                / MODULE.UNIFIED_SKILL
+                / "config"
+                / "crypto_portfolio.json",
+                root
+                / MODULE.UNIFIED_SKILL
+                / "config"
+                / "portfolio_accounts.json",
+                root
+                / MODULE.UNIFIED_SKILL
+                / "config"
+                / "portfolio_ledger.json",
             )
             for runtime_file in runtime_files:
                 runtime_file.parent.mkdir(parents=True, exist_ok=True)
@@ -65,6 +85,11 @@ class SyncInstalledSkillTest(unittest.TestCase):
             for runtime_part in ("reports", "recommendations", "performance"):
                 self.assertFalse(
                     any(f"/{runtime_part}/" in path for path in manifest),
+                    manifest,
+                )
+            for private_filename in MODULE.PRIVATE_RUNTIME_FILENAMES:
+                self.assertFalse(
+                    any(Path(path).name == private_filename for path in manifest),
                     manifest,
                 )
 

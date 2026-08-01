@@ -72,6 +72,13 @@ RUNTIME_PARTS = {
 }
 
 IGNORED_FILENAMES = {".DS_Store"}
+PRIVATE_RUNTIME_FILENAMES = {
+    "crypto_portfolio.json",
+    "current_position_overrides.json",
+    "portfolio_accounts.json",
+    "portfolio_ledger.json",
+    "user_strategy_memory.json",
+}
 
 
 def utc_now() -> str:
@@ -92,7 +99,7 @@ def manifest_digest(files: dict[str, str]) -> str:
 
 
 def is_runtime_or_ignored(path: Path) -> bool:
-    return path.name in IGNORED_FILENAMES or any(
+    return path.name in IGNORED_FILENAMES | PRIVATE_RUNTIME_FILENAMES or any(
         part in RUNTIME_PARTS for part in path.parts
     )
 
