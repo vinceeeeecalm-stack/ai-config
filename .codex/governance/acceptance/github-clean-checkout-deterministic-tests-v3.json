@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "github-clean-checkout-deterministic-tests-v3",
+  "title": "GitHub main tests do not depend on excluded private portfolio files",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "Runtime account and portfolio files are correctly excluded from Git"
+  ],
+  "steps": [
+    "Create a detached clean worktree from verified origin/main",
+    "Run the full Manual Skill test suite without copying private files into the worktree"
+  ],
+  "expected": [
+    "Tests use deterministic redacted fixtures for portfolio-state integration",
+    "The full suite passes in the clean checkout",
+    "No private account or holding file is added to Git"
+  ],
+  "evidence": [
+    "clean-checkout unittest output",
+    "tracked-file privacy scan"
+  ]
+}

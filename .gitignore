@@ -8,6 +8,7 @@
 !scripts/
 scripts/*
 !scripts/verify-monorepo-policy.py
+!scripts/scan-public-repo.py
 !.codex/
 .codex/*
 !.codex/governance/
