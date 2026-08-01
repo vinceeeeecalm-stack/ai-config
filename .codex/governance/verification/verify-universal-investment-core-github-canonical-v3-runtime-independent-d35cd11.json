@@ -1,0 +1,92 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-universal-investment-core-github-canonical-v3-runtime-independent-d35cd11",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "3a3270b9b851d4a8ef3bbe64f5ced260a6a472c085bcd5d6e6ede171eaf46e26",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "clean-main-identity",
+      "result": "PASS",
+      "evidence": {
+        "head": "d35cd11de323092075ce4d53cc93d69171507621",
+        "origin_main": "d35cd11de323092075ce4d53cc93d69171507621",
+        "worktree_clean": true
+      }
+    },
+    {
+      "id": "public-repo-secret-privacy-zero-v3",
+      "result": "PASS",
+      "evidence": {
+        "trackable_file_count": 602,
+        "history_blob_count": 832,
+        "secret_finding_count": 0,
+        "privacy_finding_count": 0
+      }
+    },
+    {
+      "id": "deterministic-tests",
+      "result": "PASS",
+      "evidence": {
+        "manual_tests": 191,
+        "governor_tests": 14,
+        "failures": 0,
+        "errors": 0
+      }
+    },
+    {
+      "id": "universal-investment-shadow-suite",
+      "result": "PASS",
+      "evidence": {
+        "crypto_enter": "ENTER_NOW",
+        "crypto_no_trade": "NO_TRADE",
+        "equity_wait": "WAIT_FOR_ENTRY",
+        "long_data_degraded": "DATA_DEGRADED",
+        "stale_action": "NO_TRADE",
+        "recovered_action": "ENTER_NOW"
+      }
+    },
+    {
+      "id": "formal-action-paper-isolation-v3",
+      "result": "PASS",
+      "evidence": {
+        "formal_actions": [
+          "ENTER_NOW",
+          "WAIT_FOR_ENTRY",
+          "NO_TRADE"
+        ],
+        "paper_action_exposed": false,
+        "paper_can_promote_live_profit": false,
+        "live_orders_enabled": false
+      }
+    },
+    {
+      "id": "investment-outcome-four-axis-v3",
+      "result": "PASS",
+      "evidence": {
+        "delivery_status": "RUNTIME_VERIFIED",
+        "account_execution": "NO_DEPLOY_CASH",
+        "live_profit_status": "UNMEASURED",
+        "long_path_status": "DATA_DEGRADED",
+        "business_outcome_status": "EVIDENCE_PENDING"
+      }
+    },
+    {
+      "id": "global-skill-authority-mirror-v3",
+      "result": "PASS",
+      "evidence": {
+        "workspace_manifest_file_count": 267,
+        "installed_manifest_file_count": 267,
+        "manifest_sha256": "bde785903067bdc972a8425a1dbece8cd5bd428a02c77ac65251f8013a3705fe",
+        "missing_installed": [],
+        "extra_installed": [],
+        "hash_mismatches": [],
+        "private_manifest_entries": []
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T17:51:49Z"
+}
