@@ -1,9 +1,9 @@
 {
   "schema_version": "VerificationResultV1",
-  "id": "verify-universal-investment-core-github-canonical-v3-tested-12002bc5",
+  "id": "verify-universal-investment-core-github-canonical-v3-tested-d19bbe94",
   "goal_id": "universal-investment-core-github-canonical-v3",
   "level": "TESTED",
-  "source_digest": "5b00e1cbd385b9596cafab9b38cdabad99c2d6afb2783ee66fb1e44370559703",
+  "source_digest": "9cd5f1bf508d00f62ee3880735a0e2b80034fcd2068cbb9da7d7d6e7bd3eb044",
   "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "result": "PASS",
@@ -11,35 +11,35 @@
     {
       "command": "python3 scripts/verify-monorepo-policy.py",
       "exit_code": 0,
-      "duration_ms": 269,
-      "stdout_sha256": "958b761c7af37387b23783382a7cac7ade23dc274575357d54fcb746eea673e0",
+      "duration_ms": 277,
+      "stdout_sha256": "806102850333cb054a9a24981b87b1fbf90a133e27a5fe22696064f518989155",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
       "exit_code": 0,
-      "duration_ms": 316,
+      "duration_ms": 309,
       "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
-      "stderr_sha256": "70aaaf31e2105884af1a4b35dbe1be41f12ebed9bdf747f715763026c2a15b17"
+      "stderr_sha256": "aa0445bcb34edce9de45718d59ad262581c01287051db890997104e53e9f4346"
     },
     {
       "command": "python3 closed-loop-delivery-governor/scripts/test_governance.py",
       "exit_code": 0,
-      "duration_ms": 7475,
+      "duration_ms": 7543,
       "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stderr_sha256": "48ece7a365790a03f83fc9bd0726ab4a5baea36752c70389759ff060a7b09344"
+      "stderr_sha256": "657185bd78c587b3fb5b66f6bf5d941b37fd6f20045032ec239a6397d3f5042c"
     },
     {
       "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
       "exit_code": 0,
-      "duration_ms": 44,
+      "duration_ms": 43,
       "stdout_sha256": "128a45224326a3e5e3a5802d0e34e672392e2f5d18a6a882b5cd83d03932d773",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --self-test",
       "exit_code": 0,
-      "duration_ms": 42,
+      "duration_ms": 40,
       "stdout_sha256": "0b8ed624e57a2049022348ec330713a485bc8fca4d3560a2d485160d1c40a7e6",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
@@ -52,5 +52,5 @@
     }
   ],
   "findings": [],
-  "created_at": "2026-08-01T17:31:57.352578Z"
+  "created_at": "2026-08-01T17:36:20.429917Z"
 }

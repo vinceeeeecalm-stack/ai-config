@@ -1,0 +1,19 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "github-main-skill-runtime-data-isolation-v3",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "title": "Global Skills install from GitHub main without private runtime data",
+  "user_action": "Run the managed Skill sync with smoke from a clean GitHub main checkout.",
+  "expected_results": {
+    "source_manifest": "Only Skill source, configuration templates, deterministic fixtures, tests, references, and governance code are required.",
+    "runtime_data": "Recommendation history and tactical performance remain optional local runtime inputs and are neither required nor copied from public Git.",
+    "installation": "All managed Skill source hashes match the clean GitHub main checkout after installation.",
+    "smoke": "Positive smoke passes and the negative decision-contract smoke fails closed."
+  },
+  "required_level": "RUNTIME_VERIFIED",
+  "evidence": [
+    "clean-main sync output",
+    "managed manifest hash",
+    "installed smoke output"
+  ]
+}
