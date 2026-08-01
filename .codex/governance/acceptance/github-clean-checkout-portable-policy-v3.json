@@ -1,0 +1,19 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "github-clean-checkout-portable-policy-v3",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "title": "GitHub main policy validation is portable across clean checkouts",
+  "user_action": "Create a detached clean worktree from origin/main and run the repository policy verifier.",
+  "expected_results": {
+    "repository": "The verifier accepts a clean main checkout at an arbitrary filesystem path.",
+    "history": "The original mobile history remains an ancestor of the checked-out commit.",
+    "privacy": "Forbidden runtime, account, ledger, and secret-shaped files remain absent from tracked source.",
+    "recovery": "The public checkout validates the recovery manifest without requiring private external backup artifacts to be copied into Git."
+  },
+  "required_level": "RUNTIME_VERIFIED",
+  "evidence": [
+    "clean checkout policy output",
+    "Git ancestry output",
+    "public safety scan output"
+  ]
+}

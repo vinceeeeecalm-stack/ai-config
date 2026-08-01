@@ -12,8 +12,7 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_ROOT = Path("/Users/vincentpan/Documents/investing")
-EXPECTED_BRANCH = "codex/investing-monorepo-bootstrap"
+LOCAL_AUTHORITY_ROOT = Path("/Users/vincentpan/Documents/investing")
 MOBILE_ORIGINAL_HEAD = "1d169c15b8e3c23b56f0ec8336195863f1dbcb33"
 BACKUP_EVIDENCE = ROOT / ".codex" / "governance" / "migration-backup.json"
 
@@ -86,8 +85,54 @@ def tracked_paths() -> list[str]:
     return sorted(item.decode(errors="surrogateescape") for item in raw.split(b"\0") if item)
 
 
-def verify_backup() -> dict:
+def _require_sha256(value: object, field_name: str) -> str:
+    rendered = str(value or "")
+    require(
+        bool(re.fullmatch(r"[0-9a-f]{64}", rendered)),
+        f"backup_manifest_invalid_sha256:{field_name}",
+    )
+    return rendered
+
+
+def verify_backup_manifest(evidence: dict) -> dict:
+    require(
+        evidence.get("schema_version") == "MigrationBackupEvidenceV1",
+        "backup_manifest_schema_invalid",
+    )
+    require(evidence.get("original_head") == MOBILE_ORIGINAL_HEAD, "backup_original_head_mismatch")
+    bundle_digest = _require_sha256(evidence.get("bundle_sha256"), "bundle_sha256")
+    inventory_digest = _require_sha256(
+        evidence.get("excluded_file_inventory_sha256"),
+        "excluded_file_inventory_sha256",
+    )
+    _require_sha256(
+        evidence.get("workspace_snapshot_manifest_sha256"),
+        "workspace_snapshot_manifest_sha256",
+    )
+    require(evidence.get("bundle_verified_complete") is True, "backup_bundle_not_verified")
+    require(int(evidence.get("excluded_file_count") or 0) > 0, "excluded_inventory_empty")
+    require(
+        int(evidence.get("required_account_state_files_covered") or 0)
+        == len(EXCLUDED_STATE_FILES),
+        "backup_required_state_coverage_mismatch",
+    )
+    return {
+        "verification_mode": "PUBLIC_MANIFEST_ONLY",
+        "bundle_sha256": bundle_digest,
+        "excluded_inventory_sha256": inventory_digest,
+        "excluded_file_count": int(evidence["excluded_file_count"]),
+        "required_state_files_covered": int(
+            evidence["required_account_state_files_covered"]
+        ),
+        "external_artifacts_in_git": False,
+    }
+
+
+def verify_backup(*, require_external_artifacts: bool) -> dict:
     evidence = json.loads(BACKUP_EVIDENCE.read_text(encoding="utf-8"))
+    manifest = verify_backup_manifest(evidence)
+    if not require_external_artifacts:
+        return manifest
     bundle = Path(evidence["bundle_path"])
     workspace = Path(evidence["workspace_snapshot_path"])
     nested_git = Path(evidence["nested_git_backup_path"])
@@ -111,19 +156,20 @@ def verify_backup() -> dict:
         require(full_path.is_file(), f"excluded_state_file_missing:{relative}")
         require(str(full_path) in inventory_text, f"excluded_state_not_in_inventory:{relative}")
     return {
+        "verification_mode": "LOCAL_EXTERNAL_ARTIFACTS_VERIFIED",
         "bundle_sha256": digest,
         "workspace_snapshot_present": True,
         "excluded_inventory_sha256": inventory_digest,
         "excluded_file_count": len(inventory_lines),
         "required_state_files_covered": len(EXCLUDED_STATE_FILES),
+        "external_artifacts_in_git": False,
     }
 
 
 def main() -> int:
     actual_root = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip()).resolve()
-    branch = git("branch", "--show-current").stdout.decode().strip()
-    require(actual_root == EXPECTED_ROOT, "unexpected_repository_root")
-    require(branch == EXPECTED_BRANCH, "unexpected_repository_branch")
+    branch = git("branch", "--show-current").stdout.decode().strip() or "DETACHED"
+    require(actual_root == ROOT.resolve(), "script_root_not_repository_root")
     require(not (ROOT / "mobile-investment-console" / ".git").exists(), "nested_mobile_git_present")
     ancestor = git("merge-base", "--is-ancestor", MOBILE_ORIGINAL_HEAD, "HEAD", check=False)
     require(ancestor.returncode == 0, "mobile_history_not_preserved")
@@ -155,7 +201,7 @@ def main() -> int:
 
     require(not violations, f"forbidden_tracked_paths:{','.join(violations[:10])}")
     require(not secret_hits, f"secret_shaped_content:{','.join(secret_hits[:10])}")
-    backup = verify_backup()
+    backup = verify_backup(require_external_artifacts=actual_root == LOCAL_AUTHORITY_ROOT)
     print(json.dumps({
         "schema_version": "InvestingMonorepoPolicyCheckV1",
         "result": "PASS",

@@ -1,13 +1,13 @@
 {
   "schema_version": "VerificationResultV1",
-  "id": "verify-universal-investment-core-github-canonical-v3-coded-e3397e26",
+  "id": "verify-universal-investment-core-github-canonical-v3-coded-8319d3f7",
   "goal_id": "universal-investment-core-github-canonical-v3",
   "level": "CODED",
-  "source_digest": "81619f37aa0bd3eb81354d907439f0fd4660a053a6598ee18ff89eedfa95ed04",
+  "source_digest": "5b00e1cbd385b9596cafab9b38cdabad99c2d6afb2783ee66fb1e44370559703",
   "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
   "result": "PASS",
   "checks": [],
   "findings": [],
-  "created_at": "2026-08-01T17:21:43.980661Z"
+  "created_at": "2026-08-01T17:31:49.002318Z"
 }
