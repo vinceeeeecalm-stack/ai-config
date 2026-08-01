@@ -47,13 +47,26 @@ class SyncInstalledSkillTest(unittest.TestCase):
             root = Path(temp)
             for name in MODULE.SKILL_SPECS:
                 make_skill(root, name)
-            runtime = root / MODULE.ACTIVE_SKILL / "reports"
-            runtime.mkdir()
-            (runtime / "report.md").write_text("runtime", encoding="utf-8")
-            manifest = MODULE.build_full_manifest(root, require_declared=True)
-            self.assertFalse(
-                any("/reports/" in path for path in manifest), manifest
+            runtime_files = (
+                root / MODULE.ACTIVE_SKILL / "reports" / "report.md",
+                root
+                / MODULE.MANUAL_SKILL
+                / "recommendations"
+                / "recommendation_history.json",
+                root
+                / MODULE.MANUAL_SKILL
+                / "performance"
+                / "us_tactical_performance.json",
             )
+            for runtime_file in runtime_files:
+                runtime_file.parent.mkdir(parents=True, exist_ok=True)
+                runtime_file.write_text("{}\n", encoding="utf-8")
+            manifest = MODULE.build_full_manifest(root, require_declared=True)
+            for runtime_part in ("reports", "recommendations", "performance"):
+                self.assertFalse(
+                    any(f"/{runtime_part}/" in path for path in manifest),
+                    manifest,
+                )
 
     def test_exact_manifest_detects_hash_and_extra_source(self):
         with tempfile.TemporaryDirectory() as temp:

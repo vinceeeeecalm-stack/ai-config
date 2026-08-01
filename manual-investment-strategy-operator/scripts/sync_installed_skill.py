@@ -40,11 +40,7 @@ SKILL_SPECS: dict[str, dict[str, tuple[str, ...]]] = {
             "import_templates",
             "tests",
         ),
-        "files": (
-            "SKILL.md",
-            "recommendations/recommendation_history.json",
-            "performance/us_tactical_performance.json",
-        ),
+        "files": ("SKILL.md",),
     },
     ACTIVE_SKILL: {
         "directories": ("references", "scripts", "config"),
@@ -66,6 +62,8 @@ RUNTIME_PARTS = {
     "handoffs",
     "cache",
     "paper_trades",
+    "performance",
+    "recommendations",
     "subagent_outputs",
     "subagent_tasks",
     "__pycache__",
