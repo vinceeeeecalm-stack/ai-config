@@ -21,7 +21,7 @@
 | 5 年内本金 10x | 激进路径，只能通过增长主线、高凸性尾仓、美股战术 alpha 和严格复盘共同尝试 |
 | 10 年内本金 10x | 兜底路径，用长期 DCA、质押复利、资产轮动和风险控制提高概率 |
 | 每月 `$1,000` crypto DCA | 每次先看目标差距、持仓比例、宏观、链上/流动性、质押，再动态分配，不固定买 BTC |
-| 美股月度/季度 `50%+` | 只约束动态战术资金池，不包含 CRCL 等长期保护仓 |
+| 战术资金月度 ROI `100%` 进攻目标 | 优先服务盘中、日度、周度和 1–3 周机会，只约束已确认的战术资金与同通道闲置资金，不包含 CRCL 等长期保护仓，也不是收益承诺 |
 | 每次调度主动取数 | 抓市场、情绪、宏观、链上、新闻、社交、候选和现金通道，再输出行动 |
 
 这套系统不保证每次都赚钱。正确目标是每次调度都留下可复盘证据，让 60%-79% 的判断逐步校准到 80%+。
@@ -76,7 +76,7 @@ python3 manual-investment-strategy-operator/scripts/next_dispatch_readiness.py \
 1. **One Page Conclusion**：今天最大动作等级是什么。
 2. **Portfolio / Goal Gap**：当前组合离 5年/10年 10x 还差多少年化。
 3. **Crypto DCA Direction**：本月 DCA 买什么、买多少、等什么价。
-4. **US Tactical Relay**：当前战术仓是否继续持有、卖出、等待回补或接力新标的。
+4. **Tactical Ranked Choices**：当前战术仓是否继续持有、卖出、等待回补或接力；同时显示一个主推荐与最多两个合格备选。
 5. **Risk / Downgrade**：哪些数据缺失导致不能强执行。
 6. **Learning Review Calendar**：下一次什么时候能复盘，样本还差多少。
 
@@ -115,7 +115,7 @@ DCA 行动最多两档：
 | 动态战术仓 | 由当前持仓自动识别，不 hardcode SOXL |
 | 杠杆 ETF | 只做短期战术，必须有最晚退出日 |
 
-美股短线主建议必须满足：
+股票、ETF、杠杆 ETF 与 crypto 短线主建议必须满足：
 
 - 先判断 2-4 周主趋势，再给 1-5 个交易日入场/出场。
 - 每个标的最多 2 个入场区间和 2 个出场区间。
@@ -206,12 +206,13 @@ python3 manual-investment-strategy-operator/scripts/next_goal_execution_queue.py
 
 ## 10. Next Evidence Priorities
 
-当前系统下一步最有价值的证据不是再堆规则，而是补这些：
+当前系统下一步最有价值的证据不是等待未来样本成熟，而是优先回调 point-in-time 历史数据完成样本外、事件、摩擦和稳定性回归；未来结果并行用于校准和失效检测：
 
 | 优先级 | 证据 | 影响 |
 |---|---|---|
-| P0 | 到期 paper 样本复盘 | 决定短线策略是否能从 paper 走向更高动作 |
-| P0 | recommendation resolved 样本 | 校准 60%-79% 判断能否提高 |
+| P0 | 历史 point-in-time 回调与 walk-forward | 不等待未来数周即可验证短期策略的样本外胜率、EV、回撤和稳定性 |
+| P0 | 主推荐与最多两个备选的同口径回归 | 让用户看到最高优先级判断及其他高质量选择为何排名靠后 |
+| P1 | 到期 paper 与 recommendation resolved 复盘 | 并行校准历史模型并检测策略失效，不阻塞首次排名 |
 | P1 | 美股 settled cash / buying power 截图或导出 | 决定真实 sizing |
 | P1 | lcETH 成本、赎回、费用、解锁条款 | 决定 ETH/lcETH 是否拖慢目标 |
 | P1 | ADA/SOL 完整 lot 与质押奖励 | 决定真实收益和 DCA 权重 |

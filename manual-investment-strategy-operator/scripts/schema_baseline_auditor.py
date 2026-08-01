@@ -69,7 +69,7 @@ REQUIRED_BASELINE_FILES: list[dict[str, Any]] = [
         "type": "json_config",
         "required": True,
         "purpose": "Manual dispatch goals, DCA defaults, target gates, risk rules and progressive learning settings.",
-        "supports": ["five_to_ten_year_goal", "monthly_dca", "us_tactical_goal", "double_80_gate"],
+        "supports": ["five_to_ten_year_goal", "monthly_dca", "us_tactical_goal", "sample_ev_signal_risk_gate"],
         "required_keys": ["goal_10x_execution_plan", "goal_oriented_dca", "manual_dispatch_runner"],
     },
     {
@@ -102,7 +102,7 @@ OBJECTIVE_REQUIREMENTS = [
     },
     {
         "id": "us_equity_monthly_quarterly_tactical_goal",
-        "requirement": "US equity tactical sleeve must track monthly/quarterly 50%+ goal without treating protected long-term holdings as tactical cash.",
+        "requirement": "The tactical sleeve must track the monthly ROI 100% attack goal without treating protected long-term holdings or DCA principal as tactical cash.",
         "needs": ["manual_strategy_config", "portfolio_ledger", "recommendation_history"],
     },
     {

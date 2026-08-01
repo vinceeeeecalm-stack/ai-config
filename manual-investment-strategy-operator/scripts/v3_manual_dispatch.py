@@ -59,6 +59,20 @@ def validate_package(payload: dict[str, Any]) -> dict[str, Any]:
     preferred_by_mode: dict[str, int] = {}
     validated: list[Any] = []
     for index, raw in enumerate(raw_recommendations):
+        fixed_fields = {
+            "best_candidate",
+            "research_decision",
+            "current_direct_decision",
+            "account_state",
+            "execution_decision",
+            "executable_amount",
+        }
+        missing_fixed = fixed_fields - set(raw) if isinstance(raw, dict) else fixed_fields
+        if missing_fixed:
+            errors.append(
+                f"recommendations[{index}]:fixed_decision_fields_missing:"
+                f"{sorted(missing_fixed)}"
+            )
         try:
             item = recommendation_from_payload(raw)
             item.validate(evidence_snapshot=snapshot)
@@ -97,6 +111,23 @@ def validate_package(payload: dict[str, Any]) -> dict[str, Any]:
             preferred_by_mode[item.mode.value] = (
                 preferred_by_mode.get(item.mode.value, 0) + 1
             )
+            if raw.get("best_candidate") != item.symbol:
+                errors.append(
+                    f"recommendations[{index}]:best_candidate_must_match_preferred_symbol"
+                )
+        account_state = raw.get("account_state")
+        if not isinstance(account_state, dict):
+            errors.append(f"recommendations[{index}]:account_state_object_required")
+        else:
+            if account_state.get("deployable_cash") != item.deployable_cash:
+                errors.append(f"recommendations[{index}]:account_state_cash_mismatch")
+        expected_executable = (
+            item.deployable_cash
+            if item.execution_decision.value == "manual_execute_candidate"
+            else 0.0
+        )
+        if raw.get("executable_amount") != expected_executable:
+            errors.append(f"recommendations[{index}]:executable_amount_mismatch")
         validated.append(item)
 
     for mode, count in preferred_by_mode.items():
@@ -208,6 +239,7 @@ def render_decision_first(payload: dict[str, Any], audit: dict[str, Any]) -> str
                 f"- Current: `{item['current_direct_decision']}`",
                 f"- Research: `{item['research_decision']}`",
                 f"- Execution: `{item['execution_decision']}`; deployable cash `{item['deployable_cash']}` from `{item['cash_source']}`",
+                f"- Executable amount now: `{item['executable_amount']}`; account state `{item['account_state']}`",
                 f"- Decision price: `{item['decision_price']}` as of `{item['price_as_of']}`",
                 f"- Valid until: `{item['decision_valid_until']}`; review due: `{item['review_due_at']}`",
                 "",

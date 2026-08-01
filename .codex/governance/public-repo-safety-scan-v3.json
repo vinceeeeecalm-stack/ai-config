@@ -1,0 +1,16 @@
+{
+  "schema_version": "PublicRepositorySafetyEvidenceV1",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "generated_at": "2026-08-01T14:29:00Z",
+  "result": "PASS",
+  "trackable_file_count": 590,
+  "history_blob_count": 730,
+  "secret_finding_count": 0,
+  "privacy_finding_count": 0,
+  "external_report": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3/public-repo-safety-scan-final.json",
+  "external_report_sha256": "4778e3337180042af8bd36bc2db09a7991b18c063aa90a252b3656e303aa5f36",
+  "notes": [
+    "The tracked evidence contains counts and hashes only; raw secrets or private account data are never recorded.",
+    "The public repository gate requires both finding counts to remain zero at publication time."
+  ]
+}

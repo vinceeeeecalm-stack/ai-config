@@ -1,0 +1,40 @@
+{
+  "schema_version": "ProfitObjectiveBundleV1",
+  "frozen_at": "2026-08-01T00:00:00Z",
+  "objectives": [
+    {
+      "schema_version": "ProfitObjectiveV1",
+      "objective_id": "short-crypto-tactical-monthly-100-v1",
+      "sleeve": "short_tactical",
+      "principal_policy": "user_confirmed_month_opening_tactical_pool_only",
+      "target_return_pct": 100.0,
+      "horizon": "calendar_month",
+      "return_formula": "(realized_profit + ending_open_position_change - fees - slippage) / month_opening_tactical_capital",
+      "risk_boundaries": {
+        "market": "crypto_only",
+        "holding_period": "1_to_7_days",
+        "emergency_pause_drawdown_pct": -15.0,
+        "live_orders_enabled": false,
+        "human_confirmation_required": true
+      },
+      "frozen_at": "2026-08-01T00:00:00Z"
+    },
+    {
+      "schema_version": "ProfitObjectiveV1",
+      "objective_id": "long-compound-5y10x-10y10x-v1",
+      "sleeve": "long_compound",
+      "principal_policy": "user_confirmed_holdings_cash_cost_and_staking_snapshot",
+      "target_return_pct": 900.0,
+      "horizon": "5_year_primary_10_year_fallback",
+      "return_formula": "time_weighted_portfolio_return_excluding_net_new_principal",
+      "risk_boundaries": {
+        "primary_required_cagr_pct": 58.489,
+        "fallback_required_cagr_pct": 25.893,
+        "new_principal_is_not_profit": true,
+        "live_orders_enabled": false,
+        "human_confirmation_required": true
+      },
+      "frozen_at": "2026-08-01T00:00:00Z"
+    }
+  ]
+}

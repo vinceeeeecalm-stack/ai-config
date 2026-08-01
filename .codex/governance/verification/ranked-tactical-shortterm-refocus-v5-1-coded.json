@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-ranked-tactical-shortterm-refocus-v5-1-coded-25fb3c81",
+  "goal_id": "ranked-tactical-shortterm-refocus-v5-1",
+  "level": "CODED",
+  "source_digest": "a7c33bdf1e3e9a8699d52a93d2db7af9659bc3172dc4f1ab17deeb0374de09ee",
+  "implementation_owner_thread_id": "019fbbb1-664d-7f30-a605-83eb0f406c33",
+  "verifier_thread_id": "019fbbb1-664d-7f30-a605-83eb0f406c33",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-01T05:43:35.509483Z"
+}

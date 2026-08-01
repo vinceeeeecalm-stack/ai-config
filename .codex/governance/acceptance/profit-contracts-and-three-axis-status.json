@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-contracts-and-three-axis-status",
+  "title": "赚钱合同和交付、短期、长期三轴状态可确定计算",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["使用隔离临时运行目录", "不读取或写入真实账户"],
+  "steps": ["校验全部 V1 合同", "计算缺少外部输入的状态", "补齐确定性夹具后重新计算"],
+  "expected": ["所有合同拒绝缺失或非法字段", "系统状态与短期利润状态和长期路径状态分开", "缺少外部输入显示 BLOCKED 而非完成"],
+  "evidence": ["合同单元测试", "profit_loop self-test 输出"]
+}

@@ -52,6 +52,14 @@ REQUIRED_HISTORICAL = {
     "median_mae_pct",
     "pullback_before_target_pct",
     "missed_upside_if_wait_pct",
+    "net_expectancy_after_friction_pct",
+    "profit_factor",
+    "max_drawdown_pct",
+    "walk_forward_positive_windows",
+    "walk_forward_total_windows",
+    "untouched_holdout",
+    "lookahead_free",
+    "simulation_evidence_label",
     "limitations",
 }
 REQUIRED_EVENT = {
@@ -167,10 +175,41 @@ def validate_record(record: dict[str, Any]) -> dict[str, Any]:
             errors.append("historical_path_counts_do_not_sum_to_sample_size")
         validate_percentage(historical.get("target_first_pct"), "target_first_pct", errors)
         validate_percentage(historical.get("stop_first_pct"), "stop_first_pct", errors)
-        if isinstance(sample_size, int) and sample_size < 20:
-            warnings.append("historical_sample_below_20_requires_wide_probability_range")
-        if isinstance(sample_size, int) and sample_size < 20 and decision in ENTRY_DECISIONS:
-            errors.append("historical_sample_below_20_blocks_current_entry")
+        if isinstance(sample_size, int) and sample_size < 30:
+            warnings.append("historical_sample_below_30_requires_wide_probability_range")
+        if isinstance(sample_size, int) and sample_size < 10 and decision in ENTRY_DECISIONS:
+            errors.append("historical_sample_below_10_blocks_current_entry")
+        if 10 <= sample_size < 30 and decision == "enter_now":
+            errors.append("historical_sample_10_29_max_small_entry_now")
+        net_expectancy = historical.get("net_expectancy_after_friction_pct")
+        profit_factor = historical.get("profit_factor")
+        if decision in ENTRY_DECISIONS:
+            if not isinstance(net_expectancy, (int, float)) or net_expectancy <= 0:
+                errors.append("historical_entry_requires_positive_net_expectancy")
+            if not isinstance(profit_factor, (int, float)) or profit_factor <= 1:
+                errors.append("historical_entry_requires_profit_factor_above_1")
+        positive_windows = historical.get("walk_forward_positive_windows")
+        total_windows = historical.get("walk_forward_total_windows")
+        if (
+            not isinstance(positive_windows, int)
+            or not isinstance(total_windows, int)
+            or total_windows < 0
+            or positive_windows < 0
+            or positive_windows > total_windows
+            or (sample_size > 0 and total_windows == 0)
+        ):
+            errors.append("historical_walk_forward_window_counts_invalid")
+        if sample_size >= 30 and decision in ENTRY_DECISIONS and (
+            historical.get("untouched_holdout") is not True
+            or historical.get("lookahead_free") is not True
+        ):
+            errors.append("historical_calibrated_entry_requires_untouched_holdout_no_lookahead")
+        if historical.get("simulation_evidence_label") not in {
+            "historical_simulation",
+            "walk_forward_out_of_sample",
+            "unavailable",
+        }:
+            errors.append("historical_simulation_evidence_label_required")
 
     event = record.get("macro_event_conditioning")
     if not isinstance(event, dict):
@@ -182,8 +221,10 @@ def validate_record(record: dict[str, Any]) -> dict[str, Any]:
         event_sample = event.get("sample_size")
         if not isinstance(event_sample, int) or event_sample < 0:
             errors.append("invalid:macro_event_conditioning.sample_size")
-        elif event_sample < 20 and decision in ENTRY_DECISIONS:
-            errors.append("event_sample_below_20_blocks_current_entry")
+        elif event_sample < 10 and decision in ENTRY_DECISIONS:
+            errors.append("event_sample_below_10_blocks_current_entry")
+        elif event_sample < 30 and decision == "enter_now":
+            errors.append("event_sample_10_29_max_small_entry_now")
     elif event.get("event_within_10_trading_days") is not False:
         errors.append("macro_event_conditioning.event_within_10_trading_days_must_be_boolean")
 
@@ -277,6 +318,14 @@ def self_test() -> dict[str, Any]:
             "median_mae_pct": -5.1,
             "pullback_before_target_pct": 65.4,
             "missed_upside_if_wait_pct": 34.6,
+            "net_expectancy_after_friction_pct": 0.4,
+            "profit_factor": 1.08,
+            "max_drawdown_pct": -12.0,
+            "walk_forward_positive_windows": 3,
+            "walk_forward_total_windows": 5,
+            "untouched_holdout": False,
+            "lookahead_free": True,
+            "simulation_evidence_label": "walk_forward_out_of_sample",
             "limitations": ["FOMC-conditioned sample handled separately"],
         },
         "macro_event_conditioning": {
@@ -344,20 +393,18 @@ def self_test() -> dict[str, Any]:
     mid_sample["historical_cycle_conditioning"]["unresolved_count"] = 2
     mid_sample["macro_event_conditioning"] = dict(fixture["macro_event_conditioning"])
     mid_sample["macro_event_conditioning"]["sample_size"] = 15
-    mid_sample_invalid = validate_record(mid_sample)
+    mid_sample_result = validate_record(mid_sample)
     return {
         "status": (
             "ok"
             if good["status"] == "pass"
             and invalid["status"] == "fail"
-            and mid_sample_invalid["status"] == "fail"
-            and "historical_sample_below_20_blocks_current_entry" in mid_sample_invalid["errors"]
-            and "event_sample_below_20_blocks_current_entry" in mid_sample_invalid["errors"]
+            and mid_sample_result["status"] == "pass"
             else "failed"
         ),
         "valid_fixture": good,
         "invalid_fixture": invalid,
-        "mid_sample_invalid_fixture": mid_sample_invalid,
+        "mid_sample_wide_interval_fixture": mid_sample_result,
     }
 
 

@@ -84,7 +84,11 @@ Required fields:
 
 - `forecast_probability_pct` is the true target-achievement probability, not confidence language.
 - `execution_readiness_score` is operational readiness, not probability.
-- US equity tactical and crypto tactical `execute_now` requires both `forecast_probability_pct >= 80` and `execution_readiness_score >= 80`.
+- US equity and crypto tactical actions do not use a universal probability or
+  readiness-score cutoff. Use sample tier, conservative EV, reward/risk,
+  realtime signal completeness and the per-action account-risk cap.
+- `execution_readiness_score` describes only price, liquidity, cash and
+  operations readiness; it cannot stand in for candidate quality or probability.
 - US equity tactical candidates must also pass `PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md`. Target probability cannot override a higher stop-first probability, weak reward/risk, event gap or capital-risk block.
 - If historical sample, paper/walk-forward, multi-source confirmation, or catalyst verification is missing, the candidate cannot be higher than `watch`.
 - If the asset has already made an extreme move and the next target has poor risk/reward, probability must be lowered.
@@ -137,7 +141,7 @@ Short-term `paper_only` or `no_deploy` status does not automatically block a lon
 ## Output Discipline
 
 - The final action list must be derived from candidate cards only.
-- When the user requests one current recommendation, apply `SINGLE_BEST_CANDIDATE_DEFAULT_POLICY.md`: rank the full internal universe, expose exactly one primary candidate, and keep runners-up to a one-line rejection note.
+- When the user requests current choices, apply `SINGLE_BEST_CANDIDATE_DEFAULT_POLICY.md`: rank the full internal universe, expose exactly one primary candidate, and expose up to two qualified alternatives with comparable historical win-rate intervals, conservative EV, expected return, Profit Factor, drawdown, liquidity and explicit lower-rank reasons. Full deep-dive execution authority remains with the primary until the user selects an alternative for promotion.
 - Every probability must declare `probability_type` (`historical_path` / `event_estimate` / `scenario_weight`), sample size, formula or adjustment log, and confidence limitation. If a reproducible base rate is unavailable, use a range and mark it `judgment_only`; do not print a precise single-point success probability.
 - Separate the evidence chain into `FACT` (source-backed observation), `DERIVED` (shown calculation), and `JUDGMENT` (explicit inference). A judgment may affect sizing or ranking but must not be phrased as a verified fact.
 - Candidate cards must pass `scripts/recommendation_execution_calendar_gate.py`; a missing calendar, freshness, holding-period, event, funding, signal-continuity, candidate-role coverage or post-exit field caps the action at `no_deploy`.

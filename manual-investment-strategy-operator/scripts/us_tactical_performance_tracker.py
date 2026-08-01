@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Track the US equity tactical sleeve against 50% monthly/quarterly goals.
+"""Track the tactical sleeve against the monthly 100% attack goal.
 
 The tracker is intentionally narrow: it measures only the current deployable
 US tactical sleeve, such as tactical shares plus broker cash waiting for the
@@ -25,8 +25,8 @@ DEFAULT_TACTICAL_SYMBOLS = ["SOXL"]
 DEFAULT_TACTICAL_CASH_SYMBOLS = ["USD_US_EQUITY"]
 DEFAULT_PROTECTED_SYMBOLS = ["CRCL"]
 DEFAULT_CONDITIONAL_SYMBOLS = ["COIN"]
-DEFAULT_MONTHLY_TARGET_PCT = 50.0
-DEFAULT_QUARTERLY_TARGET_PCT = 50.0
+DEFAULT_MONTHLY_TARGET_PCT = 100.0
+DEFAULT_QUARTERLY_TARGET_PCT = 100.0
 
 
 def utc_now() -> str:
@@ -69,7 +69,8 @@ def empty_ledger() -> dict[str, Any]:
             "tactical_cash_symbols": DEFAULT_TACTICAL_CASH_SYMBOLS,
             "notes": [
                 "This ledger tracks only the dynamically deployable US tactical sleeve, not the whole US equity portfolio.",
-                "CRCL is protected long-term by default and is excluded from monthly/quarterly tactical return targets.",
+                "CRCL is protected long-term by default and is excluded from the tactical monthly attack target.",
+                "The quarterly field is a reporting checkpoint, not a lower alternative to the monthly 100% attack goal.",
                 "COIN is conditional supplemental liquidity and is excluded unless a report explicitly designates it as deployable.",
             ],
         },
@@ -404,8 +405,8 @@ def render_markdown(summary: dict[str, Any]) -> str:
         "### US Tactical Performance Panel",
         f"- Sleeve: `{summary.get('sleeve_id')}`",
         f"- 当前战术资金池: `${summary.get('current_tactical_value_usd')}`，基准 `${summary.get('baseline_value_usd')}`，当前收益 `{summary.get('current_return_pct')}%`",
-        f"- 月度 50% 目标值: `${summary.get('monthly_target_value_usd')}`，缺口 `${summary.get('monthly_gap_usd')}`，状态 `{summary.get('monthly_progress_status')}`",
-        f"- 季度 50% 目标值: `${summary.get('quarterly_target_value_usd')}`，缺口 `${summary.get('quarterly_gap_usd')}`，状态 `{summary.get('quarterly_progress_status')}`",
+        f"- 月度 ROI 100% 进攻目标值: `${summary.get('monthly_target_value_usd')}`，缺口 `${summary.get('monthly_gap_usd')}`，状态 `{summary.get('monthly_progress_status')}`",
+        f"- 季度报告检查点: `${summary.get('quarterly_target_value_usd')}`，缺口 `${summary.get('quarterly_gap_usd')}`，状态 `{summary.get('quarterly_progress_status')}`",
         f"- 战术现金: `${summary.get('tactical_cash_value_usd')}`，现金拖累 `{summary.get('tactical_cash_drag_pct')}%`",
         f"- 数据质量: `{summary.get('data_quality')}`；最大动作: `{summary.get('max_allowed_action')}`",
     ]

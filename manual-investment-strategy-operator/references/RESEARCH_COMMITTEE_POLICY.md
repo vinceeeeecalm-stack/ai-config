@@ -51,7 +51,12 @@
 - 旧结论只有在 prior thesis challenge 未发现反证时才可沿用。
 - 任一关键角色输出 `block/no_deploy/risk_alert`，对应资产不得新增。
 - 社交/新闻不能单独触发 `execute_now`。
-- 美股/crypto 战术 `execute_now` 仍必须满足真实目标达成概率 `>=80%` 且执行准备度 `>=80`。
+- 美股/crypto 战术动作使用样本分层、保守 EV、R/R、实时信号与风险上限，
+  不使用统一的 80% 概率或准备度分数门槛。
+
+发现阶段不运行委员会。日内小仓使用微观结构与组合风险两个角色；1–7 日
+完整仓使用四个相关角色；二元事件、新高风险资产和重大长期配置使用六个以上
+角色。缺少委员会只降低动作资格，不删除市场发现 Top3。
 - `execute_now` 不是永久硬编码关闭；它只能由 `report_readiness.execute_now_gate_version=positive-path-v1` 的最终门槛打开。该门槛必须同时看到：非降级外部 Research Committee、策略晋级证据通过、无阻断型缺失数据、至少一个候选通过双 80、live order 仍关闭并等待人工确认。
 - 最终行动清单仍遵守 Two-Step Action Ladder。
 

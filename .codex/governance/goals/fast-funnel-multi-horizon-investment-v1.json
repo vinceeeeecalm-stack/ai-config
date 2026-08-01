@@ -1,0 +1,52 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "fast-funnel-multi-horizon-investment-v1",
+  "title": "交付快速候选漏斗、盘中短线和独立长期 next-dollar 决策",
+  "business_outcome": "让用户在公开只读数据上先快速看到可解释的 Top3，再获得唯一 Top1 的当前可买或不可买结论，同时让长期新增资金在持仓、美股、ETF 与加密资产之间独立动态排名",
+  "scope": [
+    "Active 批量发现并在十五秒 P95 内输出 DiscoveryCandidateV1 Top3",
+    "只对 Top3 做候选验证并在四十五秒内确定 Top1，只对 Top1 做完整深研并在一百二十秒内生成决策卡",
+    "移除排序分数与预测概率混淆以及统一百分之八十门槛，改用样本分层、保守期望值和收益风险门",
+    "新增 intraday_scalp 请求模式、分钟级新鲜度、当日退出、杠杆 ETF 底层确认和按最大损失定仓",
+    "按请求风险分层调用研究委员会，并分离研究结论、当前直接决策、账户状态、执行决策和可执行金额",
+    "建立跨当前持仓、美股、普通 ETF 和主流加密资产的独立长期 next-dollar 动态排名",
+    "修复 gap 候选目标或止损为空时的报告崩溃并保留每个近失候选的拒绝原因",
+    "完成固定夹具、性能、实时只读、安全、安装同步与独立复验"
+  ],
+  "non_goals": [
+    "自动真实下单、撤单、转账、质押、融资、期权、期货或永续交易",
+    "承诺月度百分之五十收益、单笔三倍收益或任何确定性回报",
+    "降低流动性、止损、新鲜度、事件或人类确认门槛",
+    "把历史、估算、Demo 或未结算账户状态冒充当前正式决策输入"
+  ],
+  "constraints": [
+    "只使用公开或已授权只读数据，live_orders_enabled 始终为 false",
+    "同一候选结论引用同一个 EvidenceSnapshotV2 截止时间且后续状态生成新记录",
+    "短线、事件、盘中和长期的目标函数、概率样本与执行语义必须隔离",
+    "零现金只能把实际执行金额降为零，不能抹除研究胜者或当前理论决策",
+    "发现阶段不得调用概率、完整融资审计、委员会或真实账户执行逻辑",
+    "高风险 BUSINESS_READY 必须由不同 CODEX_THREAD_ID 只读复验通过"
+  ],
+  "acceptance_scenario_ids": [
+    "fast-funnel-probability-no-deadlock",
+    "fast-funnel-top3-risk-scope",
+    "fast-funnel-30-crypto-performance",
+    "fast-funnel-ineligible-assets-excluded",
+    "fast-funnel-source-failure-resilience",
+    "decision-zero-cash-research-preserved",
+    "decision-realtime-price-authority",
+    "intraday-scalp-same-day-exit",
+    "leveraged-etf-underlying-required",
+    "gap-report-null-safe",
+    "committee-degraded-discovery-preserved",
+    "longterm-dynamic-next-dollar-ranking",
+    "longterm-risk-off-cash-winner",
+    "safety-live-orders-disabled"
+  ],
+  "required_level": "BUSINESS_READY",
+  "risk": "high",
+  "supersedes_id": "manual-tactical-complete-recommendation-v3",
+  "frozen_at": "2026-07-31T17:33:26.813008Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "8a01efccf13d5510b8818f9e2778e560fa1fe379a83354b55f20ad71db888eff"
+}

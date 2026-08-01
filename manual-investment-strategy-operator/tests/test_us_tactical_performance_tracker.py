@@ -18,8 +18,8 @@ class UsTacticalPerformanceTrackerTest(unittest.TestCase):
             "status": "active",
             "baseline_at": "2026-01-01T00:00:00+00:00",
             "baseline_value_usd": 1000,
-            "target_monthly_return_pct": 50,
-            "target_quarterly_return_pct": 50,
+            "target_monthly_return_pct": 100,
+            "target_quarterly_return_pct": 100,
             "protected_holdings_excluded": ["CRCL"],
         }]
         snapshot = {

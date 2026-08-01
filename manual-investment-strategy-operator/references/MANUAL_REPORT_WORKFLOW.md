@@ -75,7 +75,7 @@ python3 manual-investment-strategy-operator/scripts/manual_dispatch_run.py --smo
 18. 本期 DCA 交易对推荐：目标函数、数据质量、动态权重和分批计划。
 19. Unified Candidate Deep Dive：所有 DCA、长期、短线、持有/减仓候选卡片。
 20. 美股 High-Return Focus Gate / Dynamic Alpha Discovery。
-21. US Tactical Performance Panel：当前战术资金池相对月度/季度 50%+ 目标的进度、缺口和现金拖累。
+21. Tactical Performance Panel：当前战术资金池相对月度 ROI 100% 进攻目标的进度、缺口和现金拖累；季度只作报告检查点。
 22. Tactical Rotation Relay Panel：当前战术仓与现金接力状态。
 23. 最终操作清单：短期走势、长期 DCA、现金通道、风险与下次复盘。
 24. Recommendation History Panel：本次建议ID、未复盘建议、到期结果、错误归因和 proposed changes。
@@ -257,12 +257,12 @@ Pre-Entry Downside and Capital Risk Panel 必须说明：
 US Tactical Performance Panel 必须说明：
 
 - `sleeve_id`、基准时间、基准金额、当前战术资金池金额、当前收益率。
-- 月度 `50%+` 目标值、当前缺口、进度状态和若要追上目标所需的剩余收益。
-- 季度 `50%+` 目标值、当前缺口、进度状态和复盘窗口。
+- 月度 ROI `100%` 进攻目标值、当前缺口、进度状态和若要追上目标所需的剩余收益。
+- 季度报告检查点、当前缺口、进度状态和复盘窗口；它不是更低的替代业务目标。
 - 当前战术资金中有多少是持仓、有多少是现金；现金等待是否已经成为目标拖累。
 - CRCL 默认排除，COIN 默认不纳入常规战术池，除非本次报告明确把它动态识别为可部署补充流动性。
 - 若战术现金来自用户口述或截图而非券商导出，标记 `degraded_user_stated_cash`，真实交易建议只能是 `conditional_action` 或更低。
-- 若缺少 active sleeve baseline，必须提示先初始化或人工确认基准，不得用 50% 目标制造新的强买入建议。
+- 若缺少 active sleeve baseline，必须提示先初始化或人工确认基准，不得用月度翻倍目标制造新的强买入建议。
 
 Tactical Rotation Relay Panel 必须说明：
 

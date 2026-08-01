@@ -1,0 +1,29 @@
+{
+  "schema_version": "MigrationBackupV1",
+  "id": "migration-backup-universal-v3-20260801",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "created_at": "2026-08-01T14:10:00Z",
+  "backup_root": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3",
+  "workspace_full_clone": {
+    "path": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3/workspace-full-clone",
+    "logical_size": "6.2G",
+    "file_count": 15040,
+    "sha256_manifest": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3/workspace-full-sha256.txt",
+    "manifest_sha256": "8f642af8a5bf58a38027fd74f03762a2189bd252dc834484c5f72cb3aa40b3bf"
+  },
+  "git_bundle": {
+    "path": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3/repository-before-v3.bundle",
+    "sha256": "42f175bd238a3407471ebb04dd423ca20a5f3c8d443cbfc89d202a29fd540f50",
+    "verified_complete": true
+  },
+  "worktree_source_snapshot": {
+    "path": "/Users/vincentpan/Documents/investing-backups/20260801-universal-v3/worktree-source-before-v3.tar.gz",
+    "sha256": "40a3fbdc53af4fad492cbec90df103250223992563a677ba7adc3c4d5ba2b14b",
+    "file_count": 582
+  },
+  "original_branch": "codex/investing-monorepo-bootstrap",
+  "original_head": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+  "history_rewrite_allowed": false,
+  "contains_private_runtime_data": true,
+  "public_repository_upload_forbidden": true
+}

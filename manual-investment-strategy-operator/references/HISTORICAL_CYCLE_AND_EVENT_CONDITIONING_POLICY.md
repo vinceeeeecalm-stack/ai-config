@@ -9,6 +9,13 @@ the current state on comparable historical paths and relevant macro, earnings,
 or regulatory events before the report says whether the asset is investable
 now.
 
+Historical validation is the first recommendation proof, not a task that waits
+for future days to elapse. Reconstruct point-in-time features and run rolling
+out-of-sample, untouched-holdout, friction-stress and parameter-perturbation
+checks immediately. Forward paper remains a separate, parallel invalidation
+and calibration stream; it must not be merged with historical observations or
+used to delay the first ranked research conclusion.
+
 The user-facing primary decision must be one of:
 
 - `enter_now`
@@ -63,6 +70,11 @@ For each reproducible sample, calculate:
 - frequency of a material pullback before target;
 - frequency that waiting missed the upside;
 - severe gap or liquidation path when relevant.
+- net expectancy after friction, Profit Factor and the fraction of profitable
+  walk-forward windows;
+- sensitivity to small changes in feature thresholds, entry delay, stop and
+  target;
+- whether one period or one winner dominates total profit.
 
 Do not choose only successful analogs, only one market cycle, or only dates that
 look similar after seeing the result. Document data start/end, feature
@@ -71,11 +83,12 @@ definitions, filters, target, stop and horizon.
 Sample rules:
 
 - `n < 10`: block `enter_now` and `small_entry_now`; output judgment-only range.
-- `10 <= n < 20`: use a probability range at least 15 percentage points wide;
-  maximum action is `watch`, `paper_only` or theoretical `do_not_enter_now`.
-- `n >= 20`: a measured base rate may be published, but qualitative
-  adjustments remain separate and normally cannot exceed 10 percentage points
-  in total without a calibrated model.
+- `10 <= n < 30`: use `wide_interval`; a theoretical `small_entry_now` is
+  allowed only when conservative interval EV is positive, reward/risk is at
+  least 2, the realtime signal is complete and maximum account risk is 0.25%.
+- `n >= 30`: `calibrated` requires no lookahead and an untouched holdout. Only
+  positive conservative lower-bound EV, reward/risk at least 2, a complete
+  realtime signal and maximum account risk 0.5% can support `enter_now`.
 
 ## Macro and Discrete-Event Conditioning
 
@@ -157,6 +170,24 @@ Keep three layers separate:
 Publish the measured base rate before adjustments. Show target-first and
 stop-first separately. Do not convert ranking, research confidence, evidence
 quality, social heat or execution readiness into a price probability.
+
+## Ranked Candidate Stability
+
+When more than one candidate passes the minimum quality gate, compare at most
+three candidates on the same snapshot and historical rules. Rank 1 is the
+primary judgment; ranks 2 and 3 are optional qualified alternatives.
+
+- Use conservative EV and target-compatible expected return after friction as
+  the first ordering keys, with explicit drawdown, instability, liquidity and
+  switching penalties.
+- Report sample size and a win-rate interval, not only a point win rate.
+- The same snapshot, strategy version and config hash must reproduce the same
+  order.
+- Preserve the incumbent unless its thesis is invalidated or a challenger has
+  a material and reproducible risk-adjusted advantage.
+- An alternative with fewer than 30 no-lookahead observations, non-positive
+  conservative EV, reward/risk below 2, Profit Factor at or below 1, stale
+  liquidity or an expired decision window stays outside the user choice set.
 
 ## Current Direct Decision Gate
 

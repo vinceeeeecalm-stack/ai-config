@@ -11,6 +11,7 @@ from typing import Iterable
 
 class ResearchMode(str, Enum):
     LONGTERM_DCA = "longterm_dca"
+    INTRADAY_SCALP = "intraday_scalp"
     TACTICAL_1_7D = "tactical_1_7d"
     EVENT_TRADE_1_3W = "event_trade_1_3w"
     EXISTING_POSITION_REVIEW = "existing_position_review"
@@ -26,6 +27,15 @@ MODE_KEYWORDS: dict[ResearchMode, tuple[str, ...]] = {
         "十年",
         "质押",
         "long term",
+    ),
+    ResearchMode.INTRADAY_SCALP: (
+        "盘中",
+        "日内",
+        "当天平仓",
+        "几分钟",
+        "几小时",
+        "intraday",
+        "scalp",
     ),
     ResearchMode.TACTICAL_1_7D: (
         "短线",

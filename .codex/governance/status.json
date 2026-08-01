@@ -1,11 +1,13 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "investing-monorepo-bootstrap-v1",
-  "highest_level": "TESTED",
-  "source_digest": "bdc91a95b357c5338b5b987476051cb321be8e5841ac320e30c2c7124456d1ca",
-  "blocked": false,
-  "blockers": [],
-  "last_verification_id": "verify-investing-monorepo-bootstrap-v1-tested-c4d17225",
-  "independent_verification_id": "verify-investing-monorepo-bootstrap-v1-tested-independent-bdc91a95",
-  "updated_at": "2026-07-31T12:19:27.720012Z"
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "highest_level": "RUNTIME_VERIFIED",
+  "source_digest": "085ce78cdc0741e6c42ea533f28c85281321a89268beb18be3807dcfb7f97ffb",
+  "blocked": true,
+  "blockers": [
+    "GitHub main publication and post-merge canonical-source verification are pending this release."
+  ],
+  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime_verified-778e1ac1",
+  "independent_verification_id": null,
+  "updated_at": "2026-08-01T16:57:10.119295Z"
 }

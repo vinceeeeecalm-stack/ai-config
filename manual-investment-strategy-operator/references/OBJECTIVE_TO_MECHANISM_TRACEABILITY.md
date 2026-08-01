@@ -1,6 +1,6 @@
 # Objective To Mechanism Traceability
 
-本文件把用户的长期目标拆成可审计的机制。它的作用不是保证收益，而是确保每次手动调度都围绕同一个目标运行：crypto 用 DCA 和质押复利追 5-10 年 10x，美股用动态战术仓追月度/季度 `50%+` 机会收益，同时保留人工确认和学习闭环。
+本文件把用户的双重目标拆成可审计机制。它不保证收益；它确保每次调度优先用已确认战术资金和同通道闲置资金争取月度 ROI `100%`，并独立使用每月 DCA、质押复利与价值增长追求 5 年 10x、10 年 10x 兜底，同时保留人工确认和学习闭环。
 
 术语备注：`traceability` 是“目标能追溯到哪个面板、脚本和证据”；`mechanism` 是“系统流程”，不是收益承诺。
 
@@ -12,7 +12,7 @@
 | 每月约 `$1,000` crypto DCA | 本月买什么、买多少、等什么价，是否比持现金更接近目标？ | `DCA Pair Gate`, `Comprehensive Data Quality Gate`, `Candidate Deep Dive` | `manual_dispatch_run.py`, crypto market snapshot, `recommendation_history.json` | `conditional_action / smaller_size / watch` |
 | DCA 必须长期主义而非固定买 BTC | SOL/ADA/NIGHT/ETH/BTC/USDT 谁更符合当前目标函数？质押复利能补偿多少价格涨幅要求？5年/10年 base/bull 情景是否值得占用新增本金？ | `Long-Term Goal DCA Engine`, `Long-Term Price Scenario Panel`, `Staking Compounding Model`, `Asset Micro Thesis Matrix` | `asset_goal_contribution.py`, `build_daily_report_context.py`, staking/APY evidence, DeFi/onchain/project sources | `watch / no_deploy` |
 | 每次调度主动取市场和情绪 | 本轮是否刷新了价格、宏观、链上、新闻、社交、资金流、美股候选？ | `Fresh Market Intelligence Panel`, `Macro Regime Panel`, `Crypto Key Person Intelligence Panel` | `market_data_source_preflight.py`, `macro_regime_snapshot.py`, active handoff | `market_intelligence_degraded; no execute_now` |
-| 美股战术仓月度/季度 `50%+` 目标 | 当前动态战术仓是否继续持有、卖出、回补或接力？候选是否优于当前战术仓？ | `US Tactical Performance Panel`, `Short-Mid Trend Thesis Gate`, `Tactical Rotation Relay` | `us_tactical_performance_tracker.py`, US scanner handoff, broker cash evidence | `paper_only / conditional_action` |
+| 战术资金月度 ROI `100%` 进攻目标 | 当前动态战术仓是否继续持有、卖出、回补或接力？一个主推荐和最多两个备选如何排序？ | `Ranked Tactical Choices`, `US Tactical Performance Panel`, `Tactical Rotation Relay` | 历史样本外回归、scanner handoff、同通道现金证据 | `paper_only / conditional_action` |
 | 美股短线只在高把握时执行 | 目标价在目标时间内达到的真实概率是否 `>=80%`？执行准备度是否 `>=80`？ | `Target Achievement Gate`, `Candidate Deep Dive Gate` | recommendation records, paper validation, walk-forward evidence | `watch / paper_only` |
 | 手动 skill 是被动调度，不自动交易 | 这次是否只是用户触发的报告？有没有下单、转账或后台循环？ | `Manual Dispatch Strategy Contract`, `Current Turn Closeout Gate` | `manual_dispatch_run.py`, `next_dispatch_readiness.py`, `next_goal_execution_queue.py` | `status_report_only` |
 | 策略要从 60% 学到 80%+ | 本轮新增建议是否可复盘？已有建议和 paper 样本是否到期？错误是否归因？ | `Recommendation History Gate`, `Learning Review Calendar`, `Progressive Learning Confidence Panel` | `recommendation_history.py`, `recommendation_outcome_reviewer.py`, `learning_review_calendar.py`, `progressive_learning_iteration_audit.py` | `paper_only / conditional_action` |
@@ -29,7 +29,7 @@
 4. 输出 5年/10年 10x 目标数学和当前组合目标缺口。
 5. 输出长期价格情景：至少覆盖本轮相关的 ETH/SOL/ADA/NIGHT 或其它被推荐/回避资产，说明 `5y base`、`10y base`、`10x适配`、`DCA含义` 和降级原因。
 6. 输出 `$1,000/月` DCA 或用户指定金额的动态两档计划。
-7. 输出美股动态战术仓、月度/季度目标缺口和最多两档入场/出场。
+7. 输出动态战术仓、月度 ROI `100%` 目标缺口、一个主推荐与最多两个合格备选，以及最多两档入场/出场。
 8. 所有行动都写入 recommendation history，或者明确标记写入失败并降级。
 9. 运行 `report_integrity_audit.py` 和 `objective_coverage_audit.py`。
 10. 输出 `current_turn_closeout`：继续短任务、正式报告、深研，或本轮收口。

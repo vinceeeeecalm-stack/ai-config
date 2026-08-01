@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "cross-asset-horizon-adapters-v3",
+  "title": "Crypto、美股与短长期适配逻辑完整",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["输入明确 asset_class 和 horizon"],
+  "steps": ["分别校验 Crypto 与美股基本面字段", "分别校验 tactical_1_7d 与 longterm 计划字段"],
+  "expected": ["Crypto 覆盖采用、费用、价值捕获、供应、质押、流动性、安全、监管", "美股覆盖收入、现金流、盈利质量、资产负债、估值、护城河和催化", "短期必须有入场目标止损退出", "长期使用 DCA、thesis 失效和复核日且不套短期止损"],
+  "evidence": ["四适配器单元测试"]
+}

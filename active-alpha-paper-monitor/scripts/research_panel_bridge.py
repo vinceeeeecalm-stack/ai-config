@@ -48,13 +48,21 @@ def active_research_panel_overlay(
     external_agent_outputs_json: str | None,
     run_id: str,
     missing_reason: str,
+    committee_requirement: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    requirement = committee_requirement or {
+        "tier": "six_plus",
+        "required_role_count": 6,
+        "required_roles": [],
+    }
+    required_count = max(0, int(requirement.get("required_role_count") or 0))
     if not external_agent_outputs_json:
         return {
             "research_panel_missing": True,
             "research_panel_missing_reason": missing_reason,
             "research_committee_degraded": True,
             "max_allowed_action": "watch",
+            "committee_requirement": requirement,
             "external_agent_validation": {
                 "valid": False,
                 "errors": ["external_agent_outputs_json_missing"],
@@ -70,6 +78,7 @@ def active_research_panel_overlay(
             "research_panel_missing_reason": f"{missing_reason}; manual research validator unavailable",
             "research_committee_degraded": True,
             "max_allowed_action": "watch",
+            "committee_requirement": requirement,
             "external_agent_validation": {
                 "valid": False,
                 "errors": ["manual_research_validator_unavailable"],
@@ -81,12 +90,14 @@ def active_research_panel_overlay(
     try:
         agent_outputs = runner.load_external_agent_outputs(external_agent_outputs_json)
         validation = runner.validate_external_agent_outputs(agent_outputs)
+        validation["applied_committee_requirement"] = requirement
     except Exception as exc:  # noqa: BLE001
         return {
             "research_panel_missing": True,
             "research_panel_missing_reason": f"{missing_reason}; external agent output load failed: {exc}",
             "research_committee_degraded": True,
             "max_allowed_action": "watch",
+            "committee_requirement": requirement,
             "external_agent_validation": {
                 "valid": False,
                 "errors": [f"external_agent_output_load_failed: {exc}"],
@@ -97,11 +108,11 @@ def active_research_panel_overlay(
 
     valid_external = (
         bool(validation.get("valid"))
-        and int(validation.get("unique_known_role_count") or 0) >= 6
-        and int(validation.get("successful_known_role_count") or 0) >= 6
-        and bool(validation.get("committee_quality_gate_passed"))
+        and int(validation.get("unique_known_role_count") or 0) >= required_count
+        and int(validation.get("successful_known_role_count") or 0) >= required_count
+        and int(validation.get("evidence_verified_known_role_count") or 0) >= required_count
+        and int(validation.get("roles_with_ok_source_count") or 0) >= required_count
         and int(validation.get("degraded_role_count") or 0) < int(validation.get("successful_known_role_count") or 0)
-        and not validation.get("missing_required_external_roles")
     )
     if not valid_external:
         failure_reason = (
@@ -110,13 +121,14 @@ def active_research_panel_overlay(
         return {
             "research_panel_missing": True,
             "research_panel_missing_reason": (
-                f"{failure_reason}; external agent output invalid, fewer than 6 roles, or committee quality gate failed: "
+                f"{failure_reason}; external agent output invalid, fewer than {required_count} tier-required roles, or tier quality gate failed: "
                 f"{validation.get('errors') or validation}"
             ),
             "research_committee_degraded": True,
             "max_allowed_action": "watch",
             "research_method": "external_subagent_outputs_quality_gate_failed",
             "external_agent_validation": validation,
+            "committee_requirement": requirement,
         }
 
     active_agent_outputs: list[dict[str, Any]] = []
@@ -173,6 +185,7 @@ def active_research_panel_overlay(
         "missing_external_roles": list(validation.get("missing_required_external_roles") or []),
         "required_external_roles": list(validation.get("required_external_roles") or []),
         "external_agent_validation": validation,
+        "committee_requirement": requirement,
     }
     return {
         "research_panel": panel,
@@ -180,4 +193,5 @@ def active_research_panel_overlay(
         "research_panel_missing_reason": None,
         "research_committee_degraded": False,
         "max_allowed_action": max_action,
+        "committee_requirement": requirement,
     }

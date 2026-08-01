@@ -988,7 +988,7 @@ def progressive_learning_summary(rec: dict[str, Any]) -> dict[str, Any]:
         stage = "validated_ramp"
         next_stage = "maintain_multi_regime_validation"
         needed = 0
-        max_learning_action = "conditional_action / execute_now_candidate_only_if_double80_and_all_gates_pass"
+        max_learning_action = "conditional_action / entry_candidate_only_if_sample_ev_signal_risk_gates_pass"
 
     def bucket_count(name: str) -> int:
         item = calibration.get(name) or {}
@@ -1012,7 +1012,7 @@ def progressive_learning_summary(rec: dict[str, Any]) -> dict[str, Any]:
         "strong_80_plus_resolved": bucket_resolved("80_plus"),
         "missing_probability_count": bucket_count("missing_probability"),
         "max_learning_action": max_learning_action,
-        "execute_now_note": "80% is an execute_now candidate threshold, not the starting threshold for learning samples.",
+        "execute_now_note": "Action is governed by sample tier, conservative EV, reward/risk, realtime signal completeness, and account-risk limits; no universal probability threshold is used.",
     }
 
 
@@ -1207,6 +1207,14 @@ def execution_calendar_defaults(context: dict[str, Any], record: dict[str, Any])
             "median_mae_pct": "missing",
             "pullback_before_target_pct": "missing",
             "missed_upside_if_wait_pct": "missing",
+            "net_expectancy_after_friction_pct": 0,
+            "profit_factor": 0,
+            "max_drawdown_pct": "missing",
+            "walk_forward_positive_windows": 0,
+            "walk_forward_total_windows": 0,
+            "untouched_holdout": False,
+            "lookahead_free": False,
+            "simulation_evidence_label": "unavailable",
             "limitations": ["Candidate-specific historical conditioning was not supplied; do_not_enter_now is mandatory."],
         },
         "macro_event_conditioning": {
@@ -1519,13 +1527,32 @@ def build_recommendation_records(context: dict[str, Any], run_id: str) -> list[d
             "reunderwrite_before_buy_or_trim",
             "1-10 trading days",
             tactical_data_quality,
-            "double_80_not_met_human_confirmation_required",
+            "sample_tier_ev_signal_risk_gate_not_certified",
             "research_only",
             "watch_due_to_missing_pre_entry_downside_certification",
-            forecast_probability_pct=62,
-            execution_readiness_score=78,
-            target_before_stop_probability_pct=55,
-            stop_before_target_probability_pct=45,
+            # Legacy scalar fields remain for history-schema compatibility only.
+            # The nested event declares that this is a neutral, judgment-only
+            # placeholder and therefore cannot authorize an entry.
+            forecast_probability_pct=50,
+            execution_readiness_score=0,
+            probability_event={
+                "event_id": f"{run_id}-{tactical_symbol}-target-before-stop",
+                "event_definition": "target zone is reached before the stop within the stated tactical window",
+                "probability_pct": 50,
+                "sample_size": 0,
+                "base_probability_pct": 50,
+                "adjustments": [],
+                "limitations": "judgment-only neutral placeholder; no untouched holdout was available",
+                "calibration_status": "judgment_only",
+                "untouched_holdout": False,
+                "lookahead_free": False,
+            },
+            current_direct_decision="do_not_enter_now",
+            realtime_signal_complete=False,
+            max_account_risk_pct=0,
+            execution_readiness_complete=False,
+            target_before_stop_probability_pct=50,
+            stop_before_target_probability_pct=50,
             expected_mae_pct_5d_10d_20d={"5d": -8, "10d": -12, "20d": -18},
             stress_gap_pct=-20,
             reward_risk_ratio=2.0,
@@ -1546,7 +1573,7 @@ def build_recommendation_records(context: dict[str, Any], run_id: str) -> list[d
             full_exit_or_invalidation=f"{tactical_ladder['full_exit']}; break below {tactical_ladder['invalid']} invalidates",
             latest_exit_or_review_date=date_after(generated_at, 14),
             stop_or_invalid=f"break below {tactical_ladder['invalid']} or holding exceeds 10 trading days without trend confirmation",
-            forecast_invalid_if="a stronger candidate passes true probability >=80 and readiness >=80, or semiconductor trend breaks",
+            forecast_invalid_if="a stronger candidate passes the applicable sample-tier, conservative-EV, reward/risk, realtime-signal and account-risk gates, or semiconductor trend breaks",
             position_size_plan=tactical_position_plan,
             current_quantity=tactical_quantity_float,
             current_market_value_usd=tactical_value_float,
@@ -1852,7 +1879,7 @@ def refresh_strategy_iteration_backlog(context: dict[str, Any]) -> dict[str, Any
 
 
 def collect_execute_now_candidates(context: dict[str, Any]) -> list[dict[str, Any]]:
-    """Collect candidate-like evidence that could satisfy the final double-80 gate.
+    """Collect candidate-like evidence for the sample-tiered current-action gate.
 
     This does not promote anything by itself. It only extracts structured
     candidates from active handoffs and US-open scanner summaries so the final
@@ -1870,8 +1897,13 @@ def collect_execute_now_candidates(context: dict[str, Any]) -> list[dict[str, An
             "candidate_type": handoff.get("candidate_type"),
             "monitor_recommendation": handoff.get("monitor_recommendation"),
             "max_allowed_action": handoff.get("max_allowed_action"),
-            "forecast_probability_pct": handoff.get("forecast_probability_pct"),
-            "execution_readiness_score": handoff.get("execution_readiness_score"),
+            "probability_event": handoff.get("probability_event"),
+            "current_direct_decision": handoff.get("current_direct_decision"),
+            "conservative_expected_value_pct": handoff.get("conservative_expected_value_pct"),
+            "reward_risk_ratio": handoff.get("reward_risk_ratio"),
+            "realtime_signal_complete": handoff.get("realtime_signal_complete"),
+            "max_account_risk_pct": handoff.get("max_account_risk_pct"),
+            "execution_readiness_complete": handoff.get("execution_readiness_complete"),
             "data_quality_status": handoff.get("data_quality_status"),
             "research_panel_missing": handoff.get("research_panel_missing"),
             "research_committee_degraded": handoff.get("research_committee_degraded"),
@@ -1895,8 +1927,13 @@ def collect_execute_now_candidates(context: dict[str, Any]) -> list[dict[str, An
             "candidate_type": "us_open_scan",
             "monitor_recommendation": item.get("monitor_recommendation"),
             "max_allowed_action": us_summary.get("max_allowed_action"),
-            "forecast_probability_pct": item.get("forecast_probability_pct"),
-            "execution_readiness_score": item.get("execution_readiness_score"),
+            "probability_event": item.get("probability_event"),
+            "current_direct_decision": item.get("current_direct_decision"),
+            "conservative_expected_value_pct": item.get("conservative_expected_value_pct"),
+            "reward_risk_ratio": item.get("reward_risk_ratio"),
+            "realtime_signal_complete": item.get("realtime_signal_complete"),
+            "max_account_risk_pct": item.get("max_account_risk_pct"),
+            "execution_readiness_complete": item.get("execution_readiness_complete"),
             "data_quality_status": item.get("data_quality_status"),
             "research_panel_missing": us_summary.get("research_panel_missing"),
             "research_committee_degraded": us_summary.get("research_committee_degraded"),
@@ -1915,7 +1952,7 @@ def finalize_execute_now_readiness(context: dict[str, Any]) -> dict[str, Any]:
     Current evidence is expected to fail this gate. The purpose is to avoid a
     permanent hard-coded false while preserving all conservative blockers until
     research, promotion, calibration, target probability, readiness, data
-    quality, and human-review prerequisites are all present.
+    quality, conservative EV, sample tier, and human-review prerequisites are all present.
     """
 
     readiness = context.setdefault("report_readiness", {})
@@ -1969,15 +2006,39 @@ def finalize_execute_now_readiness(context: dict[str, Any]) -> dict[str, Any]:
 
     qualified_candidates: list[dict[str, Any]] = []
     for item in candidates:
-        probability = as_float(item.get("forecast_probability_pct"), 0.0) or 0.0
-        readiness_score = as_float(item.get("execution_readiness_score"), 0.0) or 0.0
+        probability_event = item.get("probability_event") or {}
+        sample_size = int(probability_event.get("sample_size") or 0)
+        calibration = str(probability_event.get("calibration_status") or "")
+        current_decision = item.get("current_direct_decision")
+        conservative_ev = as_float(item.get("conservative_expected_value_pct"))
+        reward_risk = as_float(item.get("reward_risk_ratio"))
+        account_risk = as_float(item.get("max_account_risk_pct"))
         quality = str(item.get("data_quality_status") or "").lower()
         action = item.get("max_allowed_action") or item.get("monitor_recommendation")
         candidate_failed = []
-        if probability < 80:
-            candidate_failed.append("forecast_probability_below_80")
-        if readiness_score < 80:
-            candidate_failed.append("execution_readiness_below_80")
+        if current_decision not in {"enter_now", "small_entry_now"}:
+            candidate_failed.append("current_direct_decision_not_entry")
+        if sample_size < 10:
+            candidate_failed.append("judgment_only_sample")
+        elif sample_size < 30 and calibration != "wide_interval":
+            candidate_failed.append("n_10_29_requires_wide_interval")
+        elif current_decision == "enter_now" and (
+            calibration != "calibrated"
+            or probability_event.get("untouched_holdout") is not True
+            or probability_event.get("lookahead_free") is not True
+        ):
+            candidate_failed.append("enter_now_requires_calibrated_untouched_holdout")
+        if conservative_ev is None or conservative_ev <= 0:
+            candidate_failed.append("conservative_expected_value_not_positive")
+        if reward_risk is None or reward_risk < 2:
+            candidate_failed.append("reward_risk_below_2")
+        if item.get("realtime_signal_complete") is not True:
+            candidate_failed.append("realtime_signal_incomplete")
+        if item.get("execution_readiness_complete") is not True:
+            candidate_failed.append("execution_readiness_incomplete")
+        risk_cap = 0.25 if current_decision == "small_entry_now" else 0.5
+        if account_risk is None or account_risk > risk_cap:
+            candidate_failed.append("max_account_risk_exceeded")
         if item.get("research_panel_missing") or item.get("research_committee_degraded"):
             candidate_failed.append("candidate_research_panel_degraded")
         if item.get("live_orders_enabled") is not False:
@@ -1989,8 +2050,9 @@ def finalize_execute_now_readiness(context: dict[str, Any]) -> dict[str, Any]:
         if action not in {"conditional_action", "execute_now", "small_probe_review", "paper_only"}:
             candidate_failed.append("candidate_action_not_promotable")
         annotated = dict(item)
-        annotated["forecast_probability_pct"] = probability
-        annotated["execution_readiness_score"] = readiness_score
+        annotated["sample_size"] = sample_size
+        annotated["calibration_status"] = calibration
+        annotated["conservative_expected_value_pct"] = conservative_ev
         annotated["target_achievement_gate_passed"] = not candidate_failed
         annotated["target_achievement_failed_gates"] = candidate_failed
         if not candidate_failed:
@@ -1999,7 +2061,7 @@ def finalize_execute_now_readiness(context: dict[str, Any]) -> dict[str, Any]:
     if not candidates:
         fail("no_structured_tactical_candidates")
     elif not qualified_candidates:
-        fail("no_candidate_passed_double_80_target_achievement_gate")
+        fail("no_candidate_passed_sample_tier_conservative_ev_gate")
 
     execute_now_allowed = not blockers
     readiness.update({
@@ -2029,7 +2091,7 @@ def finalize_execute_now_readiness(context: dict[str, Any]) -> dict[str, Any]:
         readiness["max_allowed_action"] = "execute_now"
         readiness["reason"] = (
             "All hard gates passed: verified research committee, promotion evidence, "
-            "double-80 target achievement, data quality, and manual-review prerequisites."
+            "sample-tiered positive conservative EV, reward/risk, current signal, data quality, and manual-review prerequisites."
         )
     else:
         current_max = readiness.get("max_allowed_action")
@@ -2270,7 +2332,7 @@ def render_objective_coverage_audit_section(audit_result: dict[str, Any]) -> str
     return "\n".join([
         "## Objective Coverage Audit",
         "",
-        "该审计对照用户原始目标：5/10 年 10x、每月 DCA、美股战术 50%+、两路现金、动态战术仓和学习闭环。它不证明收益一定达成，只证明报告是否覆盖这些目标约束。",
+        "该审计对照用户原始目标：5 年 10x、10 年 10x 兜底、每月 DCA、战术资金月度 ROI 100% 进攻目标、独立现金通道、动态战术仓和学习闭环。它不证明收益一定达成，只证明报告是否覆盖这些目标约束。",
         "",
         markdown_table(["字段", "结果"], rows),
         "",
@@ -2657,7 +2719,7 @@ def annotate_fresh_market_intelligence(
             "max_allowed_action": us_summary.get("max_allowed_action"),
         },
         "objective_strategy_mapping": {
-            "monthly_tactical_goal": "map US equity tactical data, dynamic candidates, cash drag, and double-80 gates to the monthly tactical return objective",
+            "monthly_tactical_goal": "map US equity tactical data, dynamic candidates, cash drag, and sample-tier/EV/signal/risk gates to the monthly tactical return objective",
             "five_to_ten_year_goal": "map crypto DCA, staking, thesis quality, and goal-gap evidence to the 5-10y 10x objective",
             "cash_rail_decision": "keep crypto and US equity cash rails separate; deploy only when the relevant rail is confirmed and the trigger is clear",
             "data_summary_is_not_enough": True,
@@ -3460,7 +3522,7 @@ def render_goal_execution_dashboard_section(context: dict[str, Any]) -> str:
         ["calibration_resolved_needed", f"`{gaps.get('calibration_resolved_needed')}`"],
         ["walkforward_target_pass_needed", f"`{gaps.get('walkforward_target_research_pass_needed')}`"],
         ["progressive_learning_stage", f"`{learning.get('learning_stage')}`"],
-        ["learning_floor_to_target", f"`{learning.get('learning_floor_pct')}% -> {learning.get('validated_probability_target_pct')}%`"],
+        ["sample_tier_progression", "`n<10 judgment_only; n=10-29 wide_interval; n>=30 calibrated holdout`"],
     ]
     learning_rows = [
         ["stage", f"`{learning.get('learning_stage')}`"],
@@ -3552,10 +3614,10 @@ def render_objective_traceability_section(context: dict[str, Any]) -> str:
             "质押或解锁缺失时缩小仓位或不新增",
         ],
         [
-            "美股月/季 50%+ 战术目标",
+            "战术资金月度 ROI 100% 进攻目标",
             "US Tactical Performance / Rotation Relay",
             "us_tactical_performance_tracker.py, scanner handoff",
-            "未过双80或现金不明时停在 paper/conditional",
+            "未过样本层级、保守EV、盈亏比、实时信号、风险或现金门槛时停在 paper/conditional",
         ],
         [
             "每次调度主动取数",
@@ -3650,7 +3712,7 @@ def render_strategy_library_section(context: dict[str, Any]) -> str:
         [
             "trend_rotation_relay",
             "美股短中期趋势接力",
-            "当前动态战术仓两步回补/止盈；未过双80不 execute_now",
+            "当前动态战术仓两步回补/止盈；未过样本、保守EV、盈亏比、实时信号和风险门槛不 execute_now",
         ],
         [
             "event_news_alpha",
@@ -3688,7 +3750,7 @@ def render_strategy_library_section(context: dict[str, Any]) -> str:
         ["walkforward_frames", f"`{walkforward.get('frames_loaded')}`"],
         ["walkforward_stage_counts", f"`{walkforward.get('stage_counts')}`"],
         ["walkforward_best", f"`{walkforward.get('best_symbol')}` `{walkforward.get('best_interval')}` `{walkforward.get('best_stage')}`"],
-        ["execute_now_policy", "`blocked unless double-80 + human confirmation + verified cash rail`"],
+        ["execute_now_policy", "`blocked unless sample-tier + conservative-EV + RR>=2 + realtime signal + risk cap + human confirmation + verified cash rail`"],
     ]
     sample_gap_rows = []
     for key, value in (validation_plan.get("sample_gaps") or {}).items():
@@ -4100,8 +4162,8 @@ def render_candidate_deep_dive_section(context: dict[str, Any]) -> str:
             "monthly DCA window",
             "long-term scenario",
             review,
-            "conditional, not calibrated 80%",
-            "data_quality_dependent",
+            "judgment_only until validation",
+            "research decision; execution separate",
             condition,
         ])
     for item in scanner_candidates(context)[:3]:
@@ -4116,8 +4178,8 @@ def render_candidate_deep_dive_section(context: dict[str, Any]) -> str:
             item.get("target_time_window"),
             price(item.get("target_price")),
             item.get("latest_exit_date"),
-            f"{item.get('forecast_probability_pct')}%",
-            f"{item.get('execution_readiness_score')} pts",
+            f"setup={item.get('setup_quality_score')}; sample={(item.get('probability_event') or {}).get('sample_size')}",
+            f"EV={item.get('conservative_expected_value_pct')}; RR={item.get('reward_risk_ratio')}",
             item.get("stop_loss"),
         ])
     tactical_summary = ((context.get("us_tactical_performance_panel") or {}).get("summary") or {})
@@ -4140,8 +4202,8 @@ def render_candidate_deep_dive_section(context: dict[str, Any]) -> str:
             timing,
             trim,
             timing,
-            "requires double-80 for execute_now",
-            "readiness_degraded_until_cash_and_research_verified",
+            "requires sample-tier + positive conservative EV",
+            "requires RR>=2 + realtime signal + verified cash/risk",
             full_exit,
         ])
     return "\n".join([
@@ -4160,8 +4222,8 @@ def render_candidate_deep_dive_section(context: dict[str, Any]) -> str:
                 "目标窗口",
                 "目标/减仓",
                 "最晚复盘/退出",
-                "真实概率",
-                "执行准备度",
+                "发现/概率证据",
+                "EV/盈亏比",
                 "失效/止损",
             ],
             rows or [["n/a", "watch", "missing", "missing", "`n/a`", "`n/a`", "`n/a`", "`n/a`", "`n/a`", "`n/a`", "`n/a`", "no candidates"]],
@@ -4211,7 +4273,7 @@ def render_technical_execution_window_section(context: dict[str, Any]) -> str:
     return "\n".join([
         "## 9B. Technical Execution Window",
         "",
-        "技术执行窗口只负责把已通过目标/风险筛选的想法压缩成最多两档入场/出场，不负责绕过 Research Committee 或双80门槛。",
+        "技术执行窗口只负责把已通过目标/风险筛选的想法压缩成最多两档入场/出场，不负责绕过 Research Committee、样本校准、保守EV或账户风险门槛。",
         "",
         markdown_table(
             ["标的", "现价", "24h低/入场", "24h高/目标", "24h", "成交额", "价差bps", "执行说明"],
@@ -4236,16 +4298,33 @@ def render_us_tactical_section(context: dict[str, Any]) -> str:
             short(item.get("data_quality"), 50),
         ])
     ladder_rows = build_us_tactical_ladder_rows(context, tactical_component)
+    ranked_history = scanner.get("ranked_historical_comparison") or {}
+    ranked_history_by_symbol = {
+        str(item.get("symbol") or "").upper(): item
+        for item in ranked_history.get("rows") or []
+        if isinstance(item, dict)
+    }
     candidate_rows = []
-    for item in scanner_candidates(context)[:3]:
-        gate = "watch"
-        try:
-            if float(item.get("forecast_probability_pct") or 0) >= 80 and float(item.get("execution_readiness_score") or 0) >= 80:
-                gate = "conditional_review"
-        except (TypeError, ValueError):
-            gate = "watch"
+    omitted_alternative_count = 0
+    for fallback_rank, item in enumerate(scanner_candidates(context)[:3], start=1):
+        current_decision = str(item.get("current_direct_decision") or "do_not_enter_now")
+        gate = "conditional_review" if current_decision in {"small_entry_now", "enter_now"} else "watch"
         risk = risk_path_summary(item)
+        historical = ranked_history_by_symbol.get(str(item.get("symbol") or "").upper(), {})
+        rank = historical.get("rank") or fallback_rank
+        if rank > 1 and historical.get("historical_comparison_status") != "qualified_history_summary":
+            omitted_alternative_count += 1
+            continue
+        rank_role = "最高优先级主推荐" if rank == 1 else f"第{rank}备选"
+        interval = historical.get("out_of_sample_win_rate_interval_pct")
+        history_summary = (
+            f"n={historical.get('sample_size')} / 胜率区间={interval} / "
+            f"EV={historical.get('conservative_expected_value_pct')} / "
+            f"PF={historical.get('profit_factor')} / MDD={historical.get('max_drawdown_pct')}"
+        )
+        lower_reason = "; ".join(historical.get("why_ranked_lower") or [])
         candidate_rows.append([
+            rank_role,
             item.get("symbol"),
             price(item.get("price")),
             item.get("entry_zone"),
@@ -4255,14 +4334,15 @@ def render_us_tactical_section(context: dict[str, Any]) -> str:
             risk.get("information_ratio_60"),
             pct(risk.get("max_drawdown_60_pct")),
             f"{risk.get('persistence_label')} / {risk.get('ranking_adjustment_points')}",
-            f"{item.get('forecast_probability_pct')}% / {item.get('execution_readiness_score')} pts",
+            history_summary,
+            lower_reason or "主推荐：同口径风险调整后排名第一",
             gate,
         ])
     rows = [
         ["sleeve_id", f"`{summary.get('sleeve_id')}`"],
         ["当前战术池", money(summary.get("current_tactical_value_usd"))],
         ["当前收益率", pct(summary.get("current_return_pct"))],
-        ["月度50%目标", money(summary.get("monthly_target_value_usd"))],
+        ["月度ROI 100%进攻目标", money(summary.get("monthly_target_value_usd"))],
         ["月度缺口", money(summary.get("monthly_gap_usd"))],
         ["战术现金", money(summary.get("tactical_cash_value_usd"))],
         ["现金拖累", pct(summary.get("tactical_cash_drag_pct"))],
@@ -4284,14 +4364,15 @@ def render_us_tactical_section(context: dict[str, Any]) -> str:
         "",
         markdown_table(["标的", "角色", "次优入场", "最优入场", "部分止盈/减仓", "全部退出/失效", "时间"], ladder_rows),
         "",
-        "**动态候选审查（未过双80不替换当前战术仓）**",
+        "**战术排名选择：一个最高优先级主推荐＋最多两个通过历史质量门的备选**",
         "",
         markdown_table(
-            ["候选", "现价", "入场区", "目标", "止损", "Sharpe 20/60", "IR60", "MDD60", "路径/排名调整", "概率/执行度", "动作上限"],
+            ["排名判断", "候选", "现价", "入场区", "目标", "止损", "Sharpe 20/60", "IR60", "MDD60", "路径/排名调整", "历史样本外比较", "为何靠后", "动作上限"],
             candidate_rows,
         ),
+        f"未达到历史质量门而省略的弱备选：`{omitted_alternative_count}`。系统不会为了凑足三个选择而降低门槛。",
         "",
-        "行动格式保持最多两档：次优入场、最优入场；部分止盈/全部退出。若动态候选未过真实概率80%和执行度80分，不能升级为 execute_now。",
+        "主推荐代表系统当前最高优先级判断。备选只有样本数、胜率区间、保守EV、Profit Factor、回撤、RR和流动性达到最低门槛时才展示；备选若被用户选中，必须先生成新的完整深挖卡。真实执行仍需现金与人工确认。",
     ])
 
 

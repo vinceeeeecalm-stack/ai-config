@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import math
-from dataclasses import asdict, dataclass
+import os
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -102,6 +104,7 @@ class PortfolioStateV2:
     as_of: str
     fields: Mapping[str, ResolvedPortfolioFieldV2]
     conflicts: tuple[PortfolioConflictV2, ...]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
     def resolve(
@@ -110,6 +113,7 @@ class PortfolioStateV2:
         state_id: str,
         as_of: str,
         observations: Iterable[PortfolioFieldObservationV2],
+        metadata: Mapping[str, Any] | None = None,
     ) -> "PortfolioStateV2":
         if not state_id:
             raise ValueError("state_id:required")
@@ -164,7 +168,13 @@ class PortfolioStateV2:
                         reason=reason,
                     )
                 )
-        return cls(state_id=state_id, as_of=as_of, fields=resolved, conflicts=tuple(conflicts))
+        return cls(
+            state_id=state_id,
+            as_of=as_of,
+            fields=resolved,
+            conflicts=tuple(conflicts),
+            metadata=dict(metadata or {}),
+        )
 
     def get(self, key: str, default: Any = None) -> Any:
         field = self.fields.get(key)
@@ -183,6 +193,7 @@ class PortfolioStateV2:
             "as_of": self.as_of,
             "fields": {key: asdict(value) for key, value in sorted(self.fields.items())},
             "conflicts": [asdict(item) for item in self.conflicts],
+            "metadata": dict(self.metadata),
         }
 
 
@@ -361,6 +372,120 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     return records
 
 
+_SEMANTICALLY_VOLATILE_PAYLOAD_FIELDS = {
+    "as_of",
+    "confirmed_at",
+    "created_at",
+    "evidence_id",
+    "id",
+    "observed_at",
+    "schema_version",
+    "source",
+    "source_note",
+    "updated_at",
+}
+
+
+def _normalized_confirmation_payload(value: Any) -> Any:
+    """Remove provenance/timestamps while preserving the confirmed account facts."""
+
+    if isinstance(value, Mapping):
+        return {
+            str(key): _normalized_confirmation_payload(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+            if str(key) not in _SEMANTICALLY_VOLATILE_PAYLOAD_FIELDS
+        }
+    if isinstance(value, list):
+        return [_normalized_confirmation_payload(item) for item in value]
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value
+
+
+def account_confirmation_semantic_hash(record: Mapping[str, Any]) -> str:
+    """Hash rail plus account facts so repeated acknowledgements remain one state."""
+
+    rail = str(record.get("rail") or "")
+    payload = record.get("payload")
+    if rail not in {"crypto", "us_equity"} or not isinstance(payload, Mapping):
+        raise ValueError("user_confirmation:valid_rail_and_payload_required")
+    normalized = {
+        "rail": rail,
+        "payload": _normalized_confirmation_payload(payload),
+    }
+    encoded = json.dumps(
+        normalized, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def dedupe_user_confirmed_states(
+    records: Iterable[Mapping[str, Any]],
+) -> tuple[list[Mapping[str, Any]], dict[str, int]]:
+    """Collapse semantic duplicates for resolution without deleting audit history."""
+
+    valid: list[Mapping[str, Any]] = []
+    latest_index_by_digest: dict[str, int] = {}
+    total_confirmed = 0
+    for record in records:
+        if str(record.get("status") or "") != "confirmed":
+            continue
+        try:
+            digest = account_confirmation_semantic_hash(record)
+        except ValueError:
+            continue
+        payload = record.get("payload") or {}
+        if not str(payload.get("as_of") or ""):
+            continue
+        total_confirmed += 1
+        if digest in latest_index_by_digest:
+            valid[latest_index_by_digest[digest]] = record
+        else:
+            latest_index_by_digest[digest] = len(valid)
+            valid.append(record)
+    return valid, {
+        "total_confirmed": total_confirmed,
+        "semantic_unique": len(valid),
+        "duplicate_count": total_confirmed - len(valid),
+    }
+
+
+def append_user_confirmed_state(path: Path, record: Mapping[str, Any]) -> str:
+    """Append a real account-state change; return NO_UPDATE for equivalent state."""
+
+    if str(record.get("status") or "") != "confirmed":
+        raise ValueError("user_confirmation:confirmed_status_required")
+    digest = account_confirmation_semantic_hash(record)
+    rail = str(record["rail"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    with lock_path.open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        records = _load_jsonl(path)
+        latest_same_rail = next(
+            (
+                prior
+                for prior in reversed(records)
+                if str(prior.get("status") or "") == "confirmed"
+                and str(prior.get("rail") or "") == rail
+                and isinstance(prior.get("payload"), Mapping)
+            ),
+            None,
+        )
+        if (
+            latest_same_rail is not None
+            and account_confirmation_semantic_hash(latest_same_rail) == digest
+        ):
+            return "NO_UPDATE"
+        with path.open("a", encoding="utf-8") as output:
+            output.write(
+                json.dumps(dict(record), ensure_ascii=False, sort_keys=True) + "\n"
+            )
+            output.flush()
+            os.fsync(output.fileno())
+    return "APPENDED"
+
+
 def observations_from_user_confirmed_states(
     records: Iterable[Mapping[str, Any]], *, source: str
 ) -> list[PortfolioFieldObservationV2]:
@@ -371,7 +496,8 @@ def observations_from_user_confirmed_states(
     """
 
     latest_by_rail: dict[str, Mapping[str, Any]] = {}
-    for record in records:
+    deduped, _ = dedupe_user_confirmed_states(records)
+    for record in deduped:
         if str(record.get("status") or "") != "confirmed":
             continue
         rail = str(record.get("rail") or "")
@@ -461,10 +587,13 @@ def resolve_portfolio_state_from_files(
         contributions = load_dca_contributions(dca_contributions_path)
         latest_contribution_at = latest_contribution_timestamp(contributions)
     user_confirmed_states = _load_jsonl(user_confirmed_states_path) if user_confirmed_states_path else []
+    deduped_user_states, confirmation_dedupe = dedupe_user_confirmed_states(
+        user_confirmed_states
+    )
     latest_user_state_at = max(
         (
             str((record.get("payload") or {}).get("as_of") or "")
-            for record in user_confirmed_states
+            for record in deduped_user_states
             if str(record.get("status") or "") == "confirmed"
         ),
         default=None,
@@ -501,10 +630,10 @@ def resolve_portfolio_state_from_files(
                 contributions, source=str(dca_contributions_path)
             )
         )
-    if user_confirmed_states_path is not None and user_confirmed_states:
+    if user_confirmed_states_path is not None and deduped_user_states:
         observations.extend(
             observations_from_user_confirmed_states(
-                user_confirmed_states, source=str(user_confirmed_states_path)
+                deduped_user_states, source=str(user_confirmed_states_path)
             )
         )
     if state_id is None:
@@ -533,7 +662,10 @@ def resolve_portfolio_state_from_files(
         ).encode("utf-8")
         state_id = f"portfolio-{hashlib.sha256(seed).hexdigest()[:16]}"
     return PortfolioStateV2.resolve(
-        state_id=state_id, as_of=cutoff, observations=observations
+        state_id=state_id,
+        as_of=cutoff,
+        observations=observations,
+        metadata={"account_confirmation_dedupe": confirmation_dedupe},
     )
 
 
@@ -555,6 +687,7 @@ def portfolio_state_from_payload(payload: Mapping[str, Any]) -> PortfolioStateV2
                 for key, value in fields.items()
             },
             conflicts=tuple(PortfolioConflictV2(**item) for item in conflicts),
+            metadata=dict(payload.get("metadata") or {}),
         )
     except (KeyError, TypeError) as exc:
         raise ValueError(f"portfolio_state:invalid:{exc}") from exc

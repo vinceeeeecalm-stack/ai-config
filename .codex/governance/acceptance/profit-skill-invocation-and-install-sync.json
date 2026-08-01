@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-skill-invocation-and-install-sync",
+  "title": "Manual Skill 是唯一用户入口且安装同步可验证",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["工作区三套投资 Skill 存在", "真实订单保持关闭"],
+  "steps": ["校验 Manual Skill 唤起路由", "运行三套 quick_validate", "执行安装同步 smoke", "比较工作区与安装 manifest"],
+  "expected": ["短期、长期、复盘和完整双区请求均路由到确定性入口", "Manual 内部声明 Active 与 Governor 职责", "安装 manifest 一致", "smoke 不授权真实交易"],
+  "evidence": ["Skill 结构校验", "安装同步输出", "唤起卡"]
+}

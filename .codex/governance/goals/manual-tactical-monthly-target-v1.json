@@ -1,0 +1,31 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "manual-tactical-monthly-target-v1",
+  "title": "按一至七日交易机会重新解释月度战术目标并输出唯一即时决策",
+  "business_outcome": "避免把组合月度目标错误压缩为单笔收益门槛，同时保持即时入场的证据与风险纪律",
+  "scope": [
+    "纠正月度目标与单笔目标的口径",
+    "重新扫描美股、ETF、杠杆 ETF 与加密货币的一至七日机会",
+    "输出唯一最优候选或明确无合格交易"
+  ],
+  "non_goals": [
+    "自动下单、转账、融资或出售现有持仓",
+    "保证月度收益或承诺确定性回报",
+    "修改投资策略源码或降低既有风险门槛"
+  ],
+  "constraints": [
+    "必须使用实时价格和可追溯证据",
+    "即时入场必须满足候选自身的收益风险比与历史路径要求",
+    "不得把组合月度正收益 50% 作为单笔交易正收益 50% 的硬门槛",
+    "账户现金仍以已确认权威快照为准"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-monthly-target-not-single-trade"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": null,
+  "frozen_at": "2026-07-31T12:54:43.018354Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "ec6934eb4eec17975250b5f13d7f472a7d474cdc8c4856575c97e74cd3f386cd"
+}

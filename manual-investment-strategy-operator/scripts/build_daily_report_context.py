@@ -551,6 +551,7 @@ def us_open_scanner_summary(path: str | None) -> dict[str, Any]:
             "research_panel_missing": payload.get("research_panel_missing"),
             "research_panel_missing_reason": payload.get("research_panel_missing_reason"),
             "tactical_rotation_relay": payload.get("tactical_rotation_relay"),
+            "ranked_historical_comparison": payload.get("ranked_historical_comparison"),
             "candidates": candidates,
             "errors": payload.get("errors") or [],
             "failed_core_sources": payload.get("failed_core_sources") or [],
@@ -886,7 +887,7 @@ def build_missing_data_panel(
                 "category": "us_tactical_performance",
                 "status": str(status),
                 "impact": "conditional only",
-                "reason": "US tactical 50% target tracker is unavailable; tactical suggestions must state the target gap manually.",
+                "reason": "The tactical monthly ROI 100% attack-goal tracker is unavailable; tactical suggestions must state the target gap manually.",
             })
         elif summary.get("data_quality") == "degraded_user_stated_cash":
             panel.append({
@@ -1302,7 +1303,7 @@ def main() -> int:
             "max_allowed_action": max_action_from_context(handoffs, missing_panel, research_validation),
             "execute_now_allowed": False,
             "reason": (
-                "manual review required; execute_now requires full research committee and double-80 gates"
+                "manual review required; execute_now requires the mode-appropriate committee plus sample-tier, positive-EV, RR, realtime-signal and account-risk gates"
                 if research_validation.get("status") == "verified"
                 else f"research panel {research_validation.get('status')}; execute_now blocked"
             ),

@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,8 @@ sys.path.insert(0, str(SCRIPTS))
 from v3_portfolio_state import (  # noqa: E402
     PortfolioFieldObservationV2,
     PortfolioStateV2,
+    append_user_confirmed_state,
+    dedupe_user_confirmed_states,
     current_zero_cash_baseline,
 )
 
@@ -36,6 +39,49 @@ def observation(
 
 
 class PortfolioStateV2Test(unittest.TestCase):
+    @staticmethod
+    def confirmed_state(record_id, as_of, quantity=1):
+        return {
+            "schema_version": "UserConfirmedAccountStateV1",
+            "id": record_id,
+            "rail": "us_equity",
+            "payload": {
+                "schema_version": "UserConfirmedAccountStateV1",
+                "rail": "us_equity",
+                "as_of": as_of,
+                "settled_cash_usd": 0,
+                "unsettled_cash_usd": 0,
+                "holdings": {"CRCL": quantity},
+                "cost_basis": {},
+                "holding_roles": {},
+                "source": "dialogue",
+            },
+            "status": "confirmed",
+            "confirmed_at": as_of,
+        }
+
+    def test_semantic_confirmation_dedupe_preserves_latest_without_deleting_history(self):
+        records = [
+            self.confirmed_state("first", "2026-07-29T00:00:00Z"),
+            self.confirmed_state("second", "2026-07-30T00:00:00Z"),
+        ]
+        deduped, stats = dedupe_user_confirmed_states(records)
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(deduped[0]["id"], "second")
+        self.assertEqual(stats, {"total_confirmed": 2, "semantic_unique": 1, "duplicate_count": 1})
+        self.assertEqual(len(records), 2)
+
+    def test_equivalent_append_returns_no_update_but_real_change_appends(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "confirmed.jsonl"
+            first = self.confirmed_state("first", "2026-07-29T00:00:00Z")
+            duplicate = self.confirmed_state("duplicate", "2026-07-30T00:00:00Z")
+            changed = self.confirmed_state("changed", "2026-07-31T00:00:00Z", quantity=2)
+            self.assertEqual(append_user_confirmed_state(path, first), "APPENDED")
+            self.assertEqual(append_user_confirmed_state(path, duplicate), "NO_UPDATE")
+            self.assertEqual(append_user_confirmed_state(path, changed), "APPENDED")
+            self.assertEqual(len(path.read_text(encoding="utf-8").splitlines()), 2)
+
     def test_current_override_prevents_ghost_balances(self):
         legacy = [
             observation("holdings.NIGHT.quantity", 1000, evidence_id="old-night"),

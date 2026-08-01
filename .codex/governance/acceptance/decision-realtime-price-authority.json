@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "decision-realtime-price-authority",
+  "title": "历史持仓价格不会覆盖当前实时比较",
+  "level": "TESTED",
+  "preconditions": ["账户状态含旧价格且市场快照含更新价格"],
+  "steps": ["解析 PortfolioStateV2 并进行候选比较"],
+  "expected": ["数量和成本可来自账户权威", "当前价格、涨跌与排名来自新鲜市场证据", "冲突被显式记录"],
+  "evidence": ["数据权威回归测试"]
+}

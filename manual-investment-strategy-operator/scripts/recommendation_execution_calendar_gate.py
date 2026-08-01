@@ -59,6 +59,29 @@ def baseline_snapshot_sha256(record: dict[str, Any]) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def leveraged_etf_underlying_gate(record: dict[str, Any]) -> dict[str, Any]:
+    if record.get("leveraged_etf") is not True:
+        return {
+            "status": "not_applicable",
+            "entry_allowed": True,
+            "required_current_direct_decision": None,
+            "reason_codes": [],
+        }
+    if record.get("underlying_symbol") and record.get("underlying_confirmed") is True:
+        return {
+            "status": "pass",
+            "entry_allowed": True,
+            "required_current_direct_decision": None,
+            "reason_codes": [],
+        }
+    return {
+        "status": "blocked",
+        "entry_allowed": False,
+        "required_current_direct_decision": "do_not_enter_now",
+        "reason_codes": ["underlying_confirmation_missing"],
+    }
+
+
 def validate_holding_fields(record: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     expected = record.get("expected_holding_days")
@@ -157,6 +180,34 @@ def validate_signal_continuity(record: dict[str, Any], schema: dict[str, Any]) -
     return errors
 
 
+def validate_intraday_scalp(record: dict[str, Any], schema: dict[str, Any]) -> list[str]:
+    if record.get("request_mode") != "intraday_scalp":
+        return []
+    errors: list[str] = []
+    required = schema.get("intraday_scalp_required_fields") or []
+    for field in required:
+        if not is_nonempty(record.get(field)) and record.get(field) is not False:
+            errors.append(f"intraday_scalp.{field} is required")
+    age = record.get("data_age_minutes")
+    if not isinstance(age, (int, float)) or age < 0 or age > 1:
+        errors.append("intraday_scalp quote age must be at most 60 seconds")
+    generated = parse_time(record.get("generated_at"))
+    valid_until = parse_time(record.get("decision_valid_until"))
+    latest_close = parse_time(record.get("latest_close_at"))
+    if generated and valid_until and (valid_until - generated).total_seconds() > 300:
+        errors.append("intraday_scalp decision validity must be at most 5 minutes")
+    if generated and latest_close:
+        if latest_close <= generated:
+            errors.append("intraday_scalp latest close must be after generation")
+        if latest_close.astimezone(generated.tzinfo).date() != generated.date():
+            errors.append("intraday_scalp must close the same day")
+    if record.get("overnight_allowed") is not False:
+        errors.append("intraday_scalp overnight_allowed must be false")
+    if record.get("binary_event_inside_window") is not False:
+        errors.append("intraday_scalp binary event inside the window is forbidden")
+    return errors
+
+
 def validate_record(record: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     missing = [field for field in schema["required_fields"] if not is_nonempty(record.get(field))]
     errors: list[str] = []
@@ -193,6 +244,25 @@ def validate_record(record: dict[str, Any], schema: dict[str, Any]) -> dict[str,
     direct_decision = record.get("current_direct_decision")
     if direct_decision not in schema["current_direct_decision_values"]:
         errors.append("current_direct_decision is not an allowed value")
+    underlying_gate = leveraged_etf_underlying_gate(record)
+    if underlying_gate["status"] == "blocked":
+        if direct_decision != "do_not_enter_now":
+            errors.append(
+                "leveraged ETF missing underlying confirmation requires "
+                "current_direct_decision=do_not_enter_now"
+            )
+        reason_codes = record.get("decision_reason_codes")
+        if not isinstance(reason_codes, list) or (
+            "underlying_confirmation_missing" not in reason_codes
+        ):
+            errors.append(
+                "leveraged ETF missing underlying confirmation requires "
+                "underlying_confirmation_missing reason code"
+            )
+        if record.get("execution_action") in {"execute_now", "conditional_action"}:
+            errors.append(
+                "leveraged ETF missing underlying confirmation forbids entry action"
+            )
     decision_price = record.get("decision_price")
     if not isinstance(decision_price, (int, float)) or isinstance(decision_price, bool) or decision_price <= 0:
         errors.append("decision_price must be a positive numeric frozen price")
@@ -226,6 +296,7 @@ def validate_record(record: dict[str, Any], schema: dict[str, Any]) -> dict[str,
         errors.append("degraded/stale/missing data caps execution_action below conditional_action")
     errors.extend(validate_holding_fields(record))
     errors.extend(validate_signal_continuity(record, schema))
+    errors.extend(validate_intraday_scalp(record, schema))
     valid = not missing and not errors
     return {
         "recommendation_id": record.get("recommendation_id"),

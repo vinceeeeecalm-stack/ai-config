@@ -1,0 +1,37 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "ranked-tactical-shortterm-refocus-v5-1",
+  "title": "把历史回归从排名合同落实到真实美股与 crypto 扫描器",
+  "business_outcome": "让主推荐和高质量备选的历史胜率、EV、回报和回撤直接来自当前扫描时的历史 OHLC 回归，而不是只存在于合同或等待未来 paper 数据",
+  "scope": [
+    "为快速漏斗提供确定性的非重叠历史路径比较器",
+    "美股 Top3 使用最多五年已闭合日线生成历史样本外比较",
+    "crypto Top3 使用最多五百根已闭合日线或四小时线生成历史样本外比较",
+    "用保守 EV、预期回报、胜率区间、Profit Factor、回撤和当前 setup 综合排序",
+    "把真实历史比较写入 Active handoff 和 Manual 排名报告",
+    "增加确定性、holdout、非重叠观察和安全边界测试"
+  ],
+  "non_goals": [
+    "把历史模拟冒充当前预测概率、paper 或真实收益",
+    "保证月度翻倍或任何候选未来盈利",
+    "自动下单、转账、融资或启用 private API",
+    "为了生成备选而放宽正 EV、样本、流动性或风险门"
+  ],
+  "constraints": [
+    "同根同时触发目标与止损必须采用 stop-first 保守规则",
+    "历史观察必须不重叠并保留冻结 holdout",
+    "相同数据、目标、止损、摩擦和持有周期必须得到相同结果",
+    "排名分数和历史胜率不得转换为当前预测概率",
+    "只有 rank-1 可进入当前执行候选，备选被选择后需要新的深挖和人工确认",
+    "live_orders_enabled=false、private_api_used=false"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-live-scanner-history-regression",
+    "tactical-ranked-primary-and-alternatives",
+    "tactical-history-first-stability",
+    "safety-live-orders-disabled"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "ranked-tactical-shortterm-refocus-v5"
+}

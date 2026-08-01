@@ -26,6 +26,17 @@ active-alpha-paper-monitor/*
 !active-alpha-paper-monitor/tests/
 !active-alpha-paper-monitor/tests/**
 
+# Closed-loop delivery governance source package.
+!closed-loop-delivery-governor/
+closed-loop-delivery-governor/*
+!closed-loop-delivery-governor/SKILL.md
+!closed-loop-delivery-governor/agents/
+!closed-loop-delivery-governor/agents/**
+!closed-loop-delivery-governor/references/
+!closed-loop-delivery-governor/references/**
+!closed-loop-delivery-governor/scripts/
+!closed-loop-delivery-governor/scripts/**
+
 # Manual investment operator source package.
 !manual-investment-strategy-operator/
 manual-investment-strategy-operator/*

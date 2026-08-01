@@ -1,0 +1,29 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-scanner-history-regression",
+  "title": "真实扫描器直接生成历史样本外比较并参与 Top3 排名",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "美股或 crypto Top3 候选存在已闭合历史 OHLC 数据",
+    "目标、止损、摩擦和持有周期在观察未来路径前冻结"
+  ],
+  "steps": [
+    "对美股读取最多五年日线，对 crypto 读取最多五百根日线或四小时线",
+    "在后百分之六十冻结 holdout 上按持有周期生成不重叠观察",
+    "以同根同时触发时 stop-first 的保守规则计算目标先于止损、EV、Profit Factor 和回撤",
+    "按历史保守 EV、预期回报、胜率区间、Profit Factor、回撤和当前 setup 生成 Top3 排名"
+  ],
+  "expected": [
+    "历史比较不等待未来数日或数周",
+    "每个候选输出样本数、95%胜率区间、保守EV、预期回报、Profit Factor、最大回撤和walk-forward窗口",
+    "历史观察不重叠且留有冻结 holdout",
+    "同一输入产生确定性相同结果",
+    "历史质量不通过的候选不进入用户合格备选集",
+    "历史模拟明确标记为模拟，不能被解释成当前预测概率或真实收益"
+  ],
+  "evidence": [
+    "historical_path_comparison deterministic unit test",
+    "fast candidate funnel self-test",
+    "US scanner and crypto scanner runtime checks"
+  ]
+}

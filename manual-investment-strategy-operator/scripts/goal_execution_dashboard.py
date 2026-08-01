@@ -333,7 +333,7 @@ def build_backlog(
         backlog.append({
             "priority": "P1",
             "area": "us tactical sleeve",
-            "task": "Reduce idle tactical cash drag only when a two-step relay setup passes data, trend, and double-80 gates.",
+            "task": "Reduce idle tactical cash drag only when a two-step relay setup passes data, trend, sample-tier, conservative-EV, realtime-signal and risk gates.",
             "reason": f"Tactical cash drag is {cash_drag:.2f}%, but current evidence max action remains below execute_now.",
             "max_action": us_tactical.get("max_allowed_action") or "conditional_action",
         })
@@ -357,7 +357,7 @@ def build_backlog(
 
 
 def progressive_learning_state(validation_audit: dict[str, Any], rec_ledger: dict[str, Any]) -> dict[str, Any]:
-    """Summarize the 60% -> 80% learning ramp as a first-class objective state."""
+    """Summarize evidence maturity without using a universal probability gate."""
     paper = validation_audit.get("paper_sample_metrics") or {}
     rec = validation_audit.get("recommendation_sample_metrics") or {}
     thresholds = validation_audit.get("thresholds") or {}
@@ -382,17 +382,17 @@ def progressive_learning_state(validation_audit: dict[str, Any], rec_ledger: dic
         max_learning_action = "conditional_action / proposed_changes_after_human_review"
     else:
         stage = "validated_ramp"
-        next_stage = "80pct_candidate_review"
-        max_learning_action = "execute_now_candidate_only_if_double80_and_all_gates_pass"
+        next_stage = "maintain_untouched_holdout_calibration"
+        max_learning_action = "entry_candidate_only_if_sample_ev_signal_risk_gates_pass"
 
     floor_met = paper_win_rate is not None and paper_win_rate >= 60.0
     return {
         "status": "active",
-        "purpose": "progressively improve forecast calibration from reviewable 60%+ samples toward validated 80%+ probabilities",
+        "purpose": "progressively improve forecast calibration and preserve honest uncertainty across sample tiers",
         "learning_stage": stage,
         "next_stage": next_stage,
         "learning_floor_pct": 60,
-        "validated_probability_target_pct": 80,
+        "validated_probability_target_pct": None,
         "paper_closed_count": closed_paper,
         "paper_win_rate_pct": paper_win_rate,
         "paper_learning_floor_met": floor_met,
@@ -403,8 +403,9 @@ def progressive_learning_state(validation_audit: dict[str, Any], rec_ledger: dic
         "calibration_resolved_needed": sample_gaps.get("calibration_resolved_needed"),
         "max_learning_action": max_learning_action,
         "execute_now_still_blocked_until": [
-            "true target probability >=80",
-            "execution readiness >=80",
+            "sample tier is valid and any calibrated estimate uses an untouched, lookahead-free holdout",
+            "conservative expected value is positive and reward/risk is at least 2",
+            "realtime signal is complete and account risk is within the mode cap",
             "strategy promotion evidence passes",
             "fresh data and risk gates pass",
             "human confirmation exists",
@@ -598,7 +599,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         ["calibration_resolved_needed", f"`{gap.get('calibration_resolved_needed')}`"],
         ["walkforward_target_pass_needed", f"`{gap.get('walkforward_target_research_pass_needed')}`"],
         ["progressive_learning_stage", f"`{learning.get('learning_stage')}`"],
-        ["learning_floor_to_target", f"`{learning.get('learning_floor_pct')}% -> {learning.get('validated_probability_target_pct')}%`"],
+        ["sample_tier_progression", "`n<10 judgment_only; n=10-29 wide_interval; n>=30 calibrated holdout`"],
         ["recommendation_reviewable_now", f"`{rec_ledger.get('reviewable_now_count')}`"],
         ["recommendation_upcoming_30d", f"`{rec_ledger.get('upcoming_review_30d_count')}`"],
     ]

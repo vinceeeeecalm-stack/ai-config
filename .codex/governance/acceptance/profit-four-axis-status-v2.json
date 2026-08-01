@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-four-axis-status-v2",
+  "title": "系统、执行、短期利润和长期路径状态独立计算",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["系统达到 RUNTIME_VERIFIED", "真实现金为零", "Paper 模式可用"],
+  "steps": ["计算 BusinessOutcomeStatusV2", "检查 V1 兼容投影", "检查全部 blocker 与首要下一步"],
+  "expected": ["delivery 为 RUNTIME_VERIFIED", "execution 为 PAPER_ONLY_READY", "live profit 为 NOT_STARTED", "顶层业务结果为 EVIDENCE_PENDING 而非混合 BLOCKED", "all_blockers 完整且 primary blocker 与 next step 一致"],
+  "evidence": ["状态合同单元测试", "当前零现金黄金路径运行包"]
+}

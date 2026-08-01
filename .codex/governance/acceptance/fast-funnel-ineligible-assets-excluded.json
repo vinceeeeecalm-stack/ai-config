@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-ineligible-assets-excluded",
+  "title": "不合格 crypto 身份不会进入上涨候选",
+  "level": "TESTED",
+  "preconditions": ["扫描池包含稳定币、杠杆代币和代币化股票身份"],
+  "steps": ["运行资产资格过滤和排名"],
+  "expected": ["稳定币、UP/DOWN/BULL/BEAR 杠杆代币和 tokenized equity 全部被拒绝", "拒绝审计保留命中规则"],
+  "evidence": ["scanner self-test", "资格过滤回归夹具"]
+}

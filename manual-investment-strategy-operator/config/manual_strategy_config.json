@@ -1,7 +1,111 @@
 {
   "skill_name": "manual-investment-strategy-operator",
-  "version": "manual-v2.23-risk-adjusted-path-quality",
+  "version": "manual-v3.0-fast-funnel-multi-horizon",
   "role": "manual_portfolio_decision_and_report",
+  "universal_investment_core": {
+    "enabled": true,
+    "authoritative_engine": "scripts/universal_investment_core.py",
+    "authoritative_status_schema": "InvestmentOutcomeStatusV2",
+    "public_contracts": ["UniversalInvestmentCaseV1", "RegressionEvidenceV1", "LiveInvestmentDecisionV1", "InvestmentOutcomeStatusV2"],
+    "binding_fields": ["snapshot_id", "strategy_version", "config_digest", "source_digest"],
+    "asset_adapters": ["crypto", "us_equity"],
+    "horizon_adapters": ["tactical_1_7d", "longterm"],
+    "formal_user_actions": ["ENTER_NOW", "WAIT_FOR_ENTRY", "NO_TRADE"],
+    "paper_or_walkforward_user_action_forbidden": true,
+    "zero_cash_preserves_market_judgment": true,
+    "zero_cash_account_execution": "NO_DEPLOY_CASH",
+    "v2_compatibility_cycles_remaining": 1,
+    "live_orders_enabled": false
+  },
+  "profit_oriented_dual_sleeve": {
+    "enabled": true,
+    "objective_contract": "config/profit_objective_v1.json",
+    "policy": "references/PROFIT_ORIENTED_DUAL_SLEEVE_LOOP.md",
+    "deterministic_engine": "scripts/profit_oriented_dual_sleeve.py",
+    "short_sleeve": "crypto_tactical_1_7d",
+    "short_monthly_target_roi_pct": 100.0,
+    "short_emergency_pause_drawdown_pct": -15.0,
+    "long_primary_path": "5_year_10x",
+    "long_fallback_path": "10_year_10x",
+    "unique_top1_required": true,
+    "money_weighted_roi_required": true,
+    "short_to_long_independent_reunderwrite_required": true,
+    "max_core_profit_rule_changes_per_14_days": 1,
+    "authoritative_status_schema": "BusinessOutcomeStatusV2",
+    "required_status_axes": ["delivery_status", "execution_readiness", "short_profit_status.paper", "short_profit_status.live", "long_path_status", "business_outcome_status", "all_blockers", "unique_blocker", "unique_next_step"],
+    "paper_tactical_1_7d": {
+      "enabled": true,
+      "initial_capital_usd": 500.0,
+      "evidence_mode": "paper",
+      "legacy_unknown_horizon_imported": false,
+      "business_ready_eligible": false,
+      "live_orders_enabled": false
+    },
+    "current_market_evidence_gate": {
+      "max_quote_age_seconds": 60,
+      "min_public_price_sources": 2,
+      "max_cross_source_spread_pct": 1.0,
+      "max_source_latency_seconds": 12,
+      "max_scan_duration_seconds": 120,
+      "failure_status": "NO_FRESH_DECISION",
+      "expired_plan_reuse_forbidden": true
+    },
+    "legacy_longterm_authority": {
+      "status": "DATA_DEGRADED",
+      "decision_scope": "RESEARCH_ONLY",
+      "formal_path_metrics_allowed": false,
+      "human_confirmed_must_not_be_inferred": true
+    },
+    "live_orders_enabled": false,
+    "human_confirmation_required": true
+  },
+  "intraday_scalp": {
+    "enabled": true,
+    "same_day_no_overnight": true,
+    "quote_max_age_seconds": 60,
+    "default_decision_validity_seconds": 300,
+    "required_closed_bars": ["1m", "5m"],
+    "required_market_fields": ["vwap", "opening_range", "relative_volume", "spread", "depth", "market_anchor"],
+    "required_plan_fields": ["entry_trigger", "cancel_if", "price_stop", "target_1", "target_2", "latest_close_at"],
+    "position_size_basis": "maximum_loss_budget",
+    "leveraged_etf_underlying_confirmation_required": true,
+    "binary_event_and_thin_book_forbidden": true,
+    "live_orders_enabled": false
+  },
+  "ranked_tactical_recommendation": {
+    "enabled": true,
+    "short_term_business_goal": "tactical_sleeve_monthly_roi_100pct_attack_goal",
+    "applies_to": ["confirmed_tactical_capital", "confirmed_idle_cash_in_same_rail"],
+    "does_not_apply_to": ["whole_portfolio", "protected_long_term_holdings", "unconfirmed_cash", "longterm_dca_principal"],
+    "primary_candidate_count": 1,
+    "qualified_alternative_max": 2,
+    "history_first_validation": true,
+    "future_paper_is_parallel_calibration_not_initial_blocker": true,
+    "alternative_min_sample_size": 30,
+    "alternative_positive_conservative_ev_required": true,
+    "alternative_min_reward_risk_ratio": 2.0,
+    "alternative_min_profit_factor_exclusive": 1.0,
+    "same_snapshot_same_strategy_same_config_deterministic": true,
+    "ranking_order": ["conservative_expected_value", "target_compatible_expected_return", "win_rate_interval", "profit_factor", "max_drawdown", "liquidity", "catalyst_quality", "entry_quality"],
+    "ranking_penalties": ["drawdown", "parameter_instability", "poor_liquidity", "switching_from_valid_incumbent"],
+    "primary_full_deep_dive_required": true,
+    "alternatives_require_new_deep_dive_before_manual_execution": true,
+    "weak_slots_must_be_omitted": true,
+    "live_orders_enabled": false
+  },
+  "longterm_next_dollar_ranking": {
+    "enabled": true,
+    "script": "scripts/longterm_next_dollar_ranker.py",
+    "investment_goals": ["capital_preservation", "compound_15_25", "aggressive_10x"],
+    "candidate_pool": ["current_holdings", "us_companies", "regular_etfs", "crypto", "new_qualified_assets", "cash"],
+    "rerank_every_run": true,
+    "fixed_asset_roles_forbidden": true,
+    "required_dimensions": ["fundamental_or_network", "moat_and_value_capture", "balance_sheet_or_supply", "valuation", "five_year_scenarios", "ten_year_scenarios", "survival", "drawdown", "correlation", "marginal_contribution"],
+    "winner_count": 1,
+    "runner_up_rejection_max": 2,
+    "zero_cash_preserves_research_winner": true,
+    "live_orders_enabled": false
+  },
   "manual_dispatch_timebox_policy": {
     "enabled": true,
     "purpose": "keep ordinary user-triggered reports finite; deep research can continue only as a separately requested workflow",
@@ -334,52 +438,41 @@
     "enabled": true,
     "required": true,
     "reference": "references/PROGRESSIVE_LEARNING_CONFIDENCE_POLICY.md",
-    "purpose": "allow the system to start with 60%-79% reviewable learning recommendations and improve toward 80%+ through resolved outcomes, without weakening execute_now gates",
+    "purpose": "separate judgment-only, wide-interval and calibrated samples while learning from resolved outcomes without a universal probability gate",
     "success_semantics": {
       "goal_mechanism_ready": "fresh data, report, recommendation records, paper review calendar, outcome review, attribution and next-evidence backlog are all functioning",
       "goal_complete": "actual financial target is achieved and tactical live readiness is proven; never inferred from a single iteration",
       "current_iteration_acceptance": "mechanism readiness and progressive learning loop are sufficient; financial target proof remains future evidence"
     },
-    "confidence_ladder": [
+    "sample_ladder": [
       {
-        "stage": "reject_or_watch",
-        "probability_min_pct": 0,
-        "probability_max_pct": 59,
+        "stage": "judgment_only",
+        "sample_size_max": 9,
         "allowed_actions": [
           "watch",
-          "no_deploy",
-          "hold"
+          "paper_only"
         ]
       },
       {
-        "stage": "learning_probe",
-        "probability_min_pct": 60,
-        "probability_max_pct": 69,
+        "stage": "wide_interval",
+        "sample_size_min": 10,
+        "sample_size_max": 29,
         "allowed_actions": [
           "watch",
           "paper_only",
-          "conditional_action"
-        ]
-      },
-      {
-        "stage": "calibrated_probe",
-        "probability_min_pct": 70,
-        "probability_max_pct": 79,
-        "allowed_actions": [
-          "paper_only",
-          "conditional_action",
-          "small_probe_review"
-        ]
-      },
-      {
-        "stage": "validated_action_candidate",
-        "probability_min_pct": 80,
-        "probability_max_pct": 100,
-        "allowed_actions": [
-          "conditional_action",
-          "execute_now_candidate"
+          "small_entry_now"
         ],
-        "still_requires_execution_readiness_score_gte": 80
+        "entry_requires": "positive_conservative_ev_reward_risk_gte_2_complete_signal_max_account_risk_0_25pct"
+      },
+      {
+        "stage": "calibrated",
+        "sample_size_min": 30,
+        "allowed_actions": [
+          "paper_only",
+          "small_entry_now",
+          "enter_now"
+        ],
+        "entry_requires": "untouched_holdout_no_lookahead_positive_conservative_lower_bound_ev_reward_risk_gte_2_complete_signal_max_account_risk_0_5pct"
       }
     ],
     "learning_milestones": {
@@ -389,7 +482,7 @@
       "usable_calibration_min_windows": 3,
       "validated_ramp_resolved_min": 50
     },
-    "execute_now_still_requires_double_80": true,
+    "universal_probability_or_readiness_score_threshold_forbidden": true,
     "learning_recommendations_must_be_written_to_history": true
   },
   "stage_acceptance_and_compounding_policy": {
@@ -1077,7 +1170,7 @@
       "10_year_10x_fallback_path",
       "monthly_crypto_dca_1000_usd_default",
       "crypto_long_term_dca_and_staking_compounding",
-      "us_tactical_monthly_or_quarterly_50pct_plus",
+      "us_tactical_monthly_roi_100pct_attack_goal",
       "manual_dispatch_fresh_market_and_sentiment_refresh",
       "progressive_learning_from_60_to_80_plus",
       "manual_confirmation_no_auto_trading"
@@ -1101,14 +1194,26 @@
     ],
     "cumulative_capital_10x_policy": "extreme_bull_reference_not_default_execution_baseline",
     "us_equity_tactical_goal": {
-      "monthly_or_quarterly_50pct_plus": true,
+      "monthly_roi_100pct_attack_goal": true,
+      "quarterly_is_reporting_checkpoint_not_lower_alternative_goal": true,
       "applies_to": "deployable_tactical_position_only",
       "does_not_apply_to": [
         "protected_long_term_holdings",
         "whole_portfolio",
         "core_dca"
       ],
-      "requires_double_80_for_execute_now": true
+      "entry_gate": {
+        "universal_probability_floor_pct": null,
+        "min_reward_risk_ratio": 2.0,
+        "positive_conservative_expected_value_required": true,
+        "realtime_signal_complete_required": true,
+        "small_entry_sample_range": [10, 29],
+        "small_entry_max_account_risk_pct": 0.25,
+        "enter_now_min_sample_size": 30,
+        "enter_now_untouched_holdout_required": true,
+        "enter_now_lookahead_free_required": true,
+        "enter_now_max_account_risk_pct": 0.5
+      }
     },
     "us_tactical_performance_tracker": {
       "enabled": true,
@@ -1129,8 +1234,8 @@
       "conditional_symbols_excluded_by_default": [
         "COIN"
       ],
-      "target_monthly_return_pct": 50,
-      "target_quarterly_return_pct": 50,
+      "target_monthly_return_pct": 100,
+      "target_quarterly_return_pct": 100,
       "required_outputs": [
         "baseline_value_usd",
         "current_tactical_value_usd",
@@ -1150,7 +1255,7 @@
       "required_annual_return_for_5y_and_10y",
       "survival_base_bull_scenarios",
       "dca_allocation_toward_goal",
-      "us_equity_tactical_path_toward_50pct_plus",
+      "us_equity_tactical_path_toward_monthly_100pct_attack_goal",
       "data_gaps_that_downgrade_goal_actions"
     ]
   },
@@ -1207,8 +1312,12 @@
       "gate_version": "positive-path-v1",
       "requires_verified_external_research_panel": true,
       "requires_strategy_promotion_gate_passed": true,
-      "requires_target_achievement_probability_pct_gte": 80,
-      "requires_execution_readiness_score_gte": 80,
+      "requires_calibrated_sample_size_gte": 30,
+      "requires_untouched_holdout_and_no_lookahead": true,
+      "requires_conservative_expected_value_gt": 0,
+      "requires_reward_risk_ratio_gte": 2,
+      "max_account_risk_pct": 0.5,
+      "execution_readiness_means_price_liquidity_cash_and_operations_only": true,
       "requires_no_blocking_missing_data": true,
       "requires_live_orders_disabled_until_manual_confirmation": true,
       "current_expected_state": "blocked_until_paper_validation_and_probability_calibration_clear"
@@ -1367,10 +1476,9 @@
       "hold_trim"
     ],
     "candidate_card_required_before_action": true,
-    "tactical_execute_now_requires_both_probability_and_readiness": true,
-    "tactical_min_forecast_probability_pct": 80,
-    "tactical_min_execution_readiness_score": 80,
-    "dca_and_longterm_do_not_require_80pct_tactical_probability": true,
+    "tactical_entry_uses_sample_tier_conservative_ev_and_risk": true,
+    "universal_probability_threshold_forbidden": true,
+    "dca_and_longterm_use_independent_goal_and_marginal_contribution_ranking": true,
     "missing_entry_exit_probability_or_invalidation_max_action": "watch",
     "required_candidate_card_fields": [
       "candidate_type",
@@ -1649,8 +1757,8 @@
       "old_thesis_reuse_requires_prior_thesis_challenge_no_disconfirming_evidence": true,
       "any_key_agent_block_blocks_new_position_for_that_asset": true,
       "social_news_cannot_trigger_execute_now_alone": true,
-      "us_tactical_execute_now_requires_forecast_probability_pct_ge_80_and_execution_readiness_score_ge_80": true,
-      "crypto_tactical_execute_now_requires_forecast_probability_pct_ge_80_and_execution_readiness_score_ge_80": true
+      "us_tactical_uses_sample_tier_conservative_ev_reward_risk_and_realtime_signal": true,
+      "crypto_tactical_uses_sample_tier_conservative_ev_reward_risk_and_realtime_signal": true
     },
     "quality_gate_requirements": {
       "min_successful_known_roles": 6,
@@ -1662,7 +1770,7 @@
       "missing_data_or_failed_gates_cap_action_at": "watch_or_paper_or_conditional",
       "quality_audit_failure_blocks_execute_now": true,
       "normalized_output_can_be_reused_but_cannot_upgrade_data_quality": true,
-      "notes": "Evidence quality is separate from action readiness. A role may be evidence-verified while still blocking execute_now because it found real cost, cash, paper-validation, double-80, or human-confirmation blockers."
+      "notes": "Evidence quality is separate from action readiness. A role may be evidence-verified while action remains blocked by conservative EV, reward/risk, current signal, cash, or human confirmation."
     },
     "report_panels_required": [
       "prior_thesis_challenge_panel",
@@ -1969,11 +2077,10 @@
         "collapse_extra_levels_to_notes": true
       },
       "probability_tiers": {
-        "execute_now_min_forecast_probability_pct": 80,
-        "conditional_action_min_forecast_probability_pct": 60,
-        "conditional_action_min_execution_readiness_score": 80,
-        "event_scalp_candidate_min_forecast_probability_pct": 60,
-        "below_60pct_max_action": "watch"
+        "n_lt_10": "judgment_only_watch_or_paper",
+        "n_10_29": "wide_interval_positive_conservative_ev_small_entry_max_risk_0_25pct",
+        "n_gte_30": "calibrated_untouched_holdout_positive_lower_bound_ev_enter_max_risk_0_5pct",
+        "universal_probability_threshold": null
       }
     },
     "goal_linked_timeboxed_trade_plan": {
@@ -2025,8 +2132,10 @@
       }
     },
     "target_achievement_gate": {
-      "min_forecast_probability_pct": 80,
-      "min_execution_readiness_score": 80,
+      "min_reward_risk_ratio": 2,
+      "small_entry_max_account_risk_pct": 0.25,
+      "enter_now_max_account_risk_pct": 0.5,
+      "conservative_expected_value_formula": "p_target*target_return-p_stop*loss-friction",
       "default_tactical_review_days": {
         "min": 1,
         "max": 5
@@ -2039,11 +2148,11 @@
         "review_every_days_max": 5
       },
       "monthly_goal_context": "double_soxl_pool_when_validated_opportunities_exist",
-      "execute_now_requires_both_probability_and_readiness": true,
-      "conditional_action_allowed_for_60_to_79pct_probability_when_readiness_ge_80": true,
+      "execute_now_requires_calibrated_positive_lower_bound_ev": true,
+      "small_entry_now_allowed_for_wide_interval_positive_ev": true,
       "missing_probability_basis_max_action": "watch",
       "unverified_news_max_action": "watch",
-      "probability_not_readiness_note": "forecast_probability_pct is true target achievement probability; execution_readiness_score is points, not probability",
+      "probability_not_readiness_note": "forecast probability is event probability; execution readiness covers price, liquidity, cash and operations only",
       "execution_readiness_breakdown_points": {
         "data_verified_multisource": 20,
         "confirmed_catalyst": 20,
@@ -2058,7 +2167,9 @@
       "max": 12
     },
     "execute_now_policy": {
-      "only_top_ranked_candidate": true,
+      "only_primary_candidate_can_be_current_execution_candidate": true,
+      "qualified_alternatives_max": 2,
+      "qualified_alternatives_must_show_historical_comparison": true,
       "must_be_clearly_better_than_current_tactical_position": true,
       "otherwise_output": "watch_or_no_action"
     },

@@ -35,7 +35,7 @@ For any report that discusses current actions, the data gate must attempt to ref
 | US equity market | SPY/QQQ/IWM/SOXX/SMH, VIX, DXY, yields, sector rotation, current tactical holdings |
 | US equity candidates | Market movers, unusual volume, news catalysts, earnings surprises, relative strength, active handoff |
 | Sentiment | Fear & Greed, flows, news tone, social/key-person confirmation, price-volume reaction |
-| Goal mapping | 5y/10y 10x gap, crypto DCA impact, US tactical 50%+ monthly/quarterly progress |
+| Goal mapping | 5y/10y 10x gap, monthly DCA impact, tactical-sleeve monthly ROI 100% attack-goal progress |
 
 ## Source Priority
 

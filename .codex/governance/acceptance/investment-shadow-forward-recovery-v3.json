@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "investment-shadow-forward-recovery-v3",
+  "title": "四个影子任务与故障恢复前向验收",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["只使用隔离夹具和公开/只读证据"],
+  "steps": ["运行 Crypto ENTER", "运行 Crypto NO_TRADE", "运行美股 WAIT", "运行长期 DATA_DEGRADED", "注入过期行情、单源失败和状态恢复"],
+  "expected": ["四类结果符合合同", "局部数据源失败只淘汰受影响候选", "过期信号不能 ENTER", "故障恢复不复用过期计划"],
+  "evidence": ["影子运行 JSON", "故障恢复报告"]
+}

@@ -9,7 +9,7 @@
 - Aggressive path: 当前本金在 5 年内达到 10x 或以上。
 - Fallback path: 当前本金在 10 年内达到 10x 或以上。
 
-默认新增资金为 `$1,000/月`，进入 crypto rail 后用于 DCA。美股目标不是全账户月度翻倍，而是让可动用战术仓在月度/季度尽量实现 `50%+` 的机会收益；长期保护仓不为短线目标牺牲。
+默认新增资金为 `$1,000/月`，进入长期 DCA rail。短期最高业务目标是让已确认的战术资金与同通道闲置资金争取月度 ROI `100%`；它不作用于全账户、长期 DCA 本金或保护仓，也不是单笔必须翻倍或收益保证。长期保护仓不为短线目标牺牲。
 
 ## Objective Traceability
 
@@ -20,7 +20,7 @@
 | 5年/10年 10x | `Goal Gap Panel`, `Goal Execution Dashboard` | 当前组合价值、目标所需年化、5/10 年路径 |
 | `$1,000/月` crypto DCA | `DCA Pair Gate`, `Candidate Deep Dive` | DCA 金额、两档入场、复盘时间、recommendation record |
 | 长期高凸性与质押复利 | `Asset Goal Contribution`, `Staking Compounding Model` | APY、锁定/解锁、达到 10x 仍需价格倍数 |
-| 美股月/季 `50%+` 战术收益 | `US Tactical Performance`, `Tactical Rotation Relay` | 当前动态战术仓、目标差距、入场/出场、现金来源 |
+| 战术资金月度 ROI `100%` 进攻目标 | `Ranked Tactical Choices`, `US Tactical Performance`, `Tactical Rotation Relay` | 主推荐、最多两个合格备选、目标差距、入场/出场、现金来源 |
 | 主动取数和情绪 | `Fresh Market Intelligence`, `Research Committee` | 数据源、时间戳、缺失/降级、subagent 证据 |
 | 持续学习 | `Recommendation History`, `Learning Review Calendar` | pending/due/resolved 建议、paper 样本、错误归因 |
 
@@ -172,7 +172,7 @@
 - 5年/10年 10x 目标数学存在且绑定当前持仓。
 - `$1,000/月` crypto DCA 同时进入目标测算、DCA guidance 和 recommendation history。
 - DCA 与美股战术建议都具备结构化金额、入场区间、入场截止日、目标/复盘窗口、失效条件和 `action_source`。
-- 美股战术池按月/季 `50%+` 目标追踪，且排除长期保护仓。
+- 战术资金池按月度 ROI `100%` 进攻目标追踪，且排除长期保护仓、长期 DCA 本金和未确认现金。
 - 两路现金通道分离，跨 rail 转移必须人工确认。
 - Research Committee、Recommendation History 和双80门槛共同阻止未校准 `execute_now`。
 - active-alpha paper ledger 已接入；样本量、paper 净收益、最大回撤和 closed trade 数不足时，目标覆盖审计必须保留 warning，并阻止把策略宣传为已验证。
@@ -185,7 +185,7 @@
 
 - 当前组合价值、`$1,000/月` DCA、5年/10年 10x 所需年化。
 - Crypto DCA 当前主线、次主线、尾部候选和禁新增资产。
-- 美股战术池的当前价值、现金拖累、月度 `50%+` 缺口和最大允许动作。
+- 战术资金池的当前价值、现金拖累、月度 ROI `100%` 目标缺口和最大允许动作。
 - Research Committee、paper validation、walk-forward、recommendation calibration 的阻断状态。
 - 下一步 execution backlog，明确哪些任务是验证样本、学习闭环、DCA、US tactical 或目标构建，不把 backlog 当成买入清单。
 

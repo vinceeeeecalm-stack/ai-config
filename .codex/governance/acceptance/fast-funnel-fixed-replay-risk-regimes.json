@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-fixed-replay-risk-regimes",
+  "title": "固定回放分别证明 risk-on、risk-off 与高开跳空安全行为",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "使用确定性候选、市场状态和历史价格夹具",
+    "回放不读取未来数据且不提交真实订单"
+  ],
+  "steps": [
+    "运行 risk-on 固定场景并验证研究胜者不会被零现金抹掉",
+    "运行 risk-off 固定场景并验证现金可以成为合法胜者",
+    "运行新鲜报价大幅高开固定场景并验证机械入场位被阻断"
+  ],
+  "expected": [
+    "risk-on 场景保留唯一研究胜者但可执行金额为零",
+    "risk-off 场景选择 CASH 并输出 do_not_enter_now",
+    "高开跳空场景设置 gap_repricing_guard、取消机械目标止损并明确 no entry",
+    "全部场景 live_orders_enabled 为 false 或不具备下单路径"
+  ],
+  "evidence": [
+    "具名固定回放测试输出",
+    "同一源码摘要的 runtime verification bundle"
+  ]
+}

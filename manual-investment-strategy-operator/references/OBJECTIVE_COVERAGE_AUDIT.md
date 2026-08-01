@@ -11,7 +11,7 @@
 - 当前持仓已经绑定到 5年/10年 10x 目标测算。
 - 默认 `$1,000/月` crypto DCA 已进入 `goal_path_projection` 与 `asset_goal_contribution_panel`。
 - Crypto DCA 给出最多两档行动，并把金额、入场、复盘日和失效条件写入 recommendation history。
-- 美股战术池按月度/季度 `50%+` 目标追踪，只包含动态可部署战术仓和战术现金，不把 `CRCL` 长期保护仓算入。
+- 战术资金池按月度 ROI `100%` 进攻目标追踪，只包含动态可部署战术仓和同通道已确认闲置资金，不把 `CRCL` 等长期保护仓或长期 DCA 本金算入。
 - 美股战术行动必须动态识别资金来源，不 hardcode 某个标的。
 - Research Committee 至少 6 个研究角色；若降级，必须阻止新的 `execute_now`。
 - 推荐历史和概率校准必须阻止未校准的 `execute_now`。

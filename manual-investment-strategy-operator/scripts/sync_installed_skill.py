@@ -27,6 +27,7 @@ DEFAULT_INSTALLED_ROOT = Path.home() / ".codex" / "skills"
 MANUAL_SKILL = "manual-investment-strategy-operator"
 ACTIVE_SKILL = "active-alpha-paper-monitor"
 UNIFIED_SKILL = "unified-longterm-alpha-investor"
+GOVERNOR_SKILL = "closed-loop-delivery-governor"
 
 SKILL_SPECS: dict[str, dict[str, tuple[str, ...]]] = {
     MANUAL_SKILL: {
@@ -51,6 +52,10 @@ SKILL_SPECS: dict[str, dict[str, tuple[str, ...]]] = {
     },
     UNIFIED_SKILL: {
         "directories": ("references", "config"),
+        "files": ("SKILL.md",),
+    },
+    GOVERNOR_SKILL: {
+        "directories": ("agents", "references", "scripts"),
         "files": ("SKILL.md",),
     },
 }

@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-fast-funnel-multi-horizon-investment-v4-20260801",
+  "project_id": "investing-monorepo",
+  "goal_id": "fast-funnel-multi-horizon-investment-v4",
+  "achieved_level": "BUSINESS_READY",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "b2cf69f0bbfeb86c5c72f333d055746c1c0c566f",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "7c1a77c66351303d07936e65991e5a3cac92cf2ce49a028fa7a8c983d4a95f12",
+  "build_version": "7c1a77c66351",
+  "runtime_version": "ca188e4b5984",
+  "database_version": null,
+  "last_verification_id": "verify-fast-funnel-multi-horizon-investment-v4-business_ready-110f6e1c",
+  "independent_verification_id": "verify-fast-funnel-multi-horizon-investment-v4-business-ready-independent-019fb981-7c1a77c6",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T04:07:45.501292Z",
+  "created_by": "019fb822-4925-7630-a3e2-3345d9e69ff9"
+}

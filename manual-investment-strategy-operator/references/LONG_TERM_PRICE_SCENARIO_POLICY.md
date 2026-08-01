@@ -53,36 +53,30 @@ If market cap or supply data is missing, the panel must mark the asset `scenario
 | `quality_hold` | Worth holding, but new DCA is less capital-efficient for the user's aggressive target. |
 | `drag_for_new_dca` | Existing holding may be fine, but additional DCA likely slows the 10x path. |
 
-## Current Asset Defaults
+## Dynamic Cross-Asset Baseline
 
-These are default labels only; each report must refresh data before using them.
+There are no asset-name defaults. Current holdings, listed companies, regular
+ETFs, BTC/ETH/SOL and other qualified crypto assets are baseline candidates
+only. Every run reranks them with current fundamentals or network evidence,
+value capture, balance-sheet or supply dilution, valuation, five- and ten-year
+scenarios, survival/drawdown, correlation and next-dollar marginal
+contribution. Cash is a valid winner in risk-off conditions. The final report
+shows exactly one next-dollar winner and at most two runner-up rejection notes.
 
-| Asset | Default role | Default implication |
-|---|---|---|
-| ETH/lcETH | `quality_hold` or `drag_for_new_dca` when overweight | Hold existing stake; do not add while ETH/lcETH concentration remains high. |
-| SOL | `strong_engine` | Primary growth DCA candidate when data is verified and price is not overheated. |
-| SUI | `satellite` with possible `strong_engine` upgrade | Growth satellite if liquidity, supply, TVL and ecosystem data remain verified. |
-| ADA | `satellite` | Deep-value staking satellite; can increase when discount, APY and ecosystem evidence support it. |
-| NIGHT | `tail_convexity` | Small tail only until DUST demand, float/unlock and liquidity evidence improve. |
-| LINK | `satellite` or `quality_hold` | Infrastructure satellite; steadier than tail assets but usually lower 10x convexity. |
-| TAO / RENDER | `tail_convexity` | AI-themed high-upside small positions only unless evidence improves. |
-| BTC | `quality_hold` / liquidity anchor | Not default new DCA for this aggressive target unless extreme fear or liquidity-anchor need appears. |
+## Existing-Holding Concentration Rule
 
-## ETH-Specific Rule
-
-ETH can remain a high-quality core asset while still being a poor use of new DCA capital for this specific aggressive goal.
-
-Reports must distinguish:
-
-- `hold_existing_eth`: long-term thesis intact; staking/settlement ecosystem remains valuable.
-- `avoid_new_eth_dca`: ETH/lcETH portfolio concentration is too high or expected price multiple is too low versus SOL/SUI/tail alternatives.
-- `resume_eth_dca`: only if ETH/lcETH concentration falls back into target range, price becomes extremely dislocated, staking/liquidity terms are verified, and the scenario panel shows improved 10x contribution.
+Any current holding can remain a quality hold while being a poor next-dollar
+destination. Reports must distinguish hold quality from marginal allocation
+using its current concentration, scenario multiple, liquidity, correlation and
+the strongest cross-asset alternative. This rule applies symmetrically to
+stocks, ETFs and crypto; it cannot encode an ETH-, SOL- or other symbol-specific
+default.
 
 ## Output Rules
 
 - Do not present scenario prices as certainty.
 - Do not use a 10-year bull case to justify chasing a 24-hour rally.
 - Do not compare assets only by APY; APY must be combined with required price multiple.
-- Do not recommend adding a new asset unless it improves the current portfolio's 5-10 year goal fit better than adding to existing SOL/ADA/NIGHT/ETH roles.
+- Do not recommend adding a new asset unless it improves the selected 5-10 year
+  goal better than the best existing holding, ETF, stock, crypto or cash alternative.
 - If a user asks for a single number, still provide survival/base/bull ranges and explain which range is most decision-relevant.
-

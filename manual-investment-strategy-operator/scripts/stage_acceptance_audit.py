@@ -204,7 +204,7 @@ def build_audit(
         "next_iteration_focus": [
             "Keep recording every DCA/tactical recommendation with review dates.",
             "Use paper and historical outcomes to separate real 60%+ edges from noise.",
-            "Do not promote to 80% true-confidence candidates until resolved outcomes and double-80 gates support it.",
+            "Do not promote to calibrated entry candidates until resolved outcomes, untouched holdout evidence, conservative EV, realtime signal and risk gates support it.",
             "Keep DCA sizing tied to the long-term compounding path and avoid large drawdowns that break compounding.",
         ],
         "input_paths": {

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "decision-zero-cash-research-preserved",
+  "title": "零现金保留研究胜者并只阻断实际执行",
+  "level": "TESTED",
+  "preconditions": ["研究存在明确最佳候选且当前权威可用现金为零"],
+  "steps": ["运行 Manual 仲裁"],
+  "expected": ["best_candidate 和 research_decision 保留", "current_direct_decision 不被现金改写", "execution_decision 为 no_deploy_cash 且 executable_amount 为零"],
+  "evidence": ["决策合同测试", "零现金夹具"]
+}

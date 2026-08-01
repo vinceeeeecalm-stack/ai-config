@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "investment-outcome-four-axis-v3",
+  "title": "V3 四轴业务状态权威且 V2 兼容",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["系统已运行验证", "账户现金为零", "长期数据为旧估算"],
+  "steps": ["计算 InvestmentOutcomeStatusV2", "生成一个兼容周期的 V2 投影"],
+  "expected": ["系统交付独立为 RUNTIME_VERIFIED", "账户执行为 NO_DEPLOY_CASH", "真钱利润为 UNMEASURED", "长期为 DATA_DEGRADED", "Paper 仅是内部附属轴", "all_blockers 与 unique_blocker 同时存在"],
+  "evidence": ["状态单元测试", "运行状态包"]
+}

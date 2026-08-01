@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "leveraged-etf-underlying-required",
+  "title": "杠杆 ETF 缺少底层确认时拒绝当前入场",
+  "level": "TESTED",
+  "preconditions": ["候选是杠杆 ETF 且底层指数或 ETF 信号缺失"],
+  "steps": ["运行日内和一至七日候选门"],
+  "expected": ["current_direct_decision 为 do_not_enter_now", "记录 underlying_confirmation_missing", "不得仅按杠杆 ETF 自身图形放行"],
+  "evidence": ["杠杆 ETF 负向测试"]
+}

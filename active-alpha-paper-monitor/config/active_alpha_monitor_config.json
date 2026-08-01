@@ -1,6 +1,6 @@
 {
   "skill_name": "active-alpha-paper-monitor",
-  "version": "monitor-v2.144-risk-adjusted-path-quality",
+  "version": "monitor-v3.0-fast-candidate-funnel",
   "role": "active_alpha_scanner_and_paper_monitor",
   "paired_skill": "manual-investment-strategy-operator",
   "auto_trading_enabled": false,
@@ -47,12 +47,35 @@
   ],
   "progressive_validation_learning_loop": {
     "enabled": true,
-    "purpose": "collect reviewable paper and signal samples so the system can improve from roughly 60% learning quality toward 80%+ calibrated probabilities over repeated runs",
+    "purpose": "collect reviewable paper and signal samples for sample-tiered probability calibration without a universal probability cutoff",
     "learning_floor_pct": 60,
-    "validated_probability_target_pct": 80,
+    "calibrated_min_sample_size": 30,
+    "untouched_holdout_required": true,
     "current_phase_accepts_paper_only_samples": true,
     "does_not_authorize_live_trades": true,
     "manual_skill_must_arbitrate_before_real_action": true
+  },
+  "fast_candidate_funnel": {
+    "schema_version": "fast-candidate-funnel-v1",
+    "discovery_candidate_schema": "DiscoveryCandidateV1",
+    "discovery_top3_p95_seconds": 15,
+    "validated_top1_seconds": 45,
+    "deep_research_top1_seconds": 120,
+    "end_to_end_seconds": 180,
+    "discovery_forbidden_inputs": [
+      "forecast_probability",
+      "portfolio_cash",
+      "full_financing_audit",
+      "research_committee",
+      "execution_permission"
+    ],
+    "deep_risk_scope": "top3_only",
+    "bounded_historical_comparison_scope": "top3_same_point_in_time_rules",
+    "ranked_primary_count": 1,
+    "qualified_alternative_max": 2,
+    "weak_alternatives_must_be_omitted": true,
+    "deep_research_scope": "top1_only",
+    "live_orders_enabled": false
   },
   "current_signal_freshness_contract": {
     "enabled": true,
@@ -995,8 +1018,9 @@
       "target_time_window",
       "stop_loss",
       "latest_exit_date",
-            "forecast_probability_pct",
-            "execution_readiness_score",
+            "discovery_score",
+            "setup_quality_score",
+            "reward_risk_ratio",
             "risk_adjusted_path",
             "why_better_than_current_tactical_position",
             "candidate_cash_relay_priority",
@@ -1450,7 +1474,7 @@
   "handoff_target": "manual-investment-strategy-operator",
   "impulse_capture_engine": {
     "enabled": true,
-    "contract_version": "v2.61",
+    "contract_version": "v3-fast-funnel",
     "mode": "paper_and_alert_only",
     "live_orders_enabled": false,
     "private_api_used": false,
@@ -1466,6 +1490,12 @@
         "BTCUSDT"
       ],
       "dynamic_top_by_quote_volume": 40,
+      "default_parallel_workers": 12,
+      "discovery_1m_baseline_bars": 60,
+      "bulk_payload_compression_required": true,
+      "top_of_book_scope": "selected_dynamic_pool",
+      "full_depth_scope": "top3_only",
+      "tokenized_security_suffix_policy": "exclude suspicious B/ON asset identities unless known native crypto or separately verified",
       "exclude_stablecoin_pairs": true,
       "us_equity_extension": "use_us_open_dynamic_scanner_then_manual_review"
     },
@@ -1473,7 +1503,7 @@
       "micro": "1m",
       "short": "5m",
       "confirmation": "15m",
-      "baseline_minutes": 120,
+      "baseline_minutes": 60,
       "post_trigger_validation_candles": 5
     },
     "crypto_required_features": [

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "intraday-scalp-same-day-exit",
+  "title": "intraday_scalp 只允许当日闭合并使用分钟级新鲜度",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["request_mode 为 intraday_scalp"],
+  "steps": ["校验闭合一分和五分 K 线、VWAP、开盘区间、流动性、触发与退出时钟"],
+  "expected": ["报价年龄不超过六十秒且默认决策有效期五分钟", "输出触发、取消、止损、两个目标和最晚平仓时间", "不允许隔夜持仓"],
+  "evidence": ["日内合同测试", "风险开关场景", "实时只读样本"]
+}

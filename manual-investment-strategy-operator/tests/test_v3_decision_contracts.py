@@ -11,6 +11,7 @@ from v3_decision_contracts import (  # noqa: E402
     CurrentDirectDecision,
     ExecutionDecision,
     HoldingPeriodV2,
+    IntradayScalpPlanV2,
     LongTermDCAPlanV2,
     OutcomeReviewV2,
     ProbabilityEstimateV2,
@@ -19,6 +20,7 @@ from v3_decision_contracts import (  # noqa: E402
     RiskAdjustedPathV2,
     ScenarioV2,
     TacticalPlanV2,
+    assess_tactical_current_decision,
 )
 from v3_evidence_snapshot import EvidenceSnapshotV2, NumericEvidenceV2  # noqa: E402
 from v3_horizon_router import ResearchMode  # noqa: E402
@@ -87,6 +89,12 @@ def probability():
         adjustments=("Current volume regime +3 percentage points.",),
         limitations="Historical analogs do not guarantee this path.",
         calibration_status="calibrated",
+        stop_probability_pct=35,
+        target_return_pct=10,
+        stop_loss_return_pct=4,
+        friction_return_pct=0.2,
+        untouched_holdout=True,
+        lookahead_free=True,
     )
 
 
@@ -132,7 +140,7 @@ def risk_adjusted_path():
     )
 
 
-def tactical_plan(*, event_exit_date=None):
+def tactical_plan(*, event_exit_date=None, leveraged_etf=False, underlying_confirmed=True):
     return TacticalPlanV2(
         entry_window_start="2026-07-25T21:30:00+08:00",
         entry_window_end="2026-07-27T04:00:00+08:00",
@@ -155,11 +163,44 @@ def tactical_plan(*, event_exit_date=None):
         downside_gap_pressure="Elevated event-gap risk reflected in bear case.",
         probability_event=probability(),
         scenarios=scenarios(),
+        leveraged_etf=leveraged_etf,
+        underlying_symbol="QQQ" if leveraged_etf else None,
+        underlying_confirmed=underlying_confirmed,
         event_exit_date=event_exit_date,
     )
 
 
+def intraday_plan(*, leveraged_etf=False, underlying_confirmed=True):
+    return IntradayScalpPlanV2(
+        quote_as_of="2026-07-25T11:59:30+08:00",
+        closed_1m_as_of="2026-07-25T11:59:00+08:00",
+        closed_5m_as_of="2026-07-25T11:55:00+08:00",
+        allowed_session="crypto_24x7_closed_bar_only",
+        vwap=187.8,
+        opening_range_high=189.0,
+        opening_range_low=185.0,
+        relative_volume=2.4,
+        spread_bps=3.0,
+        depth_bid_usd=1_000_000,
+        depth_ask_usd=900_000,
+        market_anchor="BTC and ETH supportive",
+        entry_trigger="closed 1m above 189 with volume confirmation",
+        cancel_if="price loses VWAP or spread widens above 12 bps",
+        price_stop=185.0,
+        target_1_price=194.0,
+        target_2_price=198.0,
+        latest_close_at="2026-07-25T23:55:00+08:00",
+        max_loss_budget=25.0,
+        max_account_risk_pct=0.25,
+        planned_position_size=625.0,
+        leveraged_etf=leveraged_etf,
+        underlying_symbol="QQQ" if leveraged_etf else None,
+        underlying_confirmed=underlying_confirmed,
+    )
+
+
 def recommendation(*, mode=ResearchMode.LONGTERM_DCA):
+    intraday = mode == ResearchMode.INTRADAY_SCALP
     return RecommendationV2(
         recommendation_id=f"rec-{mode.value}",
         request_id=f"request:{mode.value}",
@@ -176,10 +217,19 @@ def recommendation(*, mode=ResearchMode.LONGTERM_DCA):
         deployable_cash=0,
         cash_source="new settled USDT only",
         execution_blockers=("no_deployable_cash",),
-        decision_valid_until="2026-07-26T12:00:00+08:00",
-        review_due_at="2026-10-25T12:00:00+08:00",
+        decision_valid_until=(
+            "2026-07-25T12:04:00+08:00"
+            if intraday
+            else "2026-07-26T12:00:00+08:00"
+        ),
+        review_due_at=(
+            "2026-07-25T23:55:00+08:00"
+            if intraday
+            else "2026-10-25T12:00:00+08:00"
+        ),
         created_at=NOW,
         longterm_plan=longterm_plan() if mode == ResearchMode.LONGTERM_DCA else None,
+        intraday_plan=intraday_plan() if intraday else None,
         tactical_plan=tactical_plan()
         if mode in {ResearchMode.TACTICAL_1_7D, ResearchMode.EVENT_TRADE_1_3W}
         else None,
@@ -246,6 +296,107 @@ class RecommendationV2Test(unittest.TestCase):
         errors = []
         invalid_probability.validate(errors)
         self.assertIn("probability_event:n_lt_10_must_be_judgment_only", errors)
+
+    def test_probability_gate_uses_sample_tier_ev_and_risk_not_universal_80(self):
+        estimate = dataclasses.replace(
+            probability(),
+            probability_pct=62,
+            sample_size=18,
+            calibration_status="wide_interval",
+            probability_range_pct=(54, 70),
+            untouched_holdout=False,
+            lookahead_free=False,
+        )
+        decision = assess_tactical_current_decision(
+            estimate,
+            reward_risk_ratio=2.5,
+            realtime_signal_complete=True,
+            max_account_risk_pct=0.25,
+        )
+        self.assertEqual(decision["current_direct_decision"], "small_entry_now")
+        self.assertGreater(decision["conservative_expected_value_pct"], 0)
+
+    def test_calibrated_positive_lower_bound_can_enter_below_80(self):
+        estimate = dataclasses.replace(
+            probability(),
+            probability_pct=68,
+            probability_range_pct=(61, 74),
+        )
+        decision = assess_tactical_current_decision(
+            estimate,
+            reward_risk_ratio=2.5,
+            realtime_signal_complete=True,
+            max_account_risk_pct=0.5,
+        )
+        self.assertEqual(decision["current_direct_decision"], "enter_now")
+
+    def test_intraday_mode_requires_same_day_exit_and_fresh_quote(self):
+        item = recommendation(mode=ResearchMode.INTRADAY_SCALP)
+        self.assertEqual(item.validation_errors(evidence_snapshot=frozen_snapshot()), [])
+        overnight = dataclasses.replace(
+            item,
+            intraday_plan=dataclasses.replace(
+                item.intraday_plan,
+                latest_close_at="2026-07-26T01:00:00+08:00",
+            ),
+        )
+        self.assertIn("intraday_plan:same_day_close_required", overnight.validation_errors())
+
+    def test_intraday_leveraged_etf_without_underlying_confirmation_is_no_entry(self):
+        item = recommendation(mode=ResearchMode.INTRADAY_SCALP)
+        item = dataclasses.replace(
+            item,
+            intraday_plan=intraday_plan(
+                leveraged_etf=True,
+                underlying_confirmed=False,
+            ),
+            current_direct_decision=CurrentDirectDecision.DO_NOT_ENTER_NOW,
+            execution_blockers=("no_deployable_cash", "underlying_confirmation_missing"),
+        )
+        self.assertEqual(item.validation_errors(), [])
+        payload = item.to_dict()
+        self.assertEqual(payload["current_direct_decision"], "do_not_enter_now")
+        self.assertIn(
+            "underlying_confirmation_missing", payload["decision_reason_codes"]
+        )
+
+    def test_tactical_leveraged_etf_without_underlying_confirmation_is_no_entry(self):
+        item = recommendation(mode=ResearchMode.TACTICAL_1_7D)
+        item = dataclasses.replace(
+            item,
+            tactical_plan=tactical_plan(
+                leveraged_etf=True,
+                underlying_confirmed=False,
+            ),
+            current_direct_decision=CurrentDirectDecision.DO_NOT_ENTER_NOW,
+            execution_blockers=("no_deployable_cash", "underlying_confirmation_missing"),
+        )
+        self.assertEqual(item.validation_errors(), [])
+        payload = item.to_dict()
+        self.assertEqual(payload["current_direct_decision"], "do_not_enter_now")
+        self.assertIn(
+            "underlying_confirmation_missing", payload["decision_reason_codes"]
+        )
+
+    def test_missing_underlying_cannot_keep_entry_now_decision(self):
+        item = recommendation(mode=ResearchMode.INTRADAY_SCALP)
+        item = dataclasses.replace(
+            item,
+            intraday_plan=intraday_plan(
+                leveraged_etf=True,
+                underlying_confirmed=False,
+            ),
+        )
+        errors = item.validation_errors()
+        self.assertIn(
+            "current_direct_decision:do_not_enter_now_required_when_"
+            "underlying_confirmation_missing",
+            errors,
+        )
+        self.assertIn(
+            "execution_blockers:underlying_confirmation_missing_required",
+            errors,
+        )
 
     def test_event_trade_requires_explicit_event_exit_date(self):
         item = dataclasses.replace(

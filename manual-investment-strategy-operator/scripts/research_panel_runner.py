@@ -172,6 +172,10 @@ ACTION_BLOCKER_PATTERNS = [
     "target_research_pass",
     "double-80",
     "double_80",
+    "sample tier",
+    "conservative ev",
+    "reward/risk",
+    "realtime signal",
     "execute_now",
     "human confirmation",
     "live_orders",
@@ -797,7 +801,7 @@ def macro_role(context: dict[str, Any]) -> dict[str, Any]:
                     "us_tactical",
                     "macro",
                     "mixed",
-                    f"US tactical posture is {posture}; macro cannot bypass double-80 candidate gates.",
+                    f"US tactical posture is {posture}; macro cannot bypass sample-tier, conservative-EV, reward/risk, realtime-signal, or account-risk gates.",
                     "1d-10d",
                 ),
             ],
@@ -936,15 +940,17 @@ def us_equity_role(us_snapshot: dict[str, Any] | None, context: dict[str, Any]) 
     current = (us_snapshot or {}).get("current_tactical_position") or "current_tactical_position"
     signals = []
     for item in candidates[:3]:
-        probability = item.get("forecast_probability_pct")
-        readiness = item.get("execution_readiness_score")
+        setup_quality = item.get("setup_quality_score")
+        reward_risk = item.get("reward_risk_ratio")
+        sample_size = (item.get("probability_event") or {}).get("sample_size")
+        conservative_ev = item.get("conservative_expected_value_pct")
         action = item.get("monitor_recommendation")
         signals.append(
             signal(
                 item.get("symbol") or item.get("candidate_symbol"),
                 "tactical_alpha",
                 "neutral",
-                f"Candidate from US scanner has probability {probability}, readiness {readiness}, action {action}; not double-80.",
+                f"US discovery candidate has setup quality {setup_quality}, RR {reward_risk}, sample n={sample_size}, conservative EV={conservative_ev}, action {action}; scanner score is not probability.",
                 "1d-10d",
             )
         )
@@ -960,10 +966,10 @@ def us_equity_role(us_snapshot: dict[str, Any] | None, context: dict[str, Any]) 
         58 if candidates else 35,
         "degraded" if degraded else ("verified" if candidates else "missing"),
         ["complete Yahoo screener coverage", "US equity walk-forward base-rate evidence"] if degraded else ["US equity walk-forward base-rate evidence"],
-        ["double_80_not_met"],
+        ["sample_ev_signal_risk_gate_not_certified"],
         "watch",
         [
-            "A candidate beats current tactical position with forecast_probability_pct >=80 and execution_readiness_score >=80.",
+            "A candidate beats the current tactical position and passes sample-tier, positive conservative-EV, RR>=2, realtime-signal, and account-risk gates.",
             "SOXL reaches trim zone or valid pullback entry with confirmed semiconductor trend.",
         ],
     )
@@ -1399,7 +1405,7 @@ def main() -> int:
                 disconfirming_evidence.append(text)
     if not disconfirming_evidence:
         disconfirming_evidence = [
-            "No US equity dynamic candidate passed double-80.",
+            "No US equity dynamic candidate passed the sample-tier, conservative-EV, realtime-signal, and account-risk gates.",
             "Crypto multisource alpha scores do not support aggressive immediate deployment.",
             "Recommendation history has pending but not resolved evidence.",
         ]
@@ -1442,13 +1448,13 @@ def main() -> int:
                 for signal in output.get("signals", [])
                 if signal.get("direction") == "bearish" and signal.get("summary")
             ),
-            "Macro/liquidity weakens, ETH concentration drags, tactical candidates fail double-80, and pending recommendations lack evidence.",
+            "Macro/liquidity weakens, concentration drags, tactical candidates fail calibrated EV/risk gates, and pending recommendations lack evidence.",
         ),
         "disconfirming_evidence": disconfirming_evidence,
         "prior_thesis_status": prior_status,
         "arbiter_decision": (
             "No execute_now. Use the most conservative common action from the research roles; allow conditional DCA or tactical relay "
-            "only after trigger prices, data checks, double-80 gates, and human confirmation."
+            "only after trigger prices, data checks, sample-tier/EV/signal/risk gates, and human confirmation."
         ),
         "old_thesis_reuse_allowed": old_reuse_allowed,
         "missing_data_summary": missing_data,

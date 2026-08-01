@@ -15,6 +15,7 @@ Required:
 `request_mode` is exactly one of:
 
 - `longterm_dca`
+- `intraday_scalp`
 - `tactical_1_7d`
 - `event_trade_1_3w`
 - `existing_position_review`
@@ -45,6 +46,34 @@ must keep `live_gate_effect=none_until_promotion`. See
 
 Zero cash does not erase research preference or the current direct decision. It requires `execution_decision=no_deploy_cash`, `deployable_cash=0` and blocker `no_deployable_cash`.
 
+Serialized recommendations expose the fixed decision-first fields
+`best_candidate / research_decision / current_direct_decision / account_state /
+execution_decision / executable_amount`. Cash and execution permission may
+change only the execution fields, not the research winner.
+
+## RankedRecommendationSetV1
+
+For `intraday_scalp`, `tactical_1_7d` and `event_trade_1_3w`, the report layer
+must group validated RecommendationV2 records into one deterministic ranked
+set:
+
+- exactly one `primary_candidate` with `research_decision=preferred`;
+- zero to two `qualified_alternatives` with `research_decision=eligible`;
+- one shared `evidence_snapshot_id / strategy_version / config_hash`;
+- per candidate `rank / symbol / historical_win_rate_interval / sample_size /
+  conservative_expected_value / expected_return / profit_factor /
+  max_drawdown / reward_risk / liquidity_status / decision_valid_until`;
+- for each alternative, `why_ranked_lower` and the material metric delta versus
+  the primary;
+- `incumbent_symbol / supersedes_recommendation_id / switch_reason_codes` when
+  rank 1 changes.
+
+The compatibility field `best_candidate` remains the rank-1 symbol. Alternatives
+do not become simultaneous orders. Only the primary may be a current manual
+execution candidate; selecting an alternative requires a new timestamped deep
+dive and human confirmation. If fewer than three candidates pass the minimum
+historical-quality gate, omit the weak slots instead of filling them.
+
 ## LongTermDCAPlanV2
 
 Required only for `longterm_dca`:
@@ -60,6 +89,15 @@ Required only for `longterm_dca`:
 - `thesis_invalidation`
 
 Do not require tactical targets, price stop, trading session or event exit.
+
+## IntradayScalpPlanV2
+
+Required only for `intraday_scalp`: quote age no more than 60 seconds, closed
+1m and 5m timestamps, VWAP, opening range, relative volume, spread, bid/ask
+depth, market anchor, trigger, cancellation, stop, two targets, same-day latest
+close, maximum-loss budget and position size. Default decision validity is five
+minutes. Overnight is forbidden. A leveraged ETF requires confirmed underlying
+evidence; a binary event or thin/unverified book blocks entry.
 
 ## TacticalPlanV2
 
@@ -94,7 +132,13 @@ selection, market confirmation and invalidation. A DEX-only asset cannot be
 rejected merely because it lacks a CEX pair, but missing sellability, holder,
 LP or contract evidence blocks a theoretical current entry.
 
-Sample rules: `n<10` is `judgment_only`; `10–29` may be `wide_interval`; only `n≥30` without lookahead leakage may be `calibrated`.
+Sample rules: `n<10` is `judgment_only`; `10–29` must be `wide_interval`; only `n≥30` without lookahead leakage and with an untouched holdout may be `calibrated`.
+
+The action gate has no universal 80% threshold. Conservative EV is
+`p_target*target_return - p_stop*loss - friction`. A wide-interval sample may
+support only `small_entry_now` with positive conservative EV, R/R≥2, a complete
+realtime signal and account risk≤0.25%. `enter_now` additionally requires a
+calibrated untouched holdout, positive lower-bound EV and account risk≤0.5%.
 
 ## ExistingPositionReviewPlanV2
 
@@ -127,11 +171,12 @@ A rejected candidate is not a RecommendationV2. It must not contain probability,
 
 ## Report order
 
-1. current direct decision;
-2. research decision;
-3. execution decision and real amount;
-4. entry/holding/exit or review calendar;
-5. probability event and scenarios;
-6. evidence chain;
-7. local data downgrades;
-8. audit appendix.
+1. rank-1 current direct decision and one-line verdict;
+2. ranked primary plus qualified-alternative comparison;
+3. research decision;
+4. execution decision and real amount;
+5. entry/holding/exit or review calendar;
+6. probability event, historical validation and scenarios;
+7. evidence chain;
+8. local data downgrades;
+9. audit appendix.

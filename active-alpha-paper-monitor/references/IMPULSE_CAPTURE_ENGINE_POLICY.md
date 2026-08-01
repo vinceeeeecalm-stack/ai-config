@@ -6,6 +6,11 @@
 
 当前版本只允许输出 `watch / paper_only / conditional_action`。它不自动真实下单，不调用私有交易 API，不撤单，不移动真实资金。
 
+扫描执行采用快速漏斗：分钟级 K 线、成交、盘口和锚点可并行批量取数，
+先按 `DiscoveryCandidateV1.discovery_score` 返回 Top3；日线/4h 路径等深度
+风险计算只能作用于 Top3，Top1 之外不得运行完整深研。发现阶段不得计算
+预测概率、读取现金、运行完整融资审计或等待研究委员会。
+
 ## 能捕捉什么
 
 | 阶段 | 含义 | 典型信号 | 最高动作 |
@@ -24,10 +29,17 @@
 本轮动态扫描标记为 degraded，稳定币信号只能作为市场结构异常，不得进入
 机会排名。
 
+动态成交榜必须使用压缩的批量 24h 快照先做流动性预选，再只对预选交易对
+查询 `exchangeInfo` 与 top-of-book；发现阶段默认 12 个并行 worker、60 分钟
+基线加最新完整 5m 桶，完整 1%/2% 深度只查询 Top3。不得下载全市场盘口或
+为每个候选逐一获取完整深度来消耗十五秒预算。
+
 动态成交榜中的每个候选还必须通过 `exchangeInfo` 的
 `TRADING + isSpotTradingAllowed` 资格确认。仅有 ticker/行情但无法确认现货交易
 资格的代币化证券、失效交易对或异常代码必须写入淘汰审计，不能进入 Crypto
-机会排名。动态池还要用公开资产身份目录交叉检查；一旦同 symbol 出现 ETF、
+机会排名。发现阶段先对 bStocks 等 `B/ON` 证券化身份后缀做保守隔离；有争议的
+标的只能在后续验证中通过公开资产身份目录重新证明其为原生 crypto。公开目录
+一旦显示同 symbol 出现 ETF、
 公司股票、Backpack Securities、Robinhood Token 或 tokenized equity 身份，
 即使交易所行情端点可用，也从 Crypto 候选中排除并记录身份匹配。公共主端点
 出现 418、地域或限流错误时，可按固定顺序回退到 Binance
@@ -85,6 +97,7 @@ Binance 缺少交易对不得让资产从 observation pool 消失。无法获得
 ## 概率和动作约束
 
 - `impulse_score_points` 只是异动强度，不是预测概率。
+- scanner 不得从 `impulse_score_points`、研究信心或执行准备度推导预测概率。
 - 只有积累足够历史样本、paper 命中记录和当前多源确认后，manual skill 才能把某个动作升级为真实操作草案。
 - `conditional_action` 表示“人工确认后可考虑”，不是自动买入。
 - 如果缺少盘口、成交额或 K 线新鲜数据，最高只能 `watch`。

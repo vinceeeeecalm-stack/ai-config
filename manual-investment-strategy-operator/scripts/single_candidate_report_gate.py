@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the compact single-best-candidate report contract."""
+"""Validate a primary tactical candidate plus up to two qualified alternatives."""
 
 from __future__ import annotations
 
@@ -24,6 +24,8 @@ ALLOWED_PROBABILITY_TYPES = {
     "judgment_only",
     "unavailable",
 }
+ALLOWED_CURRENT_DECISIONS = {"enter_now", "small_entry_now", "do_not_enter_now"}
+ALLOWED_MODES = {"single_best_candidate", "ranked_best_candidate"}
 
 
 def _present(value: Any) -> bool:
@@ -50,7 +52,8 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
 
-    if payload.get("mode") != "single_best_candidate":
+    mode = payload.get("mode")
+    if mode not in ALLOWED_MODES:
         errors.append("invalid:mode")
     if "candidates" in payload:
         errors.append("invalid:multiple_candidates_not_allowed")
@@ -78,6 +81,14 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
             "probability_provenance",
             "invalidation",
             "funding",
+            "best_candidate",
+            "research_decision",
+            "current_direct_decision",
+            "account_state",
+            "execution_decision",
+            "executable_amount",
+            "reward_risk_ratio",
+            "realtime_signal_complete",
         ],
         "candidate.",
         errors,
@@ -85,6 +96,11 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
 
     if candidate.get("verdict") not in ALLOWED_VERDICTS:
         errors.append("invalid:candidate.verdict")
+    direct_decision = candidate.get("current_direct_decision")
+    if direct_decision not in ALLOWED_CURRENT_DECISIONS:
+        errors.append("invalid:candidate.current_direct_decision")
+    if candidate.get("best_candidate") != candidate.get("symbol"):
+        errors.append("invalid:candidate.best_candidate")
     _parse_iso(candidate.get("price_as_of"), "candidate.price_as_of", errors)
 
     evidence = candidate.get("evidence_chain", [])
@@ -155,18 +171,49 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(provenance, dict):
         _require(
             provenance,
-            ["probability_type", "method", "sample_size", "base_rate", "adjustments", "limitations"],
+            [
+                "probability_type",
+                "method",
+                "sample_size",
+                "base_rate",
+                "adjustments",
+                "limitations",
+                "calibration_status",
+                "conservative_expected_value_pct",
+            ],
             "probability_provenance.",
             errors,
         )
         probability_type = provenance.get("probability_type")
         if probability_type not in ALLOWED_PROBABILITY_TYPES:
             errors.append("invalid:probability_provenance.probability_type")
-        if probability_type in {"judgment_only", "unavailable"} and candidate.get("verdict") == "small_entry_allowed":
-            errors.append("invalid:uncalibrated_probability_cannot_allow_entry")
         sample_size = provenance.get("sample_size")
-        if isinstance(sample_size, (int, float)) and sample_size < 20:
+        calibration = provenance.get("calibration_status")
+        if isinstance(sample_size, (int, float)) and sample_size < 10:
+            if direct_decision != "do_not_enter_now":
+                errors.append("invalid:judgment_only_cannot_allow_entry")
+        elif isinstance(sample_size, (int, float)) and sample_size < 30:
+            interval = provenance.get("probability_range_pct")
+            if calibration != "wide_interval" or not isinstance(interval, list) or len(interval) != 2:
+                errors.append("invalid:n_10_29_requires_wide_interval")
+            if direct_decision == "enter_now":
+                errors.append("invalid:wide_interval_max_small_entry_now")
             warnings.append("low_sample_size_use_wide_probability_range")
+        elif isinstance(sample_size, (int, float)):
+            if direct_decision == "enter_now" and (
+                calibration != "calibrated"
+                or provenance.get("untouched_holdout") is not True
+                or provenance.get("lookahead_free") is not True
+            ):
+                errors.append("invalid:enter_now_requires_calibrated_untouched_holdout")
+        if direct_decision in {"enter_now", "small_entry_now"}:
+            ev = provenance.get("conservative_expected_value_pct")
+            if not isinstance(ev, (int, float)) or ev <= 0:
+                errors.append("invalid:entry_requires_positive_conservative_ev")
+            if not isinstance(candidate.get("reward_risk_ratio"), (int, float)) or candidate["reward_risk_ratio"] < 2:
+                errors.append("invalid:entry_requires_reward_risk_gte_2")
+            if candidate.get("realtime_signal_complete") is not True:
+                errors.append("invalid:entry_requires_complete_realtime_signal")
     else:
         errors.append("invalid:candidate.probability_provenance")
 
@@ -174,20 +221,135 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(funding, dict):
         _require(funding, ["deployable_cash", "cash_source", "position_size", "settlement_constraint"], "funding.", errors)
         cash = funding.get("deployable_cash")
-        if candidate.get("verdict") == "small_entry_allowed" and (not isinstance(cash, (int, float)) or cash <= 0):
-            errors.append("invalid:entry_allowed_without_deployable_cash")
+        expected_amount = cash if candidate.get("execution_decision") == "manual_execute_candidate" else 0
+        if candidate.get("executable_amount") != expected_amount:
+            errors.append("invalid:executable_amount_mismatch")
+        if (not isinstance(cash, (int, float)) or cash <= 0) and candidate.get("execution_decision") != "no_deploy_cash":
+            errors.append("invalid:zero_cash_requires_no_deploy_cash")
     else:
         errors.append("invalid:candidate.funding")
+
+    ranking_context = payload.get("ranking_context")
+    if mode == "ranked_best_candidate":
+        if not isinstance(ranking_context, dict):
+            errors.append("missing:ranking_context")
+            ranking_context = {}
+        else:
+            _require(
+                ranking_context,
+                [
+                    "evidence_snapshot_id",
+                    "strategy_version",
+                    "generated_at",
+                    "ranking_method",
+                    "short_term_business_goal",
+                    "historical_validation_first",
+                    "deterministic_input_hash",
+                    "primary_rank_reason",
+                ],
+                "ranking_context.",
+                errors,
+            )
+            _parse_iso(
+                ranking_context.get("generated_at"),
+                "ranking_context.generated_at",
+                errors,
+            )
+            if ranking_context.get("historical_validation_first") is not True:
+                errors.append("invalid:ranking_context.historical_validation_first")
+            if ranking_context.get("short_term_business_goal") != (
+                "tactical_sleeve_monthly_roi_100pct_attack_goal"
+            ):
+                errors.append("invalid:ranking_context.short_term_business_goal")
 
     runners_up = payload.get("runners_up", [])
     if not isinstance(runners_up, list) or len(runners_up) > 2:
         errors.append("invalid:runners_up_max_two")
+        runners_up = []
+    if mode == "ranked_best_candidate":
+        seen_symbols = {str(candidate.get("symbol") or "")}
+        snapshot_id = (
+            ranking_context.get("evidence_snapshot_id")
+            if isinstance(ranking_context, dict)
+            else None
+        )
+        for index, alternative in enumerate(runners_up):
+            prefix = f"runners_up[{index}]."
+            if not isinstance(alternative, dict):
+                errors.append(f"invalid:runners_up[{index}]")
+                continue
+            _require(
+                alternative,
+                [
+                    "rank",
+                    "symbol",
+                    "asset_class",
+                    "sample_size",
+                    "historical_win_rate_pct",
+                    "win_rate_interval_pct",
+                    "conservative_expected_value_pct",
+                    "expected_return_pct",
+                    "max_drawdown_pct",
+                    "profit_factor",
+                    "reward_risk_ratio",
+                    "liquidity_status",
+                    "current_direct_decision",
+                    "decision_valid_until",
+                    "evidence_snapshot_id",
+                    "why_ranked_lower",
+                ],
+                prefix,
+                errors,
+            )
+            symbol = str(alternative.get("symbol") or "")
+            if symbol in seen_symbols:
+                errors.append(f"invalid:{prefix}duplicate_symbol")
+            seen_symbols.add(symbol)
+            if alternative.get("rank") != index + 2:
+                errors.append(f"invalid:{prefix}rank")
+            if alternative.get("evidence_snapshot_id") != snapshot_id:
+                errors.append(f"invalid:{prefix}snapshot_mismatch")
+            _parse_iso(
+                alternative.get("decision_valid_until"),
+                f"{prefix}decision_valid_until",
+                errors,
+            )
+            sample_size = alternative.get("sample_size")
+            if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 30:
+                errors.append(f"invalid:{prefix}sample_size_min_30")
+            win_rate = alternative.get("historical_win_rate_pct")
+            if not isinstance(win_rate, (int, float)) or isinstance(win_rate, bool) or not 0 <= win_rate <= 100:
+                errors.append(f"invalid:{prefix}historical_win_rate_pct")
+            interval = alternative.get("win_rate_interval_pct")
+            if (
+                not isinstance(interval, list)
+                or len(interval) != 2
+                or not all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in interval)
+                or interval[0] >= interval[1]
+            ):
+                errors.append(f"invalid:{prefix}win_rate_interval_pct")
+            conservative_ev = alternative.get("conservative_expected_value_pct")
+            if not isinstance(conservative_ev, (int, float)) or conservative_ev <= 0:
+                errors.append(f"invalid:{prefix}positive_conservative_ev_required")
+            reward_risk = alternative.get("reward_risk_ratio")
+            if not isinstance(reward_risk, (int, float)) or reward_risk < 2:
+                errors.append(f"invalid:{prefix}reward_risk_gte_2_required")
+            profit_factor = alternative.get("profit_factor")
+            if not isinstance(profit_factor, (int, float)) or profit_factor <= 1:
+                errors.append(f"invalid:{prefix}profit_factor_gt_1_required")
+            if alternative.get("current_direct_decision") not in ALLOWED_CURRENT_DECISIONS:
+                errors.append(f"invalid:{prefix}current_direct_decision")
+            reasons = alternative.get("why_ranked_lower")
+            if not isinstance(reasons, list) or not reasons:
+                errors.append(f"invalid:{prefix}why_ranked_lower")
 
     return {
         "status": "pass" if not errors else "fail",
         "errors": errors,
         "warnings": warnings,
         "allowed_max_action": candidate.get("verdict") if not errors else "no_qualified_trade",
+        "primary_symbol": candidate.get("symbol") if not errors else None,
+        "qualified_alternative_count": len(runners_up) if not errors else 0,
     }
 
 

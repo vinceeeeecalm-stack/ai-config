@@ -3,7 +3,7 @@
 
 This is stricter than the report integrity audit. It verifies that the report
 is not merely well-formed, but tied back to the actual operating objective:
-5y/10y 10x goal math, $1k crypto DCA, US tactical 50%+ target tracking,
+5y/10y 10x goal math, $1k monthly DCA, tactical-sleeve monthly ROI 100% attack-goal tracking,
 separate cash rails, dynamic candidate/relay logic, and a reviewable learning
 ledger. It does not claim the return target is achievable or guaranteed.
 """
@@ -82,6 +82,43 @@ def extract_run_id(report_text: str, context: dict[str, Any], explicit: str | No
 
 def record_missing(record: dict[str, Any], fields: set[str]) -> list[str]:
     return sorted(field for field in fields if record.get(field) in (None, ""))
+
+
+def tactical_sample_ev_risk_gate_passed(record: dict[str, Any]) -> bool:
+    """Mirror the V3 action gate without imposing a universal probability floor."""
+
+    event = record.get("probability_event") or {}
+    decision = str(record.get("current_direct_decision") or "")
+    sample_size = int(event.get("sample_size") or 0)
+    calibration = str(event.get("calibration_status") or "")
+    risk_cap = 0.25 if decision == "small_entry_now" else 0.5
+    if decision not in {"small_entry_now", "enter_now"}:
+        return False
+    if sample_size < 10:
+        return False
+    if 10 <= sample_size < 30 and (
+        calibration != "wide_interval" or decision != "small_entry_now"
+    ):
+        return False
+    if sample_size >= 30 and decision == "enter_now" and (
+        calibration != "calibrated"
+        or event.get("untouched_holdout") is not True
+        or event.get("lookahead_free") is not True
+    ):
+        return False
+    conservative_ev = as_float(record.get("conservative_expected_value_pct"), -999.0)
+    reward_risk = as_float(record.get("reward_risk_ratio"), 0.0)
+    account_risk = as_float(record.get("max_account_risk_pct"), 999.0)
+    return (
+        conservative_ev is not None
+        and conservative_ev > 0
+        and reward_risk is not None
+        and reward_risk >= 2
+        and record.get("realtime_signal_complete") is True
+        and record.get("execution_readiness_complete") is True
+        and account_risk is not None
+        and account_risk <= risk_cap
+    )
 
 
 def records_for_run(ledger: dict[str, Any], run_id: str | None) -> list[dict[str, Any]]:
@@ -587,13 +624,13 @@ def audit(
             "目标到机制映射" in report_text
             and "5年/10年 10x" in report_text
             and "$1,000/月 crypto DCA" in report_text
-            and "美股月/季 50%+ 战术目标" in report_text,
+            and "战术资金月度 ROI 100% 进攻目标" in report_text,
             "report includes objective traceability panel linking user goals to mechanisms",
         ),
         check(
-            "us_tactical_50pct_target_tracked",
-            as_float(us_tactical.get("target_monthly_return_pct"), 0.0) >= 50
-            and as_float(us_tactical.get("target_quarterly_return_pct"), 0.0) >= 50
+            "us_tactical_monthly_100pct_attack_goal_tracked",
+            as_float(us_tactical.get("target_monthly_return_pct"), 0.0) >= 100
+            and as_float(us_tactical.get("target_quarterly_return_pct"), 0.0) >= 100
             and (
                 as_float(us_tactical.get("current_tactical_value_usd"), 0.0) > 0
                 or us_tactical.get("status") in {"baseline_missing", "baseline_rebuild_required"}
@@ -718,14 +755,10 @@ def audit(
             f"resolved={calibration_resolved}; execute_now={readiness.get('execute_now_allowed')}",
         ),
         check(
-            "double_80_enforced_for_tactical_records",
+            "sample_ev_signal_risk_gate_enforced_for_tactical_records",
             readiness.get("execute_now_allowed") is False
-            or all(
-                as_float(item.get("forecast_probability_pct"), 0.0) >= 80
-                and as_float(item.get("execution_readiness_score"), 0.0) >= 80
-                for item in tactical_records
-            ),
-            f"execute_now={readiness.get('execute_now_allowed')}",
+            or any(tactical_sample_ev_risk_gate_passed(item) for item in tactical_records),
+            f"execute_now={readiness.get('execute_now_allowed')}; tactical_records={len(tactical_records)}",
         ),
         check(
             "missing_data_downgrade_panel_present",

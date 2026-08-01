@@ -17,9 +17,10 @@ class HorizonRouterV2Test(unittest.TestCase):
             requested_at="2026-07-25T12:00:00+08:00",
         )
 
-    def test_all_five_modes_route_deterministically(self):
+    def test_all_six_modes_route_deterministically(self):
         cases = {
             "长期 DCA 定投分析": ResearchMode.LONGTERM_DCA,
+            "给我盘中几分钟的日内机会": ResearchMode.INTRADAY_SCALP,
             "给我一周短线计划": ResearchMode.TACTICAL_1_7D,
             "分析下一次财报交易": ResearchMode.EVENT_TRADE_1_3W,
             "这个现有仓位继续持有吗": ResearchMode.EXISTING_POSITION_REVIEW,

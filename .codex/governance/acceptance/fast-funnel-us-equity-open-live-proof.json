@@ -1,0 +1,26 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-us-equity-open-live-proof",
+  "title": "当前源码摘要在美股正常开盘中通过实时只读快速漏斗",
+  "level": "BUSINESS_READY",
+  "preconditions": [
+    "验证对象是冻结目标的当前源码摘要",
+    "美股处于正常常规交易时段",
+    "扫描只读且真实下单能力关闭"
+  ],
+  "steps": [
+    "以 --assert-runtime-contract --require-open-session 运行公开只读美股动态扫描",
+    "保存会话状态、报价时间、阶段计时、完整 Top1 卡和安全字段"
+  ],
+  "expected": [
+    "market_session.state 等于 open_live 且报价在决策时不超过六十秒",
+    "Top3 发现不超过十五秒、Top1 验证不超过四十五秒、完整卡不超过一百二十秒、总耗时不超过一百八十秒",
+    "Top1 卡含入场、失效、止损、目标、期限、过期时间、置信度、风险收益、风险等级、数据时间和显式阻断项",
+    "live_orders_enabled 保持 false 且没有任何真实订单副作用"
+  ],
+  "evidence": [
+    "同一源码摘要的 exact command 和 exit status",
+    "open_live 会话分类与新鲜报价时间戳",
+    "阶段计时、完整 Top1 卡和 live_orders=false"
+  ]
+}

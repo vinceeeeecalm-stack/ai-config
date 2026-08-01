@@ -1205,7 +1205,7 @@ def main() -> int:
     check(
         checks,
         "us_tactical_50pct_goal",
-        "US equity tactical sleeve tracks monthly/quarterly 50%+ target separately from long-term protected holdings.",
+        "The tactical sleeve tracks the monthly ROI 100% attack goal separately from long-term protected holdings and DCA principal.",
         "proven" if us_state.get("monthly_gap_usd") is not None and "CRCL" in (us_state.get("protected_symbols_excluded") or []) else "missing",
         f"sleeve={us_state.get('sleeve_id')}; current={us_state.get('current_tactical_value_usd')}; monthly_gap={us_state.get('monthly_gap_usd')}; cash_drag={us_state.get('tactical_cash_drag_pct')}; protected={us_state.get('protected_symbols_excluded')}; data_quality={us_state.get('data_quality')}",
         "warning" if us_state.get("data_quality") == "degraded_user_stated_cash" else "pass",
@@ -1573,12 +1573,11 @@ def main() -> int:
     check(
         checks,
         "progressive_learning_mechanism",
-        "System may start with 60%-79% reviewable samples and improve toward 80%+ through repeated dispatch, paper review, and outcome attribution.",
+        "System may start with judgment-only evidence, graduate to wide intervals at n=10-29, and use calibrated untouched holdouts at n>=30.",
         "proven"
         if manual_learning_cfg.get("enabled") is True
         and learning_state.get("status") == "active"
-        and learning_state.get("learning_floor_pct") == 60
-        and learning_state.get("validated_probability_target_pct") == 80
+        and learning_state.get("validated_probability_target_pct") is None
         and file_exists(ACTIVE_ROOT / "scripts" / "validation_progress_runner.py")
         and file_exists(ACTIVE_ROOT / "scripts" / "validation_sample_auditor.py")
         else "missing",
@@ -1591,7 +1590,7 @@ def main() -> int:
             f"runner_mode={paper_calendar.get('recommended_runner_mode')}"
         ),
         "pass" if learning_state.get("status") == "active" else "warning",
-        "Keep resolving paper trades and recommendation outcomes; do not upgrade live actions until calibrated 80%+ evidence exists.",
+        "Keep resolving paper trades and recommendation outcomes; do not upgrade actions until the applicable sample, EV, signal and risk gates pass.",
     )
     progressive_iteration_cfg = manual_config.get("progressive_learning_iteration_audit") or {}
     progressive_iteration_script = MANUAL_ROOT / "scripts" / "progressive_learning_iteration_audit.py"

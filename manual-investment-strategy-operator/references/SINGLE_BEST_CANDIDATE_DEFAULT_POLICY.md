@@ -1,8 +1,8 @@
-# Single Best Candidate Default Policy
+# Ranked Best Candidate Default Policy
 
 ## Purpose
 
-Use this mode when the user asks for the best current US equity or crypto opportunity without requesting a full portfolio report. Scan broadly, decide narrowly, and return one decision-ready candidate.
+Use this mode when the user asks for the best current US equity or crypto opportunity without requesting a full portfolio report. The filename remains for compatibility. Scan broadly, choose one clear primary recommendation, and expose up to two additional candidates only when they pass the same minimum historical-quality gate.
 
 ## Trigger And Scope
 
@@ -22,7 +22,10 @@ Do not trigger when the user explicitly requests a complete portfolio report, mu
 3. Verify near-term information catalysts from primary sources where possible.
 4. Check macro/sector or BTC/ETH regime, financing/dilution or unlock/regulatory risk, and portfolio/funding fit.
 5. Rank candidates on catalyst quality, trend persistence, entry quality, liquidity, downside asymmetry and evidence quality. Ranking score is not a probability.
-6. Expose exactly one primary candidate. Keep at most two runners-up in one sentence explaining why they lost.
+6. Expose exactly one rank-1 primary candidate and up to two qualified alternatives. Do not fill rank 2 or 3 with weak candidates merely to create choice.
+7. Run point-in-time historical conditioning for every exposed candidate. The primary receives the complete deep dive; alternatives must still disclose the same-comparison sample size, out-of-sample win-rate interval, conservative EV, expected return, Profit Factor, drawdown, reward/risk and liquidity status.
+8. Rank by conservative EV and target-compatible return after friction, with explicit penalties for drawdown, instability, poor liquidity and switching from a still-valid incumbent. Raw win rate alone cannot win the ranking.
+9. Preserve the incumbent unless a challenger has a material, reproducible evidence advantage. The same snapshot, config and strategy version must reproduce the same ranking.
 
 Recent strong performance is a discovery signal, not an automatic buy signal. Reject an extended candidate when the remaining upside no longer compensates for the stop or event gap.
 
@@ -49,15 +52,17 @@ Rules:
 
 Keep the main report in this order:
 
-1. **One-line verdict**: symbol, asset class and one of `可以买一小仓 / 等指定价格再买 / 只管理已有仓位 / 目前没有值得交易的标的`.
-2. **What it is**: explain the business/protocol in two plain sentences.
-3. **Why this one now**: three to six decision-driving items labelled `事实 / 推导 / 判断`, each with source time.
-4. **Entry plan**: current price/time, primary and optional secondary entry, exact trigger, allowed session, start/end and do-not-chase rule.
-5. **Exit plan**: target 1/action/window, target 2/action/window, price stop, thesis invalidation, time stop and latest exit/review.
-6. **Three scenarios**: bull/base/bear, weights totaling 100, price range, date window and drivers.
-7. **Probability method**: sample, base rate, adjustments, limitations and whether the result is measured or judgment-only.
-8. **Funding**: current settled cash, legal funding source, position size and settlement constraint.
-9. **What would change the decision**: maximum three observable conditions.
+1. **One-line verdict**: rank-1 symbol, asset class and one of `可以买一小仓 / 等指定价格再买 / 只管理已有仓位 / 目前没有值得交易的标的`.
+2. **Ranked choice table**: primary plus zero to two qualified alternatives, with win-rate interval, conservative EV, expected return, drawdown, reward/risk, validity window and one-line rank reason.
+3. **What the primary is**: explain the business/protocol in two plain sentences.
+4. **Why the primary ranks first now**: three to six decision-driving items labelled `事实 / 推导 / 判断`, each with source time.
+5. **Primary entry plan**: current price/time, primary and optional secondary entry, exact trigger, allowed session, start/end and do-not-chase rule.
+6. **Primary exit plan**: target 1/action/window, target 2/action/window, price stop, thesis invalidation, time stop and latest exit/review.
+7. **Three primary scenarios**: bull/base/bear, weights totaling 100, price range, date window and drivers.
+8. **Probability and history method**: point-in-time sample, walk-forward windows, untouched holdout, base rate, interval, adjustments, limitations and simulation/paper/live evidence labels.
+9. **Why alternatives rank lower**: for each alternative, identify the exact disadvantage in probability, conservative EV, return space, drawdown, liquidity, catalyst quality or entry location.
+10. **Funding**: current settled cash, legal funding source, position size and settlement constraint.
+11. **What would change the decision**: maximum three observable conditions, including the challenger threshold required to replace the incumbent.
 
 Before the one-line verdict, the internal candidate must set
 `current_direct_decision=enter_now / small_entry_now / do_not_enter_now`.
@@ -66,7 +71,20 @@ signal may only describe the next review and cannot be the primary entry
 instruction. With zero settled cash, keep the theoretical current decision but
 set the real execution amount to zero.
 
-Put committee coverage, data-source failures and runners-up in a compact appendix. Do not make the user reconstruct the conclusion from the appendix.
+Put committee coverage and data-source failures in a compact appendix. Qualified alternatives are a user decision surface and must stay in the main report, not be hidden in the appendix.
+
+## Qualified Alternative Gate
+
+An alternative may appear only when all of the following hold:
+
+- at least 30 no-lookahead observations with an untouched holdout;
+- positive conservative EV after fees, spread and slippage;
+- reward/risk at least 2 and Profit Factor above 1;
+- current liquidity is verified and the decision window has not expired;
+- the historical simulation, forward paper and any real outcome remain separately labelled;
+- the report gives at least one material reason it ranks below the primary.
+
+If only the primary passes, output one candidate. If none passes the formal action gate, still name the highest-ranked research candidate and its reopening trigger, but do not label it high-confidence or immediately executable.
 
 ## Action Semantics
 
@@ -88,4 +106,4 @@ python3 scripts/historical_cycle_event_conditioning_gate.py --input candidate.js
 python3 scripts/single_candidate_report_gate.py --input candidate.json
 ```
 
-The gate must confirm one candidate, three evidence types, fresh price/time, dated entry and exit, exactly three scenarios totaling 100, probability provenance and real funding constraints.
+The gate must confirm one primary candidate, zero to two qualified alternatives, three evidence types, fresh price/time, dated entry and exit, exactly three primary scenarios totaling 100, historical/probability provenance, deterministic ranking context and real funding constraints.

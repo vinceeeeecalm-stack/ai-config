@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-probability-no-deadlock",
+  "title": "强候选不会因扫描器概率上限与统一门槛永久降级",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["候选具有完整实时信号、收益风险至少二比一和正的保守期望值"],
+  "steps": ["运行发现、验证和 Manual 决策门", "分别覆盖少于十、十至二十九和至少三十个无前视样本"],
+  "expected": ["发现阶段只输出 discovery_score 或 setup_quality_score", "不存在 min(68, ...) 或统一百分之八十门槛", "样本分层可得到 judgment_only、wide_interval 或 calibrated 对应动作"],
+  "evidence": ["单元测试", "固定历史夹具", "概率和动作审计字段"]
+}

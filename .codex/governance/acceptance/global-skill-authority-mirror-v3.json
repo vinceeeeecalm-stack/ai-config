@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "global-skill-authority-mirror-v3",
+  "title": "全局 Skill 是 GitHub 权威源码的只读安装镜像",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["GitHub main 权威版本可读取"],
+  "steps": ["从权威源码同步 Manual、Active 和治理 Skill", "运行结构校验和 smoke", "比较内容哈希"],
+  "expected": ["全局与权威源码哈希一致", "全局目录无独立漂移", "$manual-investment-strategy-operator 可直接唤起"],
+  "evidence": ["安装 manifest", "Skill 校验与 smoke 结果"]
+}

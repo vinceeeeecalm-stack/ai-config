@@ -12,7 +12,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 - 只使用公开或授权只读数据、paper、dry-run 或 testnet。
 - 禁止真实下单、撤单、提现、margin、futures、perpetual、跨账户转账或暴露 API key。
 - 社交、叙事、funding/OI、trending 和单条新闻只能排序或降级候选，不能单独授权真钱动作。
-- Handoff 的最高动作是 `watch / paper_only / risk_alert`；Manual 必须重新仲裁。
+- Handoff 的 `watch / paper_only / risk_alert` 仅是内部研究标签，不得原样暴露为用户正式动作；Manual 必须重新仲裁为 `ENTER_NOW / WAIT_FOR_ENTRY / NO_TRADE`。
 - `live_orders_enabled=false`、`private_api_used=false`、`human_confirmation_required=true` 是不可覆盖的不变量。
 
 ## 请求路由
@@ -39,12 +39,12 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
    美国 crypto 法案或监管催化必须运行
    `scripts/us_crypto_legislative_event_radar.py`，区分院别、委员会、正式
    floor schedule 与二级市场传闻；周末必须前看 72 小时。
-4. 对候选运行当前信号、无前视历史验证、摩擦压力和微观结构检查。
+4. 对候选运行当前信号、无前视历史验证、摩擦压力和微观结构检查。Discovery Top3 必须使用同一历史口径生成可比较摘要：样本数、样本外胜率区间、保守 EV、预期回报、Profit Factor、回撤、流动性和稳定性；不得只给 discovery score。
    需要评估 Sharpe 时，调用 `scripts/risk_adjusted_path_quality.py`，
    保留基础排名与调整后排名；不得把路径分数映射成概率或公允价值。
 5. 运行 paper 风险、容量和 recovery gate；失败时保留 blocked candidate 和明确原因。
 6. 每个冻结候选写 ObservationSampleV1；只有可复现的 Paper fill 写 TradeSampleV1。
-7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan。
+7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan；walk-forward 与 Paper 统一封装为 `RegressionEvidenceV1`。
 8. Manual V3 重新读取持仓、现金、长期目标和风险门后，才可形成研究/执行双轨结论。
 9. 到期 paper 复盘记录触发、MFE、MAE、止损/目标先后、费用、滑点和事件跳空。
 
@@ -69,9 +69,13 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 - `entry_observation / targets / stop / time_stop / event_plan`
 - `liquidity / derivatives_or_options / financing_dilution / historical_conditioning`
 - `validation_status / paper_status / blockers`
+- `rank / historical_comparison_summary / why_ranked_below_primary`（进入用户备选集时必填）
 - `max_active_action`
+- `RegressionEvidenceV1`，且与候选共同绑定 `snapshot_id / strategy_version / config_digest / source_digest`
 
-判断概率与 Bull/Base/Bear 情景概率必须分开；小样本不得宣称 calibrated 或 80% 高胜率。
+判断概率与 Bull/Base/Bear 情景概率必须分开；小样本不得宣称 calibrated 或 80% 高胜率。Active 只提供 Top3 的同口径历史比较，Manual 决定一个主推荐和最多两个高质量备选；不得把 Top3 同时解释为三个执行订单。
+
+`RegressionEvidenceV1.mode` 只允许 `historical_walkforward / forward_paper`，并强制 `formal_action_eligible=false` 与 `paper_live_separated=true`。Active 不生成 `LiveInvestmentDecisionV1` 或 `InvestmentOutcomeStatusV2`，也不判断用户真钱动作。
 
 ## Paper 与学习
 

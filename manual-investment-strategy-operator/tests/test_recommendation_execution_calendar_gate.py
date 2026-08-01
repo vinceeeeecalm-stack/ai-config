@@ -46,6 +46,21 @@ class RecommendationExecutionCalendarGateTest(unittest.TestCase):
         self.assertIn("decision_price", result["missing_fields"])
         self.assertIn("decision_price must be a positive numeric frozen price", result["errors"])
 
+    def test_leveraged_etf_missing_underlying_returns_structured_no_entry_gate(self) -> None:
+        result = MODULE.leveraged_etf_underlying_gate(
+            {
+                "leveraged_etf": True,
+                "underlying_symbol": "QQQ",
+                "underlying_confirmed": False,
+            }
+        )
+        self.assertEqual(result["status"], "blocked")
+        self.assertFalse(result["entry_allowed"])
+        self.assertEqual(
+            result["required_current_direct_decision"], "do_not_enter_now"
+        )
+        self.assertIn("underlying_confirmation_missing", result["reason_codes"])
+
 
 if __name__ == "__main__":
     unittest.main()

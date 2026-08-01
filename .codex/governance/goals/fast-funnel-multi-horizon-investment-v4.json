@@ -1,0 +1,50 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "fast-funnel-multi-horizon-investment-v4",
+  "title": "完成跨市场快速漏斗、固定回放与可安装投资 skill 交付",
+  "business_outcome": "在美股未开盘时，以已通过的公开最近交易时段只读验证完成当前投资 skill 交付；保留动态候选、概率分层、日内模式、长期下一美元排名、完整 Top1 卡和安全门，并把同摘要美股 open_live 证明留作后续增强",
+  "scope": [
+    "保留 fast-funnel-multi-horizon-investment-v3 中除 open_live 专项证明外的十六项验收行为",
+    "美股关闭时继续如实标记 closed_or_stale_last_session，并以公开最近交易时段证明快速漏斗和完整卡",
+    "保持美股和加密快速漏斗的十五秒、四十五秒、一百二十秒和一百八十秒阶段预算",
+    "保持固定 risk-on、risk-off、高开跳空回放、动态长期下一美元排名和概率分层",
+    "保持工作区与已安装 skill manifest 一致、负向安全 smoke 有效且真实下单关闭"
+  ],
+  "non_goals": [
+    "本轮不要求等待美股下一次正常开盘取得同摘要 open_live 专项证明；该证明作为后续增强保留",
+    "自动真实下单、撤单、转账、融资、卖空、期权、期货或永续",
+    "承诺月度百分之五十收益或把扫描分数伪装成校准概率",
+    "把周末、盘前或盘后数据伪装成正常开盘实时行情"
+  ],
+  "constraints": [
+    "只使用公开或授权只读数据且 live_orders_enabled 始终为 false",
+    "发现阶段不运行概率、委员会、账户现金或完整融资审计",
+    "网络源失败只能局部降级，不能清空其他成功来源候选",
+    "市场关闭时不得输出 enter_now 或伪造六十秒内美股报价",
+    "高风险 BUSINESS_READY 必须由不同 CODEX_THREAD_ID 对同一摘要只读复验"
+  ],
+  "acceptance_scenario_ids": [
+    "fast-funnel-probability-no-deadlock",
+    "fast-funnel-top3-risk-scope",
+    "fast-funnel-30-crypto-performance",
+    "fast-funnel-ineligible-assets-excluded",
+    "fast-funnel-source-failure-resilience",
+    "decision-zero-cash-research-preserved",
+    "decision-realtime-price-authority",
+    "intraday-scalp-same-day-exit",
+    "leveraged-etf-underlying-required",
+    "gap-report-null-safe",
+    "committee-degraded-discovery-preserved",
+    "longterm-dynamic-next-dollar-ranking",
+    "longterm-risk-off-cash-winner",
+    "safety-live-orders-disabled",
+    "fast-funnel-us-equity-live-performance",
+    "fast-funnel-fixed-replay-risk-regimes"
+  ],
+  "required_level": "BUSINESS_READY",
+  "risk": "high",
+  "supersedes_id": "fast-funnel-multi-horizon-investment-v3",
+  "frozen_at": "2026-08-01T04:02:34.632435Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "3e77f6621a10401f5c57ba5bc29f06d377058678cb7ca01e35f518447abbcdc8"
+}

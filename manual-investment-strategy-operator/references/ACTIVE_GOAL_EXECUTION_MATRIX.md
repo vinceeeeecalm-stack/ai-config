@@ -21,7 +21,7 @@
 | 每月约 `$1,000` crypto DCA | 根据目标差距、持仓比例、宏观、链上、质押和流动性决定买什么 | `DCA Pair Gate`, `Asset Goal Contribution`, `Staking Compounding Model` | lcETH 成本/赎回、ADA/SOL 完整 lot 和质押奖励仍需补证据 | `conditional_action` |
 | DCA 不能默认买 BTC | 动态比较 SOL、ADA、NIGHT、ETH/lcETH、BTC、USDT 与其他候选 | `Long-Term Goal DCA Engine` | 高凸性资产仍需要流动性、解锁和项目数据验证 | `watch / small_dca_review` |
 | 每次调度主动获取市场数据和情绪 | 刷新价格、成交量、宏观、资金流、链上、新闻、关键人物和美股候选 | `Fresh Market Intelligence Panel`, `Research Committee Gate` | 数据源或 subagent 不齐时必须降级 | `no execute_now` |
-| 美股战术仓月度/季度 `50%+` | 动态识别战术仓，判断持有、卖出、回补或接力候选 | `US Tactical Performance`, `Tactical Rotation Relay` | 美股 settled cash / buying power 仍缺券商证据 | `paper_only / conditional_action` |
+| 战术资金月度 ROI `100%` 进攻目标 | 动态识别战术仓和同通道闲置资金，输出一个主推荐与最多两个合格备选，判断持有、卖出、回补或接力 | `Ranked Tactical Choices`, `US Tactical Performance`, `Tactical Rotation Relay` | 未确认现金不得用于 sizing；目标不能降低胜率、EV、回撤和流动性门槛 | `paper_only / conditional_action` |
 | 强动作需要高把握 | 目标价真实达成概率 `>=80%` 且执行准备度 `>=80` | `Target Achievement Gate`, `Candidate Deep Dive Gate` | paper 样本和 recommendation resolved 样本不足 | `paper_only` |
 | 系统要越跑越聪明 | 每条建议写入 history，到期后复盘 hit/failed/not_triggered/expired | `Recommendation History`, `Learning Review Calendar`, `Progressive Learning Audit` | recommendation resolved 结果为 0，至少先补 10 条 | `paper_only / conditional_action` |
 | 手动 skill 不是自动交易 | 只在用户触发时取数和出报告；不后台下单、不自动转账 | `Passive Dispatch Runtime Policy`, `Due Learning Review Pulse` | 无阻断；但必须继续防止长循环 | `status_report_only` when not due |
@@ -50,8 +50,7 @@
 1. 现在应该做什么。
 2. 等什么价格、事件或数据确认。
 3. 哪些标的不做，为什么。
-4. 这条建议如何更接近 crypto 5-10 年 10x 或美股战术 `50%+` 目标。
+4. 这条建议如何更接近长期 5年十倍/10年十倍，或战术资金月度 ROI `100%` 进攻目标。
 5. 本轮新增了哪些可复盘记录，下一次什么时候复盘。
 
 如果报告不能回答这五点，只能作为降级参考，不能作为正式投资判断。
-

@@ -365,7 +365,7 @@ def build_panel(
             "manual_confirmation_required": True,
             "evidence_status": "paper_gate_passed" if tactical_passed else "paper_gate_failed",
             "failed_gates": tactical_failures,
-            "reason": "US tactical rotation must be proven by paper sample, drawdown, recommendation calibration and double-80 before live escalation.",
+            "reason": "US tactical rotation must be proven by paper sample, drawdown, valid calibration, positive conservative EV, RR>=2, realtime signal and account-risk caps before live escalation.",
         },
         {
             "strategy_id": "event_news_alpha",

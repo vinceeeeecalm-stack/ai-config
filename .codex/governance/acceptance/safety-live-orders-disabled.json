@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "safety-live-orders-disabled",
+  "title": "所有路径始终禁止真实订单和账户变更",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["运行发现、日内、战术、事件和长期任一模式"],
+  "steps": ["执行负向安全 smoke 并检查输出合同"],
+  "expected": ["live_orders_enabled 始终为 false", "不调用私有交易、转账、质押、融资、期权、期货或永续接口", "任何建议均需人工确认"],
+  "evidence": ["安全 smoke", "输出清单哈希"]
+}

@@ -324,7 +324,7 @@ def build_audit(path: str, run_id: str | None = None) -> dict[str, Any]:
         "normalized_agent_outputs": outputs,
         "operator_note": (
             "This audit only diagnoses external subagent output quality. It does not authorize execute_now "
-            "and does not replace manual strategy promotion, double-80, or human confirmation gates."
+            "and does not replace manual strategy promotion, sample-tier/EV/signal/risk, or human-confirmation gates."
         ),
     }
 

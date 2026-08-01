@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-weighted-roi-and-blocking",
+  "title": "短期多标的利润按资金加权且缺少本金时阻断",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["使用隔离的最小成交回执 JSONL", "夹具包含多标的、费用和未平仓价格"],
+  "steps": ["计算有月初本金的月度净 ROI", "移除月初本金后重算", "触发 15% 回撤场景"],
+  "expected": ["ROI 按金额而非百分比直接相加", "缺少本金时月度目标为 BLOCKED", "15% 回撤触发紧急暂停且不能被目标收益覆盖"],
+  "evidence": ["利润归因单元测试", "隔离运行状态"]
+}

@@ -135,12 +135,12 @@ ROLE_EVIDENCE_PLAYBOOKS: dict[str, dict[str, Any]] = {
                 "fields": ["confirmed_catalyst", "event_time", "why_better_than_current_tactical_position"],
             },
             {
-                "id": "double_80_inputs",
-                "examples": ["base rate evidence", "walk-forward/paper support", "target/readiness scoring"],
-                "fields": ["target_price", "target_window", "forecast_probability_pct", "execution_readiness_score"],
+                "id": "sample_tier_ev_inputs",
+                "examples": ["base-rate evidence", "walk-forward/paper support", "untouched holdout", "target/stop/friction estimates"],
+                "fields": ["target_price", "target_window", "sample_size", "calibration_status", "probability_range_pct", "target_return_pct", "stop_probability_pct", "stop_loss_return_pct", "friction_return_pct"],
             },
         ],
-        "pass_condition": "Top 1-3 candidates have fresh data; execute_now still requires true probability >=80 and readiness >=80.",
+        "pass_condition": "Top 1-3 candidates have fresh data; an entry still requires a valid sample tier, positive conservative EV, RR>=2, a complete realtime signal, and the applicable account-risk cap.",
     },
 }
 
@@ -231,7 +231,7 @@ def build_backlog(audit: dict[str, Any], run_id: str | None = None) -> dict[str,
             "pass_condition": playbook.get("pass_condition", "At least one fresh ok source and no role-native material gaps."),
             "action_blockers_to_keep_visible": blocker.get("blockers") or [],
             "expected_max_action_after_evidence_repair": (
-                "watch_or_paper_or_conditional; execute_now still requires action readiness, promotion evidence, double-80, and human confirmation"
+                "watch_or_paper_or_conditional; entry still requires sample/EV/signal/risk evidence, promotion evidence, and human confirmation"
             ),
             "machine_verification_requirements": [
                 "Every ok source must include name, url_or_provider, fresh_at, status, and specific coverage.",

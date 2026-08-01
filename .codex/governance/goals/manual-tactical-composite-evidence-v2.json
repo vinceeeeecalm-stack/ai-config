@@ -1,0 +1,33 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "manual-tactical-composite-evidence-v2",
+  "title": "用财报预期经营数据市场反馈与历史路径联合选择唯一短线候选",
+  "business_outcome": "避免仅凭新闻或价格动量形成短线推荐，提高唯一候选的证据完整性与可执行性",
+  "scope": [
+    "复核并重排美股、ETF、杠杆 ETF 与加密货币的一至七日候选",
+    "对公司类候选联合核对财报、预期、经营数据、市场反馈和历史相似路径",
+    "对 ETF 与加密货币使用对应的底层资产、资金流、衍生品和市场结构证据",
+    "输出唯一最优候选或明确无合格交易"
+  ],
+  "non_goals": [
+    "自动下单、转账、融资或出售现有持仓",
+    "用新闻标题替代财务和市场证据",
+    "承诺确定性收益或保证月度目标"
+  ],
+  "constraints": [
+    "公司财报与 SEC 或公司 IR 资料优先于二手文章",
+    "必须分开报告事实、公司表述、市场预期、推导和判断",
+    "即时入场仍须满足一至七日收益风险和历史路径门槛",
+    "账户现金以已确认权威快照为准"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-monthly-target-not-single-trade",
+    "tactical-single-candidate-composite-evidence"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "manual-tactical-monthly-target-v1",
+  "frozen_at": "2026-07-31T13:12:18.689214Z",
+  "frozen_by": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "content_hash": "42306215abbbb060ad4caffaa44e7427fa2c397ac1e66917d3f2d059b0087036"
+}

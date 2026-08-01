@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "longterm-risk-off-cash-winner",
+  "title": "风险关闭环境可把现金评为最佳下一美元动作",
+  "level": "TESTED",
+  "preconditions": ["跨资产风险关闭、估值或下行门不支持新增风险"],
+  "steps": ["运行长期 next-dollar 排名"],
+  "expected": ["cash 可合法成为研究胜者", "输出可观察的再评估触发", "当前现金为零时仍输出计划但 executable_amount 为零"],
+  "evidence": ["risk-off 固定场景"]
+}

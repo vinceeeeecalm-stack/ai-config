@@ -200,7 +200,7 @@ Role-native evidence cache:
 - If any context JSON has `cache_version` beginning with `research-committee-role-native-evidence-cache`, inspect it first even when the filename is different.
 - You may cite only cache/artifact fields that are actually present.
 - If the cache did not repair a required evidence item, keep that item in `missing_data`.
-- The cache can improve evidence quality, but it does not remove action blockers such as broker cash, calibration, paper validation, or double-80 gates.
+- The cache can improve evidence quality, but it does not remove action blockers such as broker cash, calibration, paper validation, conservative EV, realtime signal, or account-risk gates.
 - When using hard terms such as walk-forward, OOS, EV, funding, OI, slippage, spread, depth or drawdown, add a short plain-language note in `signals` so the manual report can translate it for the user.
 
 Output collection target for the orchestrator:

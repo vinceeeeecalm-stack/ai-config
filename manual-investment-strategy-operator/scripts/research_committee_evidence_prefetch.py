@@ -276,7 +276,7 @@ def build_cache(args: argparse.Namespace) -> dict[str, Any]:
             "artifact_path": us_result["artifact_path"],
             "evidence_summary": us_equity_summary(us_result.get("payload") or {}) if us_result["status"] == "ok" else {},
             "max_role_action": "watch",
-            "note": "US scanner evidence supports discovery only; broker/NBBO and double-80 gates still block execute_now.",
+            "note": "US scanner evidence supports discovery only; broker/NBBO plus sample-tier, conservative-EV, realtime-signal and account-risk gates still block execute_now.",
         },
     }
     ok_count = sum(1 for item in artifacts.values() if item.get("status") == "ok")

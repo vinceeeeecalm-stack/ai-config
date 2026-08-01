@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "committee-degraded-discovery-preserved",
+  "title": "委员会缺失只限制动作资格而不阻断发现",
+  "level": "TESTED",
+  "preconditions": ["研究委员会不可用或角色不足"],
+  "steps": ["运行发现、Top3 验证和动作仲裁"],
+  "expected": ["Top3 仍按市场数据输出", "research_committee_degraded 为 true", "动作上限按请求层级降级且不伪造委员会结论"],
+  "evidence": ["委员会分层测试"]
+}

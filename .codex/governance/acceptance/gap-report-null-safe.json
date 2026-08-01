@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "gap-report-null-safe",
+  "title": "gap 候选目标或止损为空时报告稳定降级",
+  "level": "TESTED",
+  "preconditions": ["gap 候选的目标价或止损字段为 null"],
+  "steps": ["生成 JSON 和 Markdown 报告"],
+  "expected": ["报告不崩溃", "空值显示为 unavailable", "候选因缺失入场锚点而降级且保留拒绝原因"],
+  "evidence": ["null 报告回归测试"]
+}

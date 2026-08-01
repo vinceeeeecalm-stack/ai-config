@@ -1,0 +1,143 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-fast-funnel-multi-horizon-investment-v1-business-ready-independent-019fb981-48c336ad-20260801t024815z",
+  "goal_id": "fast-funnel-multi-horizon-investment-v1",
+  "level": "BUSINESS_READY",
+  "source_digest": "48c336ad471226af129230d3e31f38edd3ec9a8832c67305ab26239074f4fa58",
+  "verifier_thread_id": "019fb981-0cf8-76f0-8b08-da7c9fc431c4",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "source-digest-exact-match",
+      "result": "PASS",
+      "evidence_sha256": "ed0cf4772ce02edae690118d4c84e24d680d739c97caf8aa06b8e722589fedb9"
+    },
+    {
+      "id": "configured-test-commands",
+      "result": "PASS",
+      "evidence_sha256": "bd87e1537aaa590e4ff5d7f52f48af8c27651db94a38fca7c2c8982188bed40c"
+    },
+    {
+      "id": "configured-runtime-commands",
+      "result": "PASS",
+      "evidence_sha256": "bd87e1537aaa590e4ff5d7f52f48af8c27651db94a38fca7c2c8982188bed40c"
+    },
+    {
+      "id": "fast-funnel-probability-no-deadlock",
+      "result": "PASS",
+      "evidence_sha256": "00d9982ad53dfbfdac46506ab244dfc9a7eecd379811316bd515811266bff9b4"
+    },
+    {
+      "id": "fast-funnel-top3-risk-scope",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "fast-funnel-30-crypto-performance",
+      "result": "PASS",
+      "evidence_sha256": "9a6c52d61e411b16242ef9379259f6cf59a6e5a03388a3933638f86c2b710b14"
+    },
+    {
+      "id": "deterministic-phase-p95-all-budgets",
+      "result": "PASS",
+      "evidence_sha256": "9a6c52d61e411b16242ef9379259f6cf59a6e5a03388a3933638f86c2b710b14"
+    },
+    {
+      "id": "completed-top1-decision-card-benchmark",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "live-scanner-top1-card-output-contract",
+      "result": "PASS",
+      "evidence_sha256": "9af837c833e932d05a23ce246615c402daf5733679d41c880111460d38a5afeb"
+    },
+    {
+      "id": "fast-funnel-ineligible-assets-excluded",
+      "result": "PASS",
+      "evidence_sha256": "867051fb46661871c35074a0d8ed4465e6633ecb566abbb8a577098c7d4bff89"
+    },
+    {
+      "id": "paxg-xaut-fast-alpha-exclusion",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "active-impulse-outranks-no-current-impulse",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "fast-funnel-source-failure-resilience",
+      "result": "PASS",
+      "evidence_sha256": "00d9982ad53dfbfdac46506ab244dfc9a7eecd379811316bd515811266bff9b4"
+    },
+    {
+      "id": "decision-zero-cash-research-preserved",
+      "result": "PASS",
+      "evidence_sha256": "cb5f4f138f490a9790275abf991d603456caf55b6ff3372d9207784f9c123b04"
+    },
+    {
+      "id": "decision-realtime-price-authority",
+      "result": "PASS",
+      "evidence_sha256": "00d9982ad53dfbfdac46506ab244dfc9a7eecd379811316bd515811266bff9b4"
+    },
+    {
+      "id": "intraday-scalp-same-day-exit",
+      "result": "PASS",
+      "evidence_sha256": "9af837c833e932d05a23ce246615c402daf5733679d41c880111460d38a5afeb"
+    },
+    {
+      "id": "leveraged-etf-underlying-required",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "leveraged-etf-intraday-structured-no-entry",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "leveraged-etf-tactical-structured-no-entry",
+      "result": "PASS",
+      "evidence_sha256": "2715c12c855cbd36c8c37ec39c129e1c181de2ce3420177b06383250ec0096ca"
+    },
+    {
+      "id": "gap-report-null-safe",
+      "result": "PASS",
+      "evidence_sha256": "00d9982ad53dfbfdac46506ab244dfc9a7eecd379811316bd515811266bff9b4"
+    },
+    {
+      "id": "committee-degraded-discovery-preserved",
+      "result": "PASS",
+      "evidence_sha256": "9af837c833e932d05a23ce246615c402daf5733679d41c880111460d38a5afeb"
+    },
+    {
+      "id": "longterm-dynamic-next-dollar-ranking",
+      "result": "PASS",
+      "evidence_sha256": "f401c2e222fe934b68995a3e73e81f8d7fc836dfc10f520fd1603ac526bceec0"
+    },
+    {
+      "id": "longterm-risk-off-cash-winner",
+      "result": "PASS",
+      "evidence_sha256": "f401c2e222fe934b68995a3e73e81f8d7fc836dfc10f520fd1603ac526bceec0"
+    },
+    {
+      "id": "safety-live-orders-disabled",
+      "result": "PASS",
+      "evidence_sha256": "949e2a6ecf053370bcf9e628746b3cb1b0d8eb6855ed5aeeb82be8d9da6db030"
+    },
+    {
+      "id": "installed-manual-skill-parity",
+      "result": "PASS",
+      "evidence_sha256": "c024327dda6525d721a85e7c726fea5081f70f0cf366c4402ab58b19108b7d09"
+    },
+    {
+      "id": "open-p0-p1-deviations",
+      "result": "PASS",
+      "evidence_sha256": "47c9dffad4d2a96762c89ecd7a22016b1e198e15d6cb2fe53175b5b9a8b62ee2"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T02:48:15.265367Z"
+}

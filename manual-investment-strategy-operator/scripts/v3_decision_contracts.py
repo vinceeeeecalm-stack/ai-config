@@ -97,6 +97,13 @@ class ProbabilityEstimateV2:
     adjustments: tuple[str, ...]
     limitations: str
     calibration_status: str
+    probability_range_pct: tuple[float, float] | None = None
+    stop_probability_pct: float | None = None
+    target_return_pct: float | None = None
+    stop_loss_return_pct: float | None = None
+    friction_return_pct: float = 0.0
+    untouched_holdout: bool = False
+    lookahead_free: bool = False
 
     def validate(self, errors: list[str], field_name: str = "probability_event") -> None:
         if not self.event_id or not self.event_definition:
@@ -120,10 +127,127 @@ class ProbabilityEstimateV2:
             errors.append(f"{field_name}:unsupported_calibration_status")
         elif self.sample_size < 10 and self.calibration_status != "judgment_only":
             errors.append(f"{field_name}:n_lt_10_must_be_judgment_only")
-        elif 10 <= self.sample_size < 30 and self.calibration_status == "calibrated":
-            errors.append(f"{field_name}:n_lt_30_cannot_be_calibrated")
+        elif 10 <= self.sample_size < 30 and self.calibration_status != "wide_interval":
+            errors.append(f"{field_name}:n_10_29_must_be_wide_interval")
+        if self.calibration_status == "wide_interval":
+            if (
+                not isinstance(self.probability_range_pct, tuple)
+                or len(self.probability_range_pct) != 2
+                or not all(_finite_probability(item) for item in self.probability_range_pct)
+                or self.probability_range_pct[0] >= self.probability_range_pct[1]
+            ):
+                errors.append(f"{field_name}:wide_interval_range_required")
+        if self.calibration_status == "calibrated" and (
+            self.sample_size < 30
+            or self.untouched_holdout is not True
+            or self.lookahead_free is not True
+        ):
+            errors.append(
+                f"{field_name}:calibrated_requires_n_ge_30_untouched_holdout_no_lookahead"
+            )
+        for name in (
+            "stop_probability_pct",
+            "target_return_pct",
+            "stop_loss_return_pct",
+            "friction_return_pct",
+        ):
+            value = getattr(self, name)
+            if value is not None and (
+                isinstance(value, bool) or not isinstance(value, (int, float))
+            ):
+                errors.append(f"{field_name}:{name}:number_or_null_required")
+        if self.stop_probability_pct is not None and not 0 <= self.stop_probability_pct <= 100:
+            errors.append(f"{field_name}:stop_probability_out_of_range")
+        if self.target_return_pct is not None and self.target_return_pct <= 0:
+            errors.append(f"{field_name}:target_return_positive_required")
+        if self.stop_loss_return_pct is not None and self.stop_loss_return_pct <= 0:
+            errors.append(f"{field_name}:stop_loss_return_positive_required")
+        if self.friction_return_pct < 0:
+            errors.append(f"{field_name}:friction_non_negative_required")
         if not self.limitations:
             errors.append(f"{field_name}:limitations_required")
+
+
+def _finite_probability(value: Any) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and 0 <= value <= 100
+    )
+
+
+def conservative_expected_value_pct(estimate: ProbabilityEstimateV2) -> float | None:
+    """Use the conservative target probability and stop probability, net friction."""
+
+    if estimate.target_return_pct is None or estimate.stop_loss_return_pct is None:
+        return None
+    target_probability = (
+        estimate.probability_range_pct[0]
+        if estimate.probability_range_pct is not None
+        else estimate.probability_pct
+    )
+    stop_probability = (
+        estimate.stop_probability_pct
+        if estimate.stop_probability_pct is not None
+        else 100.0 - target_probability
+    )
+    return (
+        target_probability / 100.0 * estimate.target_return_pct
+        - stop_probability / 100.0 * estimate.stop_loss_return_pct
+        - estimate.friction_return_pct
+    )
+
+
+def assess_tactical_current_decision(
+    estimate: ProbabilityEstimateV2,
+    *,
+    reward_risk_ratio: float,
+    realtime_signal_complete: bool,
+    max_account_risk_pct: float,
+) -> dict[str, Any]:
+    """Cash-independent current decision; no universal probability threshold."""
+
+    errors: list[str] = []
+    estimate.validate(errors)
+    conservative_ev = conservative_expected_value_pct(estimate)
+    blockers = list(errors)
+    if reward_risk_ratio < 2.0:
+        blockers.append("reward_risk_below_2")
+    if not realtime_signal_complete:
+        blockers.append("realtime_signal_incomplete")
+    if conservative_ev is None or conservative_ev <= 0:
+        blockers.append("conservative_expected_value_not_positive")
+
+    decision = CurrentDirectDecision.DO_NOT_ENTER_NOW
+    if not blockers and 10 <= estimate.sample_size < 30:
+        if max_account_risk_pct <= 0.25:
+            decision = CurrentDirectDecision.SMALL_ENTRY_NOW
+        else:
+            blockers.append("wide_interval_account_risk_above_0_25pct")
+    elif not blockers and estimate.sample_size >= 30:
+        if estimate.calibration_status != "calibrated":
+            blockers.append("calibrated_probability_required_for_enter_now")
+        elif max_account_risk_pct <= 0.5:
+            decision = CurrentDirectDecision.ENTER_NOW
+        else:
+            blockers.append("calibrated_account_risk_above_0_5pct")
+    elif estimate.sample_size < 10:
+        blockers.append("judgment_only_watch_or_paper")
+
+    return {
+        "schema_version": "tactical-current-decision-audit-v1",
+        "current_direct_decision": decision.value,
+        "sample_size": estimate.sample_size,
+        "calibration_status": estimate.calibration_status,
+        "probability_range_pct": list(estimate.probability_range_pct)
+        if estimate.probability_range_pct is not None
+        else None,
+        "conservative_expected_value_pct": conservative_ev,
+        "reward_risk_ratio": reward_risk_ratio,
+        "max_account_risk_pct": max_account_risk_pct,
+        "blockers": sorted(set(blockers)),
+        "cash_or_execution_permission_used": False,
+    }
 
 
 @dataclass(frozen=True)
@@ -317,6 +441,9 @@ class TacticalPlanV2:
     downside_gap_pressure: str
     probability_event: ProbabilityEstimateV2
     scenarios: tuple[ScenarioV2, ...]
+    leveraged_etf: bool = False
+    underlying_symbol: str | None = None
+    underlying_confirmed: bool = False
     event_exit_date: str | None = None
     discovery_origin: str = "known_asset_market_scan"
     catalyst_derivation_chain: tuple[str, ...] = ()
@@ -408,6 +535,100 @@ class TacticalPlanV2:
 
 
 @dataclass(frozen=True)
+class IntradayScalpPlanV2:
+    quote_as_of: str
+    closed_1m_as_of: str
+    closed_5m_as_of: str
+    allowed_session: str
+    vwap: float
+    opening_range_high: float
+    opening_range_low: float
+    relative_volume: float
+    spread_bps: float
+    depth_bid_usd: float
+    depth_ask_usd: float
+    market_anchor: str
+    entry_trigger: str
+    cancel_if: str
+    price_stop: float
+    target_1_price: float
+    target_2_price: float
+    latest_close_at: str
+    max_loss_budget: float
+    max_account_risk_pct: float
+    planned_position_size: float
+    leveraged_etf: bool = False
+    underlying_symbol: str | None = None
+    underlying_confirmed: bool = False
+    binary_event_inside_window: bool = False
+    overnight_allowed: bool = False
+
+    def validate(self, errors: list[str], *, generated_at: str, decision_valid_until: str) -> None:
+        generated = _parse_iso(generated_at, "intraday_plan:generated_at", errors)
+        quote_at = _parse_iso(self.quote_as_of, "intraday_plan:quote_as_of", errors)
+        closed_1m = _parse_iso(self.closed_1m_as_of, "intraday_plan:closed_1m_as_of", errors)
+        closed_5m = _parse_iso(self.closed_5m_as_of, "intraday_plan:closed_5m_as_of", errors)
+        valid_until = _parse_iso(
+            decision_valid_until, "intraday_plan:decision_valid_until", errors
+        )
+        latest_close = _parse_iso(
+            self.latest_close_at, "intraday_plan:latest_close_at", errors
+        )
+        if generated and quote_at:
+            quote_age = (generated - quote_at).total_seconds()
+            if quote_age < 0 or quote_age > 60:
+                errors.append("intraday_plan:quote_age_must_be_0_to_60_seconds")
+        if generated and valid_until and (valid_until - generated).total_seconds() > 300:
+            errors.append("intraday_plan:decision_validity_max_5_minutes")
+        for label, closed_at in (("1m", closed_1m), ("5m", closed_5m)):
+            if generated and closed_at and closed_at > generated:
+                errors.append(f"intraday_plan:closed_{label}_bar_cannot_be_future")
+        if generated and latest_close:
+            if latest_close <= generated:
+                errors.append("intraday_plan:latest_close_must_be_future")
+            if latest_close.astimezone(generated.tzinfo).date() != generated.date():
+                errors.append("intraday_plan:same_day_close_required")
+        if self.allowed_session not in {
+            "us_regular_session_only",
+            "crypto_24x7_closed_bar_only",
+        }:
+            errors.append("intraday_plan:allowed_session_unsupported")
+        for name in (
+            "vwap",
+            "opening_range_high",
+            "opening_range_low",
+            "relative_volume",
+            "depth_bid_usd",
+            "depth_ask_usd",
+            "price_stop",
+            "target_1_price",
+            "target_2_price",
+            "max_loss_budget",
+            "planned_position_size",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+                errors.append(f"intraday_plan:{name}:positive_number_required")
+        if (
+            isinstance(self.spread_bps, bool)
+            or not isinstance(self.spread_bps, (int, float))
+            or self.spread_bps < 0
+        ):
+            errors.append("intraday_plan:spread_bps_non_negative_required")
+        if not 0 < self.max_account_risk_pct <= 0.5:
+            errors.append("intraday_plan:max_account_risk_pct_lte_0_5_required")
+        if self.opening_range_low >= self.opening_range_high:
+            errors.append("intraday_plan:opening_range_invalid")
+        for name in ("market_anchor", "entry_trigger", "cancel_if"):
+            if not getattr(self, name):
+                errors.append(f"intraday_plan:{name}:required")
+        if self.binary_event_inside_window:
+            errors.append("intraday_plan:binary_event_inside_window_forbidden")
+        if self.overnight_allowed:
+            errors.append("intraday_plan:overnight_forbidden")
+
+
+@dataclass(frozen=True)
 class ExistingPositionReviewPlanV2:
     position_evidence_id: str
     original_horizon: str
@@ -452,6 +673,34 @@ class DailyDualWindowPlanV2:
             errors.append("daily_dual_window:baseline_id:required")
 
 
+def leveraged_etf_underlying_gate(plan: Any) -> dict[str, Any]:
+    """Return the decision override required when leveraged-ETF proof is absent."""
+
+    if plan is None or getattr(plan, "leveraged_etf", False) is not True:
+        return {
+            "status": "not_applicable",
+            "entry_allowed": True,
+            "required_current_direct_decision": None,
+            "reason_codes": [],
+        }
+    confirmed = bool(getattr(plan, "underlying_symbol", None)) and (
+        getattr(plan, "underlying_confirmed", False) is True
+    )
+    if confirmed:
+        return {
+            "status": "pass",
+            "entry_allowed": True,
+            "required_current_direct_decision": None,
+            "reason_codes": [],
+        }
+    return {
+        "status": "blocked",
+        "entry_allowed": False,
+        "required_current_direct_decision": "do_not_enter_now",
+        "reason_codes": ["underlying_confirmation_missing"],
+    }
+
+
 @dataclass(frozen=True)
 class RecommendationV2:
     recommendation_id: str
@@ -474,6 +723,7 @@ class RecommendationV2:
     created_at: str
     risk_adjusted_path: RiskAdjustedPathV2 | None = None
     longterm_plan: LongTermDCAPlanV2 | None = None
+    intraday_plan: IntradayScalpPlanV2 | None = None
     tactical_plan: TacticalPlanV2 | None = None
     position_review_plan: ExistingPositionReviewPlanV2 | None = None
     daily_dual_window_plan: DailyDualWindowPlanV2 | None = None
@@ -584,6 +834,7 @@ class RecommendationV2:
 
         plans = [
             self.longterm_plan,
+            self.intraday_plan,
             self.tactical_plan,
             self.position_review_plan,
             self.daily_dual_window_plan,
@@ -602,6 +853,15 @@ class RecommendationV2:
                 self.tactical_plan.validate(
                     errors, event_trade=self.mode == ResearchMode.EVENT_TRADE_1_3W
                 )
+        elif self.mode == ResearchMode.INTRADAY_SCALP:
+            if self.intraday_plan is None:
+                errors.append("mode_plan:intraday_plan_required")
+            else:
+                self.intraday_plan.validate(
+                    errors,
+                    generated_at=self.created_at,
+                    decision_valid_until=self.decision_valid_until,
+                )
         elif self.mode == ResearchMode.EXISTING_POSITION_REVIEW:
             if self.position_review_plan is None:
                 errors.append("mode_plan:position_review_plan_required")
@@ -612,6 +872,25 @@ class RecommendationV2:
                 errors.append("mode_plan:daily_dual_window_plan_required")
             else:
                 self.daily_dual_window_plan.validate(errors)
+
+        underlying_gate = leveraged_etf_underlying_gate(
+            self.intraday_plan or self.tactical_plan
+        )
+        if underlying_gate["status"] == "blocked":
+            if self.current_direct_decision != CurrentDirectDecision.DO_NOT_ENTER_NOW:
+                errors.append(
+                    "current_direct_decision:do_not_enter_now_required_when_"
+                    "underlying_confirmation_missing"
+                )
+            if "underlying_confirmation_missing" not in self.execution_blockers:
+                errors.append(
+                    "execution_blockers:underlying_confirmation_missing_required"
+                )
+            if self.execution_decision == ExecutionDecision.MANUAL_EXECUTE_CANDIDATE:
+                errors.append(
+                    "execution_decision:deploy_forbidden_when_"
+                    "underlying_confirmation_missing"
+                )
 
         if evidence_snapshot is not None:
             if self.evidence_snapshot_id != evidence_snapshot.snapshot_id:
@@ -644,6 +923,22 @@ class RecommendationV2:
         payload["research_decision"] = self.research_decision.value
         payload["current_direct_decision"] = self.current_direct_decision.value
         payload["execution_decision"] = self.execution_decision.value
+        payload["best_candidate"] = (
+            self.symbol
+            if self.research_decision == ResearchDecision.PREFERRED
+            else None
+        )
+        payload["account_state"] = {
+            "deployable_cash": self.deployable_cash,
+            "cash_source": self.cash_source,
+            "execution_blockers": list(self.execution_blockers),
+        }
+        payload["executable_amount"] = (
+            self.deployable_cash
+            if self.execution_decision == ExecutionDecision.MANUAL_EXECUTE_CANDIDATE
+            else 0.0
+        )
+        payload["decision_reason_codes"] = list(self.execution_blockers)
         return payload
 
 
@@ -769,6 +1064,17 @@ def _probability_from_payload(value: Any) -> ProbabilityEstimateV2:
             adjustments=tuple(value.get("adjustments") or ()),
             limitations=str(value["limitations"]),
             calibration_status=str(value["calibration_status"]),
+            probability_range_pct=(
+                tuple(value["probability_range_pct"])
+                if value.get("probability_range_pct") is not None
+                else None
+            ),
+            stop_probability_pct=value.get("stop_probability_pct"),
+            target_return_pct=value.get("target_return_pct"),
+            stop_loss_return_pct=value.get("stop_loss_return_pct"),
+            friction_return_pct=value.get("friction_return_pct", 0.0),
+            untouched_holdout=value.get("untouched_holdout", False),
+            lookahead_free=value.get("lookahead_free", False),
         )
     except KeyError as exc:
         raise ValueError(f"probability_event:missing:{exc.args[0]}") from exc
@@ -886,6 +1192,43 @@ def recommendation_from_payload(payload: dict[str, Any]) -> RecommendationV2:
             )
         except (KeyError, TypeError) as exc:
             raise ValueError(f"longterm_plan:invalid:{exc}") from exc
+    elif mode == ResearchMode.INTRADAY_SCALP:
+        value = payload.get("intraday_plan")
+        if not isinstance(value, dict):
+            raise ValueError("intraday_plan:object_required")
+        try:
+            common["intraday_plan"] = IntradayScalpPlanV2(
+                quote_as_of=str(value["quote_as_of"]),
+                closed_1m_as_of=str(value["closed_1m_as_of"]),
+                closed_5m_as_of=str(value["closed_5m_as_of"]),
+                allowed_session=str(value["allowed_session"]),
+                vwap=value["vwap"],
+                opening_range_high=value["opening_range_high"],
+                opening_range_low=value["opening_range_low"],
+                relative_volume=value["relative_volume"],
+                spread_bps=value["spread_bps"],
+                depth_bid_usd=value["depth_bid_usd"],
+                depth_ask_usd=value["depth_ask_usd"],
+                market_anchor=str(value["market_anchor"]),
+                entry_trigger=str(value["entry_trigger"]),
+                cancel_if=str(value["cancel_if"]),
+                price_stop=value["price_stop"],
+                target_1_price=value["target_1_price"],
+                target_2_price=value["target_2_price"],
+                latest_close_at=str(value["latest_close_at"]),
+                max_loss_budget=value["max_loss_budget"],
+                max_account_risk_pct=value["max_account_risk_pct"],
+                planned_position_size=value["planned_position_size"],
+                leveraged_etf=value.get("leveraged_etf", False),
+                underlying_symbol=value.get("underlying_symbol"),
+                underlying_confirmed=value.get("underlying_confirmed", False),
+                binary_event_inside_window=value.get(
+                    "binary_event_inside_window", False
+                ),
+                overnight_allowed=value.get("overnight_allowed", False),
+            )
+        except (KeyError, TypeError) as exc:
+            raise ValueError(f"intraday_plan:invalid:{exc}") from exc
     elif mode in {ResearchMode.TACTICAL_1_7D, ResearchMode.EVENT_TRADE_1_3W}:
         value = payload.get("tactical_plan")
         if not isinstance(value, dict):
@@ -927,6 +1270,9 @@ def recommendation_from_payload(payload: dict[str, Any]) -> RecommendationV2:
                 scenarios=_scenarios_from_payload(
                     value["scenarios"], "tactical_scenarios"
                 ),
+                leveraged_etf=value.get("leveraged_etf", False),
+                underlying_symbol=value.get("underlying_symbol"),
+                underlying_confirmed=value.get("underlying_confirmed", False),
                 event_exit_date=value.get("event_exit_date"),
                 auto_relay_forbidden=value.get("auto_relay_forbidden", True),
                 post_exit_state=str(

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "profit-paper-tactical-ledger-isolation-v2",
+  "title": "Crypto 1–7 日 Paper 与真钱及旧未知期限样本严格隔离",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["新 Paper 本金为 500 美元", "旧 Paper 账本含期限未知记录"],
+  "steps": ["初始化新 tactical_1_7d Paper 基线", "追加合法 Paper 入场和退出", "尝试导入未知期限、日内和真钱回执", "计算 Paper 与 live 利润状态"],
+  "expected": ["新账本初始状态为 COLLECTING_SAMPLES", "只有 tactical_1_7d 同版本同快照回执被接受", "旧 26 笔记录不进入新分母", "Paper 结果不能提升 live profit 或 BUSINESS_READY"],
+  "evidence": ["Paper 合同和利润归因测试", "隔离运行账本黄金路径"]
+}

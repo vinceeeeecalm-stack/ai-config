@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "fast-funnel-top3-risk-scope",
+  "title": "完整风险路径只在 Top3 后运行",
+  "level": "TESTED",
+  "preconditions": ["扫描池含超过三个合格候选"],
+  "steps": ["记录发现阶段与验证阶段调用轨迹"],
+  "expected": ["发现阶段不调用概率、完整融资审计、委员会或账户执行", "深度风险验证的候选集合不超出 Top3", "Top1 以外不执行完整深研"],
+  "evidence": ["调用跟踪回归测试"]
+}

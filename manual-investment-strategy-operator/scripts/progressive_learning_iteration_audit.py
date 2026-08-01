@@ -189,10 +189,10 @@ def build_audit(
             "not_required_this_iteration": [
                 "goal_complete",
                 "guaranteed_profit",
-                "already_validated_80_pct_true_forecast_accuracy",
+                "already_calibrated_untouched_holdout_evidence",
             ],
-            "current_starting_point": "60%-79% reviewable learning samples are allowed as watch/paper/conditional records.",
-            "promotion_rule": "Only resolved outcomes, evidence calibration, double-80 readiness, cash-rail proof, and human confirmation can promote a candidate.",
+            "current_starting_point": "Judgment-only and wide-interval samples are allowed as watch/paper records; n=10-29 can support only a tightly risk-capped small-entry review when conservative EV is positive.",
+            "promotion_rule": "Only valid sample tiers, conservative EV, RR>=2, realtime signal, risk caps, cash-rail proof, and human confirmation can promote a candidate.",
         },
         "learning_stage": learning.get("learning_stage"),
         "next_stage": learning.get("next_stage"),

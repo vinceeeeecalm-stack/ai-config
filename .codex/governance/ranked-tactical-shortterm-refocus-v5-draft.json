@@ -1,0 +1,47 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "ranked-tactical-shortterm-refocus-v5",
+  "title": "恢复短期战术获利主线并输出稳定的主推荐与高质量备选",
+  "business_outcome": "让投资 Skill 优先服务盘中、日度、周度和一至三周战术资金的月度翻倍进攻目标，通过历史时点样本外验证输出一个最高优先级标的和最多两个同样具备正保守期望的备选，同时保持五年十倍进攻、十年十倍兜底和每月 DCA 的长期价值投资主线",
+  "scope": [
+    "统一短期业务目标为仅作用于战术资金与已确认闲置资金的月度 ROI 100% 进攻目标，并明确它不是收益承诺或单笔目标",
+    "统一长期业务目标为五年十倍进攻路径、十年十倍兜底路径和每月约一千美元的动态 DCA",
+    "把单一 best_candidate 合约扩展为一个 primary_candidate 加最多两个通过最低质量门的 alternatives",
+    "为主推荐与备选输出可比较的历史样本外胜率区间、保守 EV、回报空间、Profit Factor、回撤、流动性、催化和排名差异",
+    "以 point-in-time 历史回调、walk-forward、untouched holdout、成本压力、事件条件和参数扰动作为首次推荐的主要验证，不等待未来数周才产生排名",
+    "加入现任候选与挑战者的稳定替换规则，防止重复询问时无实质证据变化却更换标的",
+    "保持当前持仓、现金通道、长期保护仓、人工确认和 live_orders_enabled=false 的既有权威与安全边界",
+    "更新 Manual、Active 的合同、配置、校验器、报告输出和回归测试"
+  ],
+  "non_goals": [
+    "保证月度翻倍、五年十倍、十年十倍或任何单笔盈利",
+    "为凑足三个候选而推荐未通过最低研究质量门的标的",
+    "自动真实下单、转账、融资、卖空、期权、期货或永续",
+    "把历史回测、paper 收益或评分冒充真实收益或校准概率",
+    "硬编码某个股票、ETF 或 crypto 为长期或短期固定赢家",
+    "覆盖用户未确认更新的持仓、现金和成交记录"
+  ],
+  "constraints": [
+    "短期研究优先级高于长期增量研究，但真实性、流动性、回撤和资金风险门不可降低",
+    "推荐数量为一至三个：一个主推荐是强制研究输出，备选只有在通过最低质量门时才出现",
+    "相同 EvidenceSnapshotV2、配置和策略版本必须产生确定性的相同排名",
+    "历史模拟、forward paper 和真实成交必须分轨展示，不得合并分母",
+    "短期月度翻倍是组合战术 sleeve 的进攻目标，不得转换成单笔必须上涨百分之一百",
+    "长期 DCA 必须读取最新权威持仓与现金通道，并保持五年/十年目标独立",
+    "真实交易仍需用户人工确认，live_orders_enabled 和 private_api_used 必须为 false",
+    "本轮只达到同一线程可证明的 RUNTIME_VERIFIED，不宣称收益目标已经实现"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-ranked-primary-and-alternatives",
+    "tactical-history-first-stability",
+    "dual-goal-tactical-priority-and-longterm-dca",
+    "safety-live-orders-disabled",
+    "decision-zero-cash-research-preserved",
+    "decision-realtime-price-authority",
+    "intraday-scalp-same-day-exit",
+    "leveraged-etf-underlying-required"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "fast-funnel-multi-horizon-investment-v4"
+}

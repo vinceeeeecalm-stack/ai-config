@@ -1,0 +1,35 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-ranked-tactical-shortterm-refocus-v5-tested-80c298f7",
+  "goal_id": "ranked-tactical-shortterm-refocus-v5",
+  "level": "TESTED",
+  "source_digest": "cb0842a0974bb81fabe99c116af3d8d8081368bf81e6e4e1e6bbadf955751e6e",
+  "implementation_owner_thread_id": "019fbbb1-664d-7f30-a605-83eb0f406c33",
+  "verifier_thread_id": "019fbbb1-664d-7f30-a605-83eb0f406c33",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 216,
+      "stdout_sha256": "de34288134a7c24dba8196b4f0d45293fbe4ee48d57aeb4517c737bc7bcd149e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_ms": 255,
+      "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
+      "stderr_sha256": "9a9edd5360bf1ac54cb1c5291f016000aabea4b322ad883e46d6a98948a5fc2b"
+    },
+    {
+      "command": "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts",
+      "exit_code": 0,
+      "duration_ms": 68,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-01T05:36:28.435274Z"
+}

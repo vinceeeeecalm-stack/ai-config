@@ -4,12 +4,21 @@
 
 ## 强制流程
 
-每次生成 handoff 前：
+委员会在发现阶段之后运行，不能阻塞 Top3 首次输出。候选进入相应动作层级前：
 
 1. 对候选做旧 thesis challenge，避免沿用上一轮结论。
 2. 并行执行 Research Committee Gate。
 3. 写入 `research_panel`；若不可用，写入 `research_panel_missing_reason` 并设置 `research_committee_degraded=true`。
 4. 降级 handoff：缺少研究面板时，最高只能 `watch/paper_only/risk_alert/no_deploy`。
+
+分层要求：
+
+- discovery：不调用委员会；
+- `intraday_scalp` 小仓：微观结构与组合风险两个角色；
+- 1–7 日完整仓位：四个与候选直接相关的角色；
+- 二元事件、新高风险资产或重大长期配置：六个以上角色。
+
+委员会缺失只降低动作资格，不能删除已经由市场数据生成的 Top3。
 
 当当前运行环境提供 `multi_agent_v1` 或等价 subagent 工具时，monitor 必须优先使用真实 subagent 输出，不得用本地脚本生成的观点伪装成 subagent：
 

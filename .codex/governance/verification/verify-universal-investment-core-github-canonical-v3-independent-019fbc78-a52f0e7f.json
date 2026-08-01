@@ -1,0 +1,38 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-universal-investment-core-github-canonical-v3-independent-019fbc78-a52f0e7f",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "a52f0e7fc1970341a90fe9d4649953188ae8b29282167023b17ac9cf89829191",
+  "goal_contract_digest": "6d22b362b587ee13da372f5f1c8ab9b4df8c58a4eaa18f161c6ef2cb0a2dd9ad",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent": true,
+  "read_only": true,
+  "result": "FAIL",
+  "checks": [
+    {"id":"governance-source-binding","result":"PASS","evidence":{"effective_level":"RUNTIME_VERIFIED","current_source_digest":"a52f0e7fc1970341a90fe9d4649953188ae8b29282167023b17ac9cf89829191","verification_stale":false,"runtime_verification_id":"verify-universal-investment-core-github-canonical-v3-runtime_verified-f4fb0844"}},
+    {"id":"universal-core-contract-binding-v3","result":"PASS","evidence":"四个影子案例的 case、regression、decision 均逐字段绑定相同 snapshot_id、strategy_version、config_digest、source_digest；确定性排名和绑定冲突负向测试通过。"},
+    {"id":"formal-action-paper-isolation-v3","result":"PASS","evidence":"正式动作仅出现 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE；PAPER_ONLY 负向校验通过；Paper 不能提升真钱利润或业务就绪状态。"},
+    {"id":"cross-asset-horizon-adapters-v3","result":"PASS","evidence":"Crypto、美股、1–7日战术和长期适配字段与负向合同均通过；长期计划拒绝战术止损和退出字段。"},
+    {"id":"investment-outcome-four-axis-v3","result":"PASS","evidence":"影子输出独立报告 RUNTIME_VERIFIED、NO_DEPLOY_CASH、UNMEASURED、BASELINE_DEFINED/DATA_DEGRADED；Paper 为内部证据。"},
+    {"id":"investment-shadow-forward-recovery-v3","result":"PASS","evidence":{"crypto_enter":"ENTER_NOW","crypto_no_trade":"NO_TRADE","equity_wait":"WAIT_FOR_ENTRY","long_data_degraded":"DATA_DEGRADED","fault_recovery":{"stale_action":"NO_TRADE","recovered_action":"ENTER_NOW"},"suite_passed":true}},
+    {"id":"independent-tests","result":"PASS","evidence":{"monorepo_policy":"PASS","manual_unit_tests":"190 passed","governance_tests":"14 passed","profit_loop_self_test":"PASS","universal_core_self_test":"PASS"}},
+    {"id":"migration-backup-recovery","result":"PASS","evidence":{"git_bundle_sha256":"42f175bd238a3407471ebb04dd423ca20a5f3c8d443cbfc89d202a29fd540f50","git_bundle_complete":true,"source_snapshot_sha256":"40a3fbdc53af4fad492cbec90df103250223992563a677ba7adc3c4d5ba2b14b","manifest_sha256":"8f642af8a5bf58a38027fd74f03762a2189bd252dc834484c5f72cb3aa40b3bf","full_clone_file_count":15040,"source_snapshot_file_count":582}},
+    {"id":"public-repo-secret-privacy-zero-v3","result":"PASS","evidence":{"independent_current_scan_trackable_files":593,"history_blobs":730,"secret_findings":0,"privacy_findings":0,"recorded_external_report_sha256":"4778e3337180042af8bd36bc2db09a7991b18c063aa90a252b3656e303aa5f36"}},
+    {"id":"global-skill-authority-mirror-v3","result":"PASS","evidence":{"manifest_sha256":"a75d75ed352e4c99ffaeb3af9d663c24990198f5dcf0357febae93b1242c5930","manifest_file_count":272,"missing_installed":[],"extra_installed":[],"hash_mismatches":[],"smoke_passed":true}},
+    {"id":"github-canonical-source-v3","result":"FAIL","evidence":{"origin":"https://github.com/vinceeeeecalm-stack/ai-config.git","local_branch":"codex/investing-monorepo-bootstrap","local_head":"b2cf69f0bbfeb86c5c72f333d055746c1c0c566f","remote_branches":["main"],"remote_main_head":"6ce3b1e9c1a14fe2ff063f879930c20029a18910","remote_main_commit_message":"Initial commit","remote_readme":"# ai-config\nai-config","remote_universal_core":"NOT_FOUND","open_deviation":"dev-v3-github-not-canonical"}},
+    {"id":"live-profit-and-business-ready-guard","result":"PASS","evidence":{"live_orders_enabled":false,"live_profit_status":"UNMEASURED","business_outcome_status":"EVIDENCE_PENDING","business_ready_eligible":false,"reason":"没有真实成交、退出和时间序列证据。"}}
+  ],
+  "p0_findings": [],
+  "p1_findings": [
+    {"id":"P1-github-main-not-canonical","severity":"P1","acceptance_scenario_id":"github-canonical-source-v3","expected":"GitHub main 包含当前验证后的源码和 README，并成为唯一源码权威。","actual":"远端 main 仍只有初始化提交和两行 README；通用投资内核在 main 不存在，本地实现仍未提交到远端。","impact":"GitHub 权威源码、公开恢复和唯一来源要求未实现，因此整体独立验收不能通过。","remediation":"安装并认证 GitHub CLI；在不 force-push 且保留远端 main 历史的前提下提交、推送并合入当前源码，随后重新执行安全扫描和异线程只读验证。"}
+  ],
+  "blockers": [
+    {"id":"github-canonical-publication","blocks":"goal_acceptance","message":"GitHub main 尚未包含当前源码，治理状态仍将 canonical publication 标记为 blocked。"},
+    {"id":"real-trade-time-series-absent","blocks":"BUSINESS_READY_only","message":"缺少真实成交、退出和时间序列证据；真钱利润保持 UNMEASURED，业务结果保持 EVIDENCE_PENDING。"}
+  ],
+  "highest_proven_level": "RUNTIME_VERIFIED",
+  "business_ready": false,
+  "verified_at": "2026-08-01T14:38:25Z"
+}

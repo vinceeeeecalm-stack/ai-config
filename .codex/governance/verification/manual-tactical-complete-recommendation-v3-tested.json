@@ -1,0 +1,21 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-manual-tactical-complete-recommendation-v3-tested-ffae7473",
+  "goal_id": "manual-tactical-complete-recommendation-v3",
+  "level": "TESTED",
+  "source_digest": "bbd79ec50c52a1770e9badd29b2b97a7bd7d8005cf0154ad7e1e15d04b7b94b8",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 238,
+      "stdout_sha256": "de34288134a7c24dba8196b4f0d45293fbe4ee48d57aeb4517c737bc7bcd149e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-07-31T14:28:34.347554Z"
+}

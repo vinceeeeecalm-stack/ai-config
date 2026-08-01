@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-fast-funnel-multi-horizon-investment-v4-coded-d2387dcc",
+  "goal_id": "fast-funnel-multi-horizon-investment-v4",
+  "level": "CODED",
+  "source_digest": "7c1a77c66351303d07936e65991e5a3cac92cf2ce49a028fa7a8c983d4a95f12",
+  "implementation_owner_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "verifier_thread_id": "019fb822-4925-7630-a3e2-3345d9e69ff9",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-01T04:03:13.826169Z"
+}
