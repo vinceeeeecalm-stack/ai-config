@@ -2,12 +2,12 @@
   "schema_version": "GovernanceStatusV1",
   "goal_id": "universal-investment-core-github-canonical-v3",
   "highest_level": "TESTED",
-  "source_digest": "81619f37aa0bd3eb81354d907439f0fd4660a053a6598ee18ff89eedfa95ed04",
+  "source_digest": "5b00e1cbd385b9596cafab9b38cdabad99c2d6afb2783ee66fb1e44370559703",
   "blocked": true,
   "blockers": [
-    "post-merge clean-main PR pending"
+    "portable-policy PR and clean-main verification pending"
   ],
-  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-tested-ffdfd541",
+  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-tested-12002bc5",
   "independent_verification_id": null,
-  "updated_at": "2026-08-01T17:21:52.614907Z"
+  "updated_at": "2026-08-01T17:31:57.353598Z"
 }
