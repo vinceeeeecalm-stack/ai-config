@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-universal-investment-core-v3-d35cd11",
+  "project_id": "investing-monorepo",
+  "goal_id": "universal-investment-core-github-canonical-v3",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "d35cd11de323092075ce4d53cc93d69171507621",
+    "branch": "codex/investing-monorepo-bootstrap",
+    "dirty": true
+  },
+  "source_digest": "3a3270b9b851d4a8ef3bbe64f5ced260a6a472c085bcd5d6e6ede171eaf46e26",
+  "build_version": "d35cd11de323092075ce4d53cc93d69171507621",
+  "runtime_version": "skill-manifest-bde785903067bdc972a8425a1dbece8cd5bd428a02c77ac65251f8013a3705fe",
+  "database_version": "no-schema-migration",
+  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime_verified-e22a297e",
+  "independent_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime-independent-d35cd11",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-01T17:53:49.894421Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
