@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-unified-shortterm-phase-readiness-audit-v1",
+  "project_id": "investing-monorepo",
+  "goal_id": "unified-shortterm-phase-readiness-audit-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "3f1033f175c462a2f0ca0e3a473a394f7e130a2e",
+    "branch": "codex/unified-shortterm-phase-readiness-audit-v1",
+    "dirty": false
+  },
+  "source_digest": "99e1c733307f5c6847cf52aa563f1585fe564270cf7d0a3ba74491517a7755fc",
+  "build_version": "3f1033f658695faeed332914657dfb992938fb3b",
+  "runtime_version": "eb713b6ab6bc6dd29c3e924850440109b3c78f16885024d41e9f20f88224db01",
+  "database_version": null,
+  "last_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-runtime_verified-6bc3ad19",
+  "independent_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-independent-round2-019fbc78-99e1c733",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 8,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T15:15:13.536675Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
