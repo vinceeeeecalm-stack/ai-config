@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-promotion-preregistered-criteria-v1",
+  "title": "结果出现前冻结主要路径和晋升标准",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["首批四十条可结算观察尚未到 review_due_at"],
+  "steps": ["读取版本化晋升配置", "校验主要路径、样本门、实验组、对照组和最早晋升时间", "重新计算配置摘要"],
+  "expected": ["主要路径固定为 target_5_stop_3", "辅助路径不能替代主要路径", "配置摘要确定性一致", "生产规则保持不变"],
+  "evidence": ["versioned config", "deterministic test", "runtime pre-due evaluation"]
+}

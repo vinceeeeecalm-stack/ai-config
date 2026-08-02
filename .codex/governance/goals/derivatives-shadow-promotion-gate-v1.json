@@ -1,0 +1,41 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "derivatives-shadow-promotion-gate-v1",
+  "title": "衍生品前移实验的预注册晋升与淘汰门",
+  "business_outcome": "在首批七天结果出现前冻结可重复的样本充分性、增量价值和安全判定，防止事后挑指标或主观解释；只决定阶段一是否有资格进入后续生产晋升评审，不改变任何生产赚钱规则。",
+  "scope": [
+    "新增独立版本配置，预注册最小完整样本、最小快照数、CONFIRMED_LONG 与对照 cohort 的最小样本和主要诊断路径",
+    "新增确定性只读评估器，读取 DerivativesShadowOutcomeReviewV1 结果并输出 PROMOTION_REVIEW_ELIGIBLE、REJECT_PHASE1 或 MORE_EVIDENCE_REQUIRED",
+    "主要比较冻结为 +5%/-3% 路径，辅助报告 +8%/-4% 与 +10%/-5%，不得事后切换主要路径",
+    "分别比较全部候选和 RANK_4_20 早期发现 cohort，报告目标先于止损率、差值、MFE、MAE 与样本数",
+    "把缺少预注册晋升标准登记为追加式偏差，并用确定性充分、失败和样本不足夹具回归"
+  ],
+  "non_goals": [
+    "不把衍生品因子加入生产排名、research_top1 或正式动作",
+    "不批准阶段一生产晋升，也不启动阶段二持续候选或排名加速度",
+    "不修改入场、目标、止损、退出、仓位、实时门或风险门",
+    "不启动新行情扫描，不生成 Paper 或真钱成交、ROI 或 BUSINESS_READY 证据",
+    "不自动下单、转账、换仓、质押或调用私有账户 API"
+  ],
+  "constraints": [
+    "所有阈值必须在 2026-08-09 首批结果到期前冻结并进入版本控制",
+    "数据不足只能 MORE_EVIDENCE_REQUIRED，不能通过降低最小样本或改用更有利的辅助路径晋升",
+    "只有完整闭合窗口、同绑定、非 legacy、非 DATA_BLOCKED 的结果可进入判定",
+    "CONFIRMED_LONG 为实验组；OI_ONLY_CONFLICT、CROWDED_CONFLICT 和 NO_FUEL 为冻结对照组",
+    "任何未来数据、生产动作、Paper/真钱 ROI 或执行权限污染都必须 REJECT_PHASE1",
+    "PROMOTION_REVIEW_ELIGIBLE 仅允许后续新 GoalContract 评审，不能直接修改生产规则",
+    "阶段一生产规则最早仍只能在 2026-08-16T04:30:20Z 后另建 superseding GoalContract"
+  ],
+  "acceptance_scenario_ids": [
+    "derivatives-promotion-preregistered-criteria-v1",
+    "derivatives-promotion-insufficient-evidence-v1",
+    "derivatives-promotion-benefit-and-reject-v1",
+    "derivatives-promotion-safety-isolation-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "derivatives-shadow-outcome-schedule-v1",
+  "frozen_at": "2026-08-02T13:15:57.943813Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "87999a900303cdcdfc8264262e589d1defc5624143b3cd7473a3ff36b68848ac"
+}

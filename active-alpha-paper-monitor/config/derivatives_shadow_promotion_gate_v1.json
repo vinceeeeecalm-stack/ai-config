@@ -1,0 +1,42 @@
+{
+  "schema_version": "DerivativesShadowPromotionGateConfigV1",
+  "gate_version": "derivatives-shadow-promotion-gate-v1",
+  "reviewer_version": "derivatives-shadow-outcome-review-v1",
+  "review_config_digest": "c42e46023e248a9053637f3b4543b29cc2ad3096c3f5952df6ebd0a4eb5a395e",
+  "primary_threshold_id": "target_5_stop_3",
+  "diagnostic_threshold_ids": [
+    "target_8_stop_4",
+    "target_10_stop_5"
+  ],
+  "experiment_directional_states": [
+    "CONFIRMED_LONG"
+  ],
+  "control_directional_states": [
+    "OI_ONLY_CONFLICT",
+    "CROWDED_CONFLICT",
+    "NO_FUEL"
+  ],
+  "minimum_complete_reviews": 40,
+  "minimum_unique_snapshots": 2,
+  "minimum_experiment_samples": 10,
+  "minimum_control_samples": 20,
+  "minimum_rank_4_20_experiment_samples": 5,
+  "minimum_rank_4_20_control_samples": 10,
+  "minimum_experiment_target_first_rate_pct": 55.0,
+  "minimum_overall_uplift_percentage_points": 10.0,
+  "minimum_rank_4_20_uplift_percentage_points": 10.0,
+  "maximum_experiment_median_mae_magnitude_pct": 5.0,
+  "confidence_interval": "wilson_95",
+  "earliest_production_promotion_at": "2026-08-16T04:30:20Z",
+  "eligible_result": "PROMOTION_REVIEW_ELIGIBLE",
+  "reject_result": "REJECT_PHASE1",
+  "insufficient_result": "MORE_EVIDENCE_REQUIRED",
+  "production_rule_changed": false,
+  "formal_action_eligible": false,
+  "paper_roi_eligible": false,
+  "real_money_roi_eligible": false,
+  "business_ready_eligible": false,
+  "live_orders_enabled": false,
+  "private_api_used": false,
+  "human_confirmation_required": true
+}

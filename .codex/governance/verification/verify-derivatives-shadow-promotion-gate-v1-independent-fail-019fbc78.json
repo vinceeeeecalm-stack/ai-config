@@ -1,0 +1,23 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-promotion-gate-v1-independent-fail-019fbc78",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "c7f41a3ce2bf58751b2ec426eab1ff1b0b5e51d6cf5c2b3ed29ccc2f972f83a9",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "FAIL",
+  "severity_counts": {"P0": 0, "P1": 3, "P2": 1},
+  "findings": [
+    {"severity": "P1", "id": "derivatives-promotion-frozen-threshold-mutable-v1", "summary": "冻结数值门槛未被评估器钉死"},
+    {"severity": "P1", "id": "derivatives-promotion-time-binding-missing-v1", "summary": "未来数据和同源绑定没有得到验证"},
+    {"severity": "P1", "id": "derivatives-promotion-failed-benefit-misclassified-v1", "summary": "充分样本未达到冻结收益标准时错误返回 MORE_EVIDENCE_REQUIRED"},
+    {"severity": "P2", "id": "derivatives-promotion-current-experiment-empty-v1", "summary": "当前四十条 reviewable 观察没有 CONFIRMED_LONG 实验样本，首轮只能 MORE_EVIDENCE_REQUIRED"}
+  ],
+  "passing_evidence": {
+    "targeted_tests": "7/7 PASS",
+    "skill_mirror": "286 files matched; installed 225 tests PASS",
+    "secret_boundary": "PASS",
+    "automation_guard": "PASS with nine future occurrences"
+  },
+  "created_at": "2026-08-02T13:30:15Z"
+}

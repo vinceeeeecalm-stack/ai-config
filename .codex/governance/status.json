@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "derivatives-shadow-outcome-schedule-v1",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "0852489367c267c187c248c9c2e428e19be412992144a4faad212b9046b99eae",
+  "source_digest": "2488bd64892b93a83c57b400d1a7f0abbcf7b3e32555a36bad771b2e59e3343f",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-derivatives-shadow-outcome-schedule-v1-runtime_verified-ca7393ae",
-  "independent_verification_id": "verify-derivatives-shadow-outcome-schedule-v1-independent-019fbc78",
-  "updated_at": "2026-08-02T13:05:51.441077Z"
+  "last_verification_id": "verify-derivatives-shadow-promotion-gate-v1-runtime_verified-5a91c82f",
+  "independent_verification_id": "verify-derivatives-shadow-promotion-gate-v1-independent-pass-019fbc78",
+  "updated_at": "2026-08-02T13:51:24.208508Z"
 }

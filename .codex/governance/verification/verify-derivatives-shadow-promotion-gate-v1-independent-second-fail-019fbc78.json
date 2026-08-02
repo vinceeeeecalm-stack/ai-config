@@ -1,0 +1,20 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-promotion-gate-v1-independent-second-fail-019fbc78",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "94990c8773fb75445272af71cc54b3ebe0ed3c40a0f96781d243e7801749556f",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "FAIL",
+  "severity_counts": {"P0": 0, "P1": 1, "P2": 1},
+  "findings": [
+    {"severity": "P1", "id": "derivatives-promotion-absolute-future-clock-v1", "summary": "绝对未来结果仍可取得晋升评审资格"},
+    {"severity": "P2", "id": "derivatives-promotion-current-experiment-empty-v1", "summary": "当前四十条 reviewable 观察没有 CONFIRMED_LONG 实验样本"}
+  ],
+  "fixed_findings_verified": [
+    "frozen_config_exact_values",
+    "relative_time_and_cross_review_lineage",
+    "sufficient_sample_failed_benefit_rejects"
+  ],
+  "created_at": "2026-08-02T13:37:00Z"
+}
