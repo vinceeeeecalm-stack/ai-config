@@ -60,6 +60,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 - 缺失社交、链上或单一交易所数据只降级相关维度，不得把完整候选池错误清空。
 - 旧缓存超过策略 freshness 上限时只能作为历史证据，不是当前信号。
 - Binance 公共行情请求使用受控并发、连续失败熔断和健康镜像优先；每个端点的成功、失败、跳过与熔断状态必须进入审计。局部端点超时不得清空仍可验证的候选，全部端点失败才允许输出无新鲜决策。
+- 动态现货身份以 Binance `/api/v3/exchangeInfo` 为权威。批量 `symbols` 请求被无效、历史或不符合参数语法的交易对污染时，必须在同一轮改用同一端点的全量快照并本地过滤；不得把 ticker 存在直接当作现货证明。全量快照仍必须执行 active/spot/permission/leveraged 以及证券、稳定币和商品身份门，且把 batch/fallback/恢复数量写入审计。
 - 新链 live radar 必须在访问 DEX 来源前比较当前 cutoff 与带时区的 `watch_until`。过期、缺失或不可解析的事件只保留审计，候选为空，禁止作为当前催化或输出 `why_now`；不得改写历史 replay。
 
 ## Handoff 合约

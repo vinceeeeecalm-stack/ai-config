@@ -230,8 +230,10 @@ class EndpointFailoverTests(unittest.TestCase):
         self.assertTrue(result["no_fresh_decision"])
         self.assertIsNone(result["trade_plan"])
         self.assertEqual(result["observation_samples"], [])
+        self.assertTrue(result["human_confirmation_required"])
         self.assertFalse(result["live_orders_enabled"])
         self.assertFalse(result["private_api_used"])
+        self.assertTrue(result["runtime_mode"]["no_write"])
 
 
 if __name__ == "__main__":

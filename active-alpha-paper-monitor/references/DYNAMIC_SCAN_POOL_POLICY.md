@@ -33,6 +33,22 @@ Each dynamic scan pool run should use:
 
 Stablecoins, fiat-like pairs and leveraged tokens must be excluded from new scan candidates. If Binance market data is unavailable, fall back to open symbols, explicit symbols, core liquidity symbols and the configured baseline list.
 
+Binance `/api/v3/exchangeInfo` is the authority for active spot-product
+identity.  A filtered `symbols` query can fail for the entire batch when one
+historical or non-ASCII symbol violates the request grammar.  This is a batch
+transport/input failure, not evidence that every ticker row is ineligible.  In
+that case the scanner must request the same endpoint's full exchange snapshot,
+filter it locally to the preselected symbols, and record the batch status,
+fallback status, full snapshot count and recovered definition count.  Ticker
+presence, price availability and volume never substitute for this identity
+evidence.  The fallback must retain all active-SPOT, permission, leveraged,
+stablecoin, commodity and tokenized-security exclusions.  If both filtered and
+full exchangeInfo paths fail, dynamic symbols remain unconfirmed and the run
+must identify the static list as a degraded survival fallback.
+`isSpotTradingAllowed=true` is not sufficient by itself: `SPOT` must be
+explicitly present in `permissionSets` or `permissions`; a missing permission
+field fails closed as `spot_permission_missing`.
+
 The Binance universe is the CEX execution-research universe, not the complete
 opportunity universe. A verified mainnet, bridge, canonical DEX, wallet or
 launchpad event must fan out through

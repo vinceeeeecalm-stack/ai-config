@@ -135,7 +135,7 @@ class ValidatedProfitFirstRankingTests(unittest.TestCase):
         ]
 
         self.assertEqual(first, second)
-        self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v6")
+        self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v7")
 
 
 if __name__ == "__main__":

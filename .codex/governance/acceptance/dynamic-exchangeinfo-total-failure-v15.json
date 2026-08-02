@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "dynamic-exchangeinfo-total-failure-v15",
+  "title": "批量和全量身份源均失败时保守降级",
+  "level": "TESTED",
+  "preconditions": ["batch 与 full exchangeInfo 都不可用"],
+  "steps": ["运行动态 discovery", "检查 fallback 状态和最终候选"],
+  "expected": ["动态 ticker 不被直接当作已确认现货", "显式基线仍可独立扫描", "输出 degraded 原因而不是宣称宽池完成", "无真钱动作或 Paper 成交"],
+  "evidence": ["双失败回归测试"]
+}

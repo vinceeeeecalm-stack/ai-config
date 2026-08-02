@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "dynamic-exchangeinfo-wide-runtime-v15",
+  "title": "真实 80 币动态宽池恢复并保持安全预算",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Binance 公共 ticker 与至少一个 exchangeInfo 路径可用"],
+  "steps": ["运行 dynamic-top=80、top=10、discovery-only、no-write", "检查 701 行 ticker、身份恢复、Top10 和端点审计"],
+  "expected": ["fresh_transport_verified=true", "不再因一个空 batch 把全部动态候选拒绝", "Top10 尽可能来自动态池且每个具有 active spot 身份", "发现阶段不超过 15 秒", "不写 runtime 账本或生成真钱动作"],
+  "evidence": ["真实只读 JSON 运行包", "公共端点审计", "monorepo 与 Skill 验证"]
+}
