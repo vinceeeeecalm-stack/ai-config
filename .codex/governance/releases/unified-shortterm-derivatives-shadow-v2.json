@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "unified-shortterm-derivatives-shadow-v2",
+  "project_id": "investing-monorepo",
+  "goal_id": "unified-shortterm-derivatives-shadow-v2",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "797fd9b05b2984a569ebf44b74e2ea129e7a3c8b",
+    "branch": "codex/unified-shortterm-derivatives-shadow-v2",
+    "dirty": false
+  },
+  "source_digest": "1a9ce5a0cc0d1f07a4f9e7ac2f81e85e75b4d1a25753fbaab85b3733ccd679be",
+  "build_version": "797fd9b",
+  "runtime_version": "DerivativesShadowCollectorV2",
+  "database_version": "not-applicable",
+  "last_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-runtime_verified-5b43b230",
+  "independent_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-independent-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 7,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T12:18:37.659485Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
