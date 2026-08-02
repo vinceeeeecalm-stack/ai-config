@@ -1,0 +1,27 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-append-v4",
+  "title": "冻结候选进入追加式观察分母",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "运行模式为 tactical_1_7d",
+    "扫描器产生绑定同一证据快照的冻结候选"
+  ],
+  "steps": [
+    "运行 tactical_1_7d 扫描并写入 runtime 观察账本",
+    "对同一 observation_id 重放相同记录",
+    "对同一 observation_id 尝试写入不同内容",
+    "重启进程并读取摘要"
+  ],
+  "expected": [
+    "首次写入追加一个 ObservationSampleV1",
+    "相同内容重放返回 NO_UPDATE 且行数不变",
+    "同 ID 不同内容被拒绝",
+    "重启后样本、阻断和绑定摘要完全恢复",
+    "观察样本不进入 Paper 或真钱胜率和 ROI 分母"
+  ],
+  "evidence": [
+    "active-alpha-paper-monitor/tests/test_tactical_evidence_ledger.py",
+    "tactical_1_7d scanner runtime observation summary"
+  ]
+}

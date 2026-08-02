@@ -1,0 +1,36 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-evidence-ledger-v4",
+  "title": "Crypto 1–7 日候选观察与 Paper 样本可追溯闭环",
+  "business_outcome": "让每轮唯一研究 Top1、被拒绝候选与未来合格 Paper fill 都进入相互隔离、可追加、可复盘的证据分母，避免迭代过程丢失或把 Paper 误算成真钱收益。",
+  "scope": [
+    "实现确定性的 ObservationSampleV1 与 TradeSampleV1 追加式账本和校验器",
+    "将 tactical_1_7d impulse scanner 的冻结 Top3 写入观察账本并绑定 snapshot_id、strategy_version、config_digest 和 source_digest",
+    "重复的同内容 observation/trade 返回 NO_UPDATE，同 ID 不同内容直接阻断",
+    "只有显式 tactical_1_7d Paper fill 才能成为 TradeSampleV1，旧期限未知记录不得导入",
+    "用本轮 EUL NO_TRADE 快照验证拒绝样本可持久化且不会生成 Paper 或真钱交易样本",
+    "增加回归测试、运行验收、Skill 同步与独立只读复验"
+  ],
+  "non_goals": [
+    "不改变价值、催化、实时、回归、流动性或风险硬门",
+    "不自动下单、转账、卖出、换仓、质押或调用私有交易 API",
+    "不把 Paper、观察样本或旧 26 笔历史记录计入真钱 ROI",
+    "不伪造首个 Paper fill，不因缺少样本放宽准入",
+    "不修改长期持仓权威或长期目标路径"
+  ],
+  "constraints": [
+    "观察与交易样本必须使用独立 JSONL 分母并保持只追加",
+    "所有正式动作仍只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE",
+    "live_orders_enabled、private_api_used 和 real_money_roi_eligible 必须恒为 false",
+    "同一工作树只有当前 CODEX_THREAD_ID 可写",
+    "运行数据留在 Git 外，Git 只跟踪实现、Schema、确定性夹具、测试和治理证据"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-observation-append-v4",
+    "tactical-paper-live-isolation-v4",
+    "tactical-eul-no-trade-observation-v4"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "universal-investment-core-github-canonical-v3"
+}

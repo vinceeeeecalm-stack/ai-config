@@ -1,0 +1,118 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-evidence-ledger-v4-independent-rerun-5088cb9d",
+  "goal_id": "tactical-evidence-ledger-v4",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "5088cb9dab266b816ecdd12182e486fdfd7f0de4825bf8498bd3f0dc45451f95",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-goal-and-acceptance-contracts",
+      "result": "PASS",
+      "evidence": {
+        "goal_contract_digest": "ad773ea0f8e2d2dcc61cecf20cc1285d48e2b14d591ad0e6efe286b5e8963029",
+        "acceptance_scenario_count": 3
+      }
+    },
+    {
+      "id": "prior-independent-failure-preserved",
+      "result": "PASS",
+      "evidence": {
+        "verification_id": "verify-tactical-evidence-ledger-v4-independent-8117bc03",
+        "result": "FAIL",
+        "overwritten": false
+      }
+    },
+    {
+      "id": "governance-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "current_source_digest": "5088cb9dab266b816ecdd12182e486fdfd7f0de4825bf8498bd3f0dc45451f95",
+        "verification_stale": false,
+        "open_deviations": 0
+      }
+    },
+    {
+      "id": "scanner-ledger-runtime-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "scanner_plus_ledger_digest": "cd52e8ee099814a7cf029b140ebbc8330eca96a675edea778f971cf8278e6a56",
+        "artifact": "active-alpha-paper-monitor/experiments/20260802-025605-impulse-capture.json",
+        "snapshot_id": "snapshot-29f1e0ddd58dc22a68f7",
+        "runtime_rows_for_snapshot": 3
+      }
+    },
+    {
+      "id": "tactical-observation-append-v4",
+      "result": "PASS",
+      "evidence": {
+        "first_append": "APPENDED",
+        "identical_replay": "NO_UPDATE",
+        "same_id_different_content": "BLOCKED",
+        "runtime_observation_count": 7,
+        "accepted_observation_count": 0,
+        "rejected_observation_count": 7
+      }
+    },
+    {
+      "id": "tactical-paper-live-isolation-v4",
+      "result": "PASS",
+      "evidence": {
+        "paper_trade_sample_count": 0,
+        "live_trade_sample_count": 0,
+        "real_money_roi_sample_count": 0,
+        "paper_live_separated": true,
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "paper_can_raise_business_ready": false
+      }
+    },
+    {
+      "id": "tactical-eul-no-trade-observation-v4",
+      "result": "PASS",
+      "evidence": {
+        "runtime_eul_observation_count": 1,
+        "canonical_record_sha256": "72367aaad62772a5062fe3a85afb35096c67f107cadd943a4a4998132d2f1c43",
+        "accepted": false,
+        "paper_entry_eligible": false,
+        "formal_action_eligible": false,
+        "current_source_bound": true,
+        "fake_trade_card_created": false
+      }
+    },
+    {
+      "id": "regression-suite",
+      "result": "PASS",
+      "evidence": {
+        "monorepo_policy": "PASS",
+        "tactical_evidence_ledger_tests": "8/8 PASS",
+        "manual_operator_tests": "191/191 PASS",
+        "governance_tests": "14/14 PASS",
+        "impulse_scanner_self_test": "PASS"
+      }
+    },
+    {
+      "id": "global-installed-skill-integrity",
+      "result": "PASS",
+      "evidence": {
+        "workspace_manifest_file_count": 268,
+        "installed_manifest_file_count": 268,
+        "manifest_sha256": "a02d176caf048a27e9a8bf542f69af04cad4bc637dd00425c433725633ab805c",
+        "hash_mismatches": [],
+        "smoke_passed": true
+      }
+    },
+    {
+      "id": "read-only-evidence-stability",
+      "result": "PASS",
+      "evidence": {
+        "observation_ledger_sha256": "b191f9fc3269611a3cd18ace446afec8916683cbf86e00cac1f34418e2ae115e",
+        "scan_artifact_sha256": "b9a6880165d01aea764bd8762ab4cd42cb3ce36d9472e0098b9046fe2522c7d5",
+        "files_modified_by_verifier": false
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": null
+}

@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "universal-investment-core-github-canonical-v3",
+  "goal_id": "tactical-evidence-ledger-v4",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "3a3270b9b851d4a8ef3bbe64f5ced260a6a472c085bcd5d6e6ede171eaf46e26",
+  "source_digest": "5088cb9dab266b816ecdd12182e486fdfd7f0de4825bf8498bd3f0dc45451f95",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime_verified-e22a297e",
-  "independent_verification_id": "verify-universal-investment-core-github-canonical-v3-runtime-independent-d35cd11",
-  "updated_at": "2026-08-01T17:53:34.741835Z"
+  "last_verification_id": "verify-tactical-evidence-ledger-v4-runtime_verified-37d62a9b",
+  "independent_verification_id": "verify-tactical-evidence-ledger-v4-independent-rerun-5088cb9d",
+  "updated_at": "2026-08-02T03:08:50.416959Z"
 }

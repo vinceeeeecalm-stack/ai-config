@@ -114,6 +114,7 @@ Runtime 产物应保存在工作区或显式 `INVESTING_RUNTIME_ROOT`，迁移�
 - 美股开盘扫描：`scripts/us_open_dynamic_scanner.py`
 - 样本审计：`scripts/validation_sample_auditor.py`
 - 风险和完整性：`scripts/paper_testnet_risk_control_auditor.py`、`scripts/paper_ledger_integrity_auditor.py`
+- 1–7 日双样本账本：`scripts/tactical_evidence_ledger.py`；观察与 Paper TradeSample 使用独立追加式 JSONL，均不得进入真钱 ROI。
 
 这些入口不得依赖 Unified 中不存在的旧 scripts；共享契约由 Manual V3 提供。
 

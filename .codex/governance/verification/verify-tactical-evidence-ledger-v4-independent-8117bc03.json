@@ -1,0 +1,48 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-evidence-ledger-v4-independent-8117bc03",
+  "goal_id": "tactical-evidence-ledger-v4",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "8117bc036792d5f46e6a4b4b2f738a92f26cb47e942471048b4b2793c7bb869b",
+  "goal_contract_digest": "ad773ea0f8e2d2dcc61cecf20cc1285d48e2b14d591ad0e6efe286b5e8963029",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent": true,
+  "read_only": true,
+  "result": "FAIL",
+  "checks": [
+    {"id": "source-digest-binding", "result": "PASS"},
+    {"id": "tactical-observation-append-v4", "result": "PASS"},
+    {"id": "tactical-paper-live-isolation-v4", "result": "PASS"},
+    {"id": "deterministic-eul-replay", "result": "PASS"},
+    {"id": "current-runtime-ledger", "result": "FAIL"},
+    {"id": "real-tactical-scan-observation-write", "result": "FAIL"},
+    {"id": "live-order-private-api-invariants", "result": "PASS"},
+    {"id": "regression-suite", "result": "PASS"},
+    {"id": "installed-skill-hash", "result": "PASS"}
+  ],
+  "findings": [
+    {
+      "id": "P1-runtime-ledger-source-stale",
+      "severity": "P1",
+      "acceptance_scenario_id": "tactical-observation-append-v4",
+      "expected": "真实 tactical_1_7d 扫描在当前源码摘要下写入可恢复的 ObservationSampleV1。",
+      "actual": "真实观察账本与扫描产物绑定旧扫描器源码摘要，当前源码没有同摘要真实扫描追加证据。"
+    },
+    {
+      "id": "P1-eul-runtime-observation-missing",
+      "severity": "P1",
+      "acceptance_scenario_id": "tactical-eul-no-trade-observation-v4",
+      "expected": "runtime 观察账本存在带完整 blocker 的 EUL NO_TRADE ObservationSampleV1。",
+      "actual": "EUL 仅存在于确定性测试夹具，当前 runtime 账本 EUL 行数为 0。"
+    }
+  ],
+  "p0_findings": [],
+  "p1_findings": [
+    "P1-runtime-ledger-source-stale",
+    "P1-eul-runtime-observation-missing"
+  ],
+  "highest_proven_level": "TESTED",
+  "business_ready": false,
+  "verified_at": "2026-08-02T02:51:57Z"
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": "ObservationSampleV1",
+  "observation_id": "obs-eul-no-trade-replay-v4",
+  "candidate_id": "EULUSDT",
+  "setup_id": "202608011834-EULUSDT-replay",
+  "symbol": "EULUSDT",
+  "asset_class": "crypto",
+  "request_mode": "tactical_1_7d",
+  "strategy_family": "impulse_capture",
+  "strategy_version": "eul-no-trade-replay-v4",
+  "snapshot_id": "snapshot-eul-20260801-replay",
+  "config_digest": "677e287b23243764fa237b2ce8b9f5525cb4f566db5e7abe3c64f696ec88c37c",
+  "source_digest": "cd52e8ee099814a7cf029b140ebbc8330eca96a675edea778f971cf8278e6a56",
+  "observed_at": "2026-08-01T18:35:23Z",
+  "price": 1.513,
+  "price_as_of": "2026-08-01T18:35:23Z",
+  "rank": 1,
+  "accepted": false,
+  "rejection_reasons": [
+    "positive_conservative_ev_gate_failed",
+    "closed_breakout_not_confirmed",
+    "verified_1_7d_catalyst_missing",
+    "fair_value_discount_missing"
+  ],
+  "entry_trigger_state": "not_triggered",
+  "next_check_at": "2026-08-01T19:35:23Z",
+  "review_due_at": "2026-08-08T18:35:23Z",
+  "evidence_ids": [
+    "binance-spot-closed-daily-500:EULUSDT",
+    "eul-four-venue-spot-20260801T1835Z",
+    "euler-official-event-review-20260801"
+  ],
+  "historical_summary": {
+    "sample_size": 35,
+    "out_of_sample_win_rate_interval_pct": [20.8317, 50.8481],
+    "conservative_expected_value_pct": -0.901974,
+    "expected_return_pct": 1.040489,
+    "profit_factor": 1.384072,
+    "max_drawdown_pct": -19.233112,
+    "walk_forward_positive_windows": 3,
+    "walk_forward_total_windows": 5
+  },
+  "formal_action_eligible": false,
+  "paper_entry_eligible": false,
+  "paper_live_separated": true,
+  "live_orders_enabled": false,
+  "private_api_used": false
+}
