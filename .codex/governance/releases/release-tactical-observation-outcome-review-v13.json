@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-tactical-observation-outcome-review-v13",
+  "project_id": "investing-monorepo",
+  "goal_id": "tactical-observation-outcome-review-v13",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "17ce200ca7f491788c62aacbfe4f06546eda3981",
+    "branch": "codex/tactical-observation-review-v13",
+    "dirty": true
+  },
+  "source_digest": "36fbcc04f109616a9ecfdf00e7e4264ad822164430ee317c8be772813f4b9ab9",
+  "build_version": "36fbcc04f109616a9ecfdf00e7e4264ad822164430ee317c8be772813f4b9ab9",
+  "runtime_version": "snapshot-739b64b12179410b2a76",
+  "database_version": "no-schema-change",
+  "last_verification_id": "verify-tactical-observation-outcome-review-v13-runtime_verified-72206391",
+  "independent_verification_id": "verify-tactical-observation-outcome-review-v13-independent-round2-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T09:12:51.172519Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

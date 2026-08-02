@@ -1,0 +1,47 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-observation-outcome-review-v13",
+  "title": "Crypto 1–7 日观察样本到期结果学习闭环",
+  "business_outcome": "让每个被接受或拒绝的 Crypto 1–7 日观察样本在冻结窗口内得到可复核的 MFE、MAE、阈值先后和拒绝质量结果，使后续选标规则能够区分保护资金、错过上涨和中性拒绝，同时继续与 Paper 成交、真钱成交和资金加权净 ROI 严格隔离。",
+  "scope": [
+    "新增 ObservationOutcomeReviewV1 追加式合同和独立结果账本",
+    "为新 ObservationSampleV1 保存本策略明确的诊断目标、止损和窗口，不回填或猜测旧样本缺失字段",
+    "按 observed_at、review_due_at 和闭合公共 K 线计算 MFE、MAE、目标/止损首次触发及拒绝质量",
+    "旧样本缺少阈值或行情时输出 DATA_BLOCKED 或有限的价格路径事实，不伪造结论",
+    "扫描新候选前先结算所有已到 review_due_at 的旧观察，局部数据失败不得阻断其余符号",
+    "结果只进入观察学习分母，不进入 Paper 胜率、真钱成交或真实 ROI",
+    "增加无到期、成功到期、同柱冲突、数据失败、重复复盘与重启恢复测试",
+    "同步全局 Skill 镜像并发布到 GitHub main"
+  ],
+  "non_goals": [
+    "不自动真实下单、转账、充值、卖出、换仓、质押或调用私有交易 API",
+    "不把观察路径收益称为 Paper 或真钱利润",
+    "不修改 V12 的价值、催化、EV、流动性、实时或风险硬门",
+    "不根据尚未到期样本提前晋升赚钱规则",
+    "不删除、覆盖或原地修改现有 58 条观察记录",
+    "不迁移无关美股、体育、Polymarket 或长期持仓账本"
+  ],
+  "constraints": [
+    "观察结果必须绑定原 observation_id、snapshot_id、strategy_version、config_digest 和 source_digest",
+    "结果账本只追加；相同 review_id 内容等价时返回 NO_UPDATE，冲突时阻断",
+    "只使用 observed_at 之后且不晚于 review_due_at/as_of 的闭合行情，禁止未来数据和未闭合 K 线",
+    "同一根 K 线同时触发目标与止损时采用保守 stop-first 并明确标记 path_ambiguous",
+    "旧样本缺少诊断阈值时不得从当前配置倒填历史阈值",
+    "ObservationOutcomeReviewV1 强制 formal_action_eligible=false、paper_live_separated=true、real_money_roi_eligible=false",
+    "局部来源失败只产生受影响观察的 DATA_BLOCKED，不清空全轮复盘",
+    "live_orders_enabled=false、private_api_used=false、human confirmation 边界保持"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-observation-review-success-v13",
+    "tactical-observation-review-no-hindsight-v13",
+    "tactical-observation-review-isolation-v13",
+    "tactical-observation-review-recovery-v13",
+    "tactical-observation-review-current-runtime-v13"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-live-manual-arbitration-v12",
+  "frozen_at": "2026-08-02T08:43:39.803484Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "eeded29ff2d0464c682dccf7c37b56bce761eca5c94b04b0fba4db955217485e"
+}

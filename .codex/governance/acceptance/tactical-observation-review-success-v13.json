@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-review-success-v13",
+  "title": "到期观察生成可复核的追加式结果",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["观察已到 review_due_at", "冻结阈值与闭合行情可用"],
+  "steps": ["读取原观察", "冻结 observed_at 至 review_due_at 的闭合 K 线", "计算 MFE、MAE 与首次触发", "追加 ObservationOutcomeReviewV1"],
+  "expected": ["结果绑定原四摘要和 observation_id", "同柱冲突按 stop-first", "重复运行返回 NO_UPDATE", "不修改原观察"],
+  "evidence": ["合同测试", "结果账本摘要", "运行包"]
+}

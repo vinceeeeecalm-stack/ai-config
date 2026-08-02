@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-review-recovery-v13",
+  "title": "局部行情失败和重启不会破坏复盘链",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["多个到期观察中至少一个来源失败"],
+  "steps": ["注入单符号失败", "继续复盘其他观察", "重启后重新运行"],
+  "expected": ["失败观察为 DATA_BLOCKED", "其他观察正常追加", "重启不产生重复或覆盖", "无真实订单或私有 API"],
+  "evidence": ["故障注入测试", "重启运行证据"]
+}

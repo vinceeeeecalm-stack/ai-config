@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-review-current-runtime-v13",
+  "title": "当前 58 条观察在未到期时得到准确运行状态",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["当前观察账本存在", "最早 review_due_at 尚未到达或部分已到达"],
+  "steps": ["运行 due-only 复盘", "生成当前摘要", "再运行最新扫描前置复盘"],
+  "expected": ["未到期时输出 due=0 而不是伪结果", "到期后只处理应处理记录", "观察、Paper、真钱计数分离", "live_orders_enabled=false 且 private_api_used=false"],
+  "evidence": ["当前 runtime JSON", "TacticalEvidenceLedgerSummaryV1", "独立只读复验"]
+}

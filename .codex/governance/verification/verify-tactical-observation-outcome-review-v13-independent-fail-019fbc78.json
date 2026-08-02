@@ -1,0 +1,50 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-observation-outcome-review-v13-independent-019fbc78",
+  "goal_id": "tactical-observation-outcome-review-v13",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "00e40d47fc55dd7d6cdd08658bf8210f00e78d3a4c2b5abd6b7ee5dd46c3bb50",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "FAIL",
+  "highest_proven_level": "TESTED",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "status": "PASS",
+      "evidence": "goal and five acceptance scenarios read; independent source digest matched"
+    },
+    {
+      "id": "outcome-contract-runtime",
+      "status": "PASS",
+      "evidence": "56 Active tests passed; no-hindsight, frozen thresholds, legacy PATH_ONLY, same-bar stop-first, candidate-local retry, idempotency, scan-before-settlement and ROI isolation passed"
+    },
+    {
+      "id": "current-runtime-honesty",
+      "status": "PASS",
+      "evidence": "snapshot-739b64b12179410b2a76 produced NEARUSDT research_top1, NO_TRADE, no decision card, NO_DEPLOY_CASH and UNMEASURED live profit"
+    },
+    {
+      "id": "outcome-must-bind-existing-observation",
+      "status": "FAIL",
+      "evidence": "an otherwise valid outcome was accepted by summary and restart loading while its observation ledger was empty"
+    }
+  ],
+  "findings": [
+    {
+      "id": "P1-V13-ORPHAN-OUTCOME-ACCEPTED",
+      "severity": "P1",
+      "title": "Existing outcome ledgers accept reviews without their original observation",
+      "expected": "Every outcome must bind an existing observation and its frozen identity fields.",
+      "actual": "A missing observation lookup returned null and skipped binding validation.",
+      "impact": "Orphan results could contaminate missed-upside and protected-downside statistics.",
+      "acceptance_scenario_id": "tactical-observation-review-isolation-v13",
+      "deviation_id": "dev-tactical-orphan-outcome-accepted-v13"
+    }
+  ],
+  "finding_counts": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 0
+  },
+  "created_at": "2026-08-02T09:02:00Z"
+}

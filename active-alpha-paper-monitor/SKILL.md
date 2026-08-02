@@ -30,7 +30,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 
 ## 标准流程
 
-1. 先按 `references/DUAL_SAMPLE_AND_FORWARD_VALIDATION_POLICY.md` 更新全部未关闭 observation 与 Paper trade，再扫描新候选。
+1. 先按 `references/DUAL_SAMPLE_AND_FORWARD_VALIDATION_POLICY.md` 更新全部未关闭 observation 与 Paper trade，再扫描新候选。`scripts/tactical_observation_reviewer.py` 负责把已到 `review_due_at` 的 1–7 日观察追加为 `ObservationOutcomeReviewV1`；旧样本缺少冻结阈值时只能输出 `PATH_ONLY`，不得用当前配置倒填历史。
 2. 接收或生成一个 EvidenceSnapshotV2；同一轮所有研究角色必须共享 `snapshot_id` 和截止时间。
 3. 生成动态扫描池，保留流动性、成交额、事件、历史状态和数据新鲜度证据。
    新链/mainnet/钱包或 launchpad 支持事件必须先运行
@@ -46,7 +46,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 6. 每个冻结候选写 ObservationSampleV1；只有可复现的 Paper fill 写 TradeSampleV1。
 7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan；walk-forward 与 Paper 统一封装为 `RegressionEvidenceV1`。
 8. Manual V3 重新读取持仓、现金、长期目标和风险门后，才可形成研究/执行双轨结论。
-9. 到期 paper 复盘记录触发、MFE、MAE、止损/目标先后、费用、滑点和事件跳空。
+9. 到期观察复盘记录 MFE、MAE、诊断目标/止损先后和拒绝质量；到期 Paper 复盘另行记录真实模拟成交、费用、滑点和事件跳空。观察结果不得进入 Paper 或真钱收益分母。
 
 ## EvidenceSnapshotV2
 
@@ -117,6 +117,7 @@ Runtime 产物应保存在工作区或显式 `INVESTING_RUNTIME_ROOT`，迁移�
 - 样本审计：`scripts/validation_sample_auditor.py`
 - 风险和完整性：`scripts/paper_testnet_risk_control_auditor.py`、`scripts/paper_ledger_integrity_auditor.py`
 - 1–7 日双样本账本：`scripts/tactical_evidence_ledger.py`；观察与 Paper TradeSample 使用独立追加式 JSONL，均不得进入真钱 ROI。
+- 观察结果复盘：`scripts/tactical_observation_reviewer.py`；只读取冻结观察和闭合 15m 公共行情，追加 `ObservationOutcomeReviewV1`。同柱目标/止损按 stop-first；数据失败保留可重试 `DATA_BLOCKED`，不写入伪结果。
 
 这些入口不得依赖 Unified 中不存在的旧 scripts；共享契约由 Manual V3 提供。
 

@@ -128,6 +128,7 @@ python3 scripts/universal_investment_core.py \
 - 每个 active lifecycle 必须有 `next_check_at`；新扫描不得跳过旧生命周期、到期项或待确认复盘。
 - 观察样本与交易样本使用独立分母；未触发、不行动、Legacy observation、Paper 和真钱不得混算。
 - `active-alpha-paper-monitor/scripts/tactical_evidence_ledger.py` 是 `tactical_1_7d` 观察与 Paper TradeSample 的确定性来源；Manual 只读取其摘要和绑定证据，不把观察或 Paper 样本升级为真钱动作。
+- `ObservationOutcomeReviewV1` 只衡量拒绝是否错过上涨、保护下跌或保持中性；它可以用于双周规则复盘，但不得进入 Paper 胜率、真钱 ROI、交易卡或 `BUSINESS_READY`。旧观察没有冻结目标/止损时只接受 `PATH_ONLY`，禁止后见回填。
 - 复盘分开记录观察触发、真实执行、目标/止损先后、窗口状态、MFE、MAE、滑点和事件跳空。
 - 一次性价格和新闻留在当日报告。明确 schema、安全或数据错误可立即修复；分析启发式需三次独立复现或回测证据后才可晋升。
 - 每次规则晋升记录：`漏项 → 根因 → 通用规则 → 受影响组件 → 验证结果`。

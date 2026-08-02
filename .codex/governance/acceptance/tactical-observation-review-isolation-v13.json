@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-review-isolation-v13",
+  "title": "观察结果不进入 Paper 与真钱利润分母",
+  "level": "TESTED",
+  "preconditions": ["至少一个 ObservationOutcomeReviewV1 存在"],
+  "steps": ["生成账本摘要", "运行 Paper/真钱隔离校验"],
+  "expected": ["formal_action_eligible=false", "paper_live_separated=true", "real_money_roi_eligible=false", "Paper trade 和 real money ROI 计数保持不变"],
+  "evidence": ["隔离回归测试", "账本摘要"]
+}
