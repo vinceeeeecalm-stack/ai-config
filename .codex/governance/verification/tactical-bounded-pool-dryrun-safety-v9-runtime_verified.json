@@ -1,0 +1,112 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-bounded-pool-dryrun-safety-v9-runtime_verified-ab9184b8",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 259,
+      "stdout_sha256": "70238421ef06a8582dff76917ceff9d545f2a92a436086c8cbbedf528457f831",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/fast_candidate_funnel.py --self-test --iterations 30 --candidate-count 30",
+      "exit_code": 0,
+      "duration_ms": 51,
+      "stdout_sha256": "5ac7b173ada76c4e0303a1d6c366aaf6148fa250859776ea758dce4f58345240",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --self-test --iterations 30 --candidate-count 25",
+      "exit_code": 0,
+      "duration_ms": 86,
+      "stdout_sha256": "11b11af2d6fbb8b45231b98bbe0ea5c3911a7a922447ccb376250406967fb6b1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --count 25 --top 3 --max-symbols 30 --request-timeout 12 --request-mode intraday_scalp --json-only --assert-runtime-contract",
+      "exit_code": 0,
+      "duration_ms": 4763,
+      "stdout_sha256": "4b9682149947c58182825c27bbae752ec8b2efe75dec443f3479e8e858d8ee12",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/impulse_capture_scanner.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 89,
+      "stdout_sha256": "be09fea9ff291a74df074531831040b1e33ee327908d79e52909a4dd4be12e29",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/longterm_next_dollar_ranker.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 48,
+      "stdout_sha256": "f401c2e222fe934b68995a3e73e81f8d7fc836dfc10f520fd1603ac526bceec0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 62,
+      "stdout_sha256": "128a45224326a3e5e3a5802d0e34e672392e2f5d18a6a882b5cd83d03932d773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest -v manual-investment-strategy-operator/tests/test_profit_oriented_dual_sleeve.py",
+      "exit_code": 0,
+      "duration_ms": 65,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "364e5bddfb1c39f5a8c86ec9ff3d4c81d8524c52f52bc454a6865290258bffb8"
+    },
+    {
+      "command": "python3 -m unittest -v manual-investment-strategy-operator/tests/test_longterm_next_dollar_ranker.py manual-investment-strategy-operator/tests/test_us_open_dynamic_scanner.py",
+      "exit_code": 0,
+      "duration_ms": 129,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "27caf0a2dadecd476796fef88dbe0c0b6a4e151dfcd21679d5ade1ad97da14ff"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/v3_manual_dispatch.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 57,
+      "stdout_sha256": "cb5f4f138f490a9790275abf991d603456caf55b6ff3372d9207784f9c123b04",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/recommendation_execution_calendar_gate.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 44,
+      "stdout_sha256": "e177ac87da15e01cafd03d66df9085d79fbc0bae3046271a7fb3e186fa68d52e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --shadow-suite manual-investment-strategy-operator/runtime/universal_investment_core_v3",
+      "exit_code": 0,
+      "duration_ms": 44,
+      "stdout_sha256": "0b8ed624e57a2049022348ec330713a485bc8fca4d3560a2d485160d1c40a7e6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/sync_installed_skill.py --check --with-smoke",
+      "exit_code": 0,
+      "duration_ms": 522,
+      "stdout_sha256": "caab7f2ff00bdd2cd0fa0b4bf4d1e1652c1bba501491cdccd3c838644455b3ad",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 scripts/scan-public-repo.py",
+      "exit_code": 0,
+      "duration_ms": 30589,
+      "stdout_sha256": "a8a1fab78d55d99ec93cdbe23bc68f7d196349df0513e77897900ebe02006c99",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T06:28:47.882164Z"
+}

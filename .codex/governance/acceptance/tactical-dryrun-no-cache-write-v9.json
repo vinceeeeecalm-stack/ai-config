@@ -1,0 +1,18 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-dryrun-no-cache-write-v9",
+  "title": "Dry-run never persists dynamic K-line cache",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Current-signal refresh is stale or explicit dynamic cache is requested"],
+  "steps": [
+    "Record cache inventory",
+    "Run dry-run with automatic and explicit dynamic-cache conditions",
+    "Compare cache inventory and inspect child-run audit"
+  ],
+  "expected": [
+    "binance_kline_cache_builder is not launched",
+    "Cache inventory is unchanged",
+    "Output records skipped_dry_run instead of pretending the cache completed"
+  ],
+  "evidence": ["deterministic unit fixture and before/after cache manifest"]
+}
