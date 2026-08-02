@@ -1,0 +1,240 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-profit-first-top1-ranking-v7-independent-019fbc78-8c391374",
+  "goal_id": "tactical-profit-first-top1-ranking-v7",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "8c3913745a7347e3ef5e13ac1a0c6987f20451eef7b9473d589482d287ad1f38",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "acceptance_scenarios": [
+          "tactical-profit-first-near-miss-ranking-v7",
+          "tactical-profit-first-qualified-ranking-v7",
+          "tactical-profit-first-no-gate-loosening-v7"
+        ],
+        "stored_goal_contract_digest": "859d57bf7435275983f5e311c57221a00d89d222b2dbc5b0b19e941a57c16386",
+        "recomputed_goal_contract_digest": "859d57bf7435275983f5e311c57221a00d89d222b2dbc5b0b19e941a57c16386",
+        "authoritative_source_digest": "8c3913745a7347e3ef5e13ac1a0c6987f20451eef7b9473d589482d287ad1f38",
+        "current_source_digest": "8c3913745a7347e3ef5e13ac1a0c6987f20451eef7b9473d589482d287ad1f38",
+        "verification_stale": false,
+        "effective_open_deviations": 0,
+        "closed_deviation_chain": "dev-validated-top1-technical-stage-overrides-profit-v7-closed",
+        "verifier_is_distinct_from_implementation_owner": true
+      }
+    },
+    {
+      "id": "tactical-profit-first-near-miss-ranking-v7",
+      "result": "PASS",
+      "evidence": {
+        "independent_fixture": {
+          "stronger_technical_symbol": "TECH",
+          "stronger_technical_conservative_ev_pct": -1.98,
+          "better_profit_symbol": "PROFIT",
+          "better_profit_conservative_ev_pct": -1.86,
+          "selected_top1": "PROFIT"
+        },
+        "verified_precedence": [
+          "historical_quality_gate",
+          "conservative_expected_value_pct",
+          "expected_return_pct_after_friction",
+          "out_of_sample_win_rate_interval_floor",
+          "profit_factor",
+          "max_drawdown_pct",
+          "current_setup_score",
+          "current_stage",
+          "volume",
+          "symbol_tiebreak"
+        ],
+        "all_input_permutations_same_order": true,
+        "runtime_ranked_symbols": [
+          "DEXEUSDT",
+          "ZECUSDT",
+          "PUMPUSDT"
+        ],
+        "runtime_conservative_ev_pct": [
+          -0.233323,
+          -1.883394,
+          -2.408594
+        ],
+        "runtime_technical_scores": [
+          58.5,
+          77.0,
+          87.5
+        ],
+        "runtime_top1": "DEXEUSDT",
+        "technical_score_overrode_profit_evidence": false
+      }
+    },
+    {
+      "id": "tactical-profit-first-qualified-ranking-v7",
+      "result": "PASS",
+      "evidence": {
+        "qualified_fixture": {
+          "symbol": "QUAL",
+          "sample_size": 40,
+          "conservative_ev_pct": 0.35,
+          "expected_return_pct": 1.1,
+          "profit_factor": 1.2,
+          "reward_risk_ratio": 2.0,
+          "technical_score": 20
+        },
+        "unqualified_fixture": {
+          "symbol": "UNQUAL",
+          "sample_size": 80,
+          "conservative_ev_pct": -0.01,
+          "expected_return_pct": 3.0,
+          "profit_factor": 2.0,
+          "reward_risk_ratio": 3.0,
+          "technical_score": 100
+        },
+        "selected_top1": "QUAL",
+        "repeat_order_stable": true,
+        "permutation_order_stable": true,
+        "forecast_probability_emitted": false,
+        "execution_authority_created": false
+      }
+    },
+    {
+      "id": "three-top1-projections-and-decision-card",
+      "result": "PASS",
+      "evidence": {
+        "artifact": "active-alpha-paper-monitor/experiments/20260802-043339-impulse-capture.json",
+        "artifact_sha256": "49f1c21ca44d0371d82e4daf9bedddef9649556500fa679b3f41ae89e7076cf2",
+        "validated_top1_symbol": "DEXEUSDT",
+        "deep_research_candidate_symbol": "DEXEUSDT",
+        "ranked_historical_comparison_primary_symbol": "DEXEUSDT",
+        "top1_decision_card_best_candidate": "DEXEUSDT",
+        "all_projections_consistent": true,
+        "unique_research_top1": true
+      }
+    },
+    {
+      "id": "tactical-profit-first-no-gate-loosening-v7",
+      "result": "PASS",
+      "evidence": {
+        "runtime_current_action": "NO_TRADE",
+        "runtime_trade_plan": null,
+        "runtime_decision_status": "FRESH_RESEARCH_RESULT",
+        "runtime_max_allowed_action": "watch",
+        "runtime_observations": 3,
+        "runtime_accepted_observations": 0,
+        "runtime_formal_action_eligible": 0,
+        "runtime_paper_entry_eligible": 0,
+        "top1_rejection_reasons": [
+          "closed_breakout_not_confirmed",
+          "current_impulse_not_confirmed",
+          "positive_conservative_ev_gate_failed",
+          "research_committee_degraded",
+          "verified_1_7d_catalyst_missing"
+        ],
+        "independent_high_profit_negative_fixture": {
+          "conservative_ev_pct": 5.0,
+          "expected_return_pct": 8.0,
+          "profit_factor": 3.0,
+          "accepted": false,
+          "paper_entry_eligible": false,
+          "formal_action_eligible": false,
+          "rejection_reasons": [
+            "research_committee_degraded",
+            "verified_1_7d_catalyst_missing"
+          ]
+        },
+        "hard_gate_restored_by_ranking": false
+      }
+    },
+    {
+      "id": "runtime-artifact-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "runtime_snapshot_id": "snapshot-290c08771903e64203a2",
+        "runtime_strategy_version": "impulse-capture-tactical-v5",
+        "runtime_config_digest": "53c53f92e5920c44fb5e1e0271f0ca29796c6e6d4bb16fbbc0c99dcb863855bb",
+        "artifact_scanner_plus_ledger_digest": "b2e7676ca7384692d80d3b4d58b1536026f24c4cf077b5e241a7a04f1b89fbf7",
+        "recomputed_scanner_plus_ledger_digest": "b2e7676ca7384692d80d3b4d58b1536026f24c4cf077b5e241a7a04f1b89fbf7",
+        "runtime_rows_bound_to_snapshot": 3,
+        "runtime_rows_bound_to_config": 3,
+        "runtime_rows_bound_to_source": 3
+      }
+    },
+    {
+      "id": "strategy-version-isolation",
+      "result": "PASS",
+      "evidence": {
+        "scanner_strategy_version": "impulse-capture-tactical-v5",
+        "artifact_strategy_version": "impulse-capture-tactical-v5",
+        "observation_strategy_versions": [
+          "impulse-capture-tactical-v5"
+        ],
+        "observation_count_bound_to_v5": 3,
+        "mismatched_trade_observation_strategy_version_rejected": true,
+        "rejection": "trade sample/observation mismatch: strategy_version"
+      }
+    },
+    {
+      "id": "paper-and-real-money-isolation",
+      "result": "PASS",
+      "evidence": {
+        "runtime_ledger_observation_count": 19,
+        "accepted_observation_count": 0,
+        "rejected_observation_count": 19,
+        "paper_trade_sample_count": 0,
+        "live_trade_sample_count": 0,
+        "real_money_roi_sample_count": 0,
+        "trade_ledger": "absent_zero_row",
+        "paper_live_separated": true,
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "business_ready_eligible": false
+      }
+    },
+    {
+      "id": "targeted-regression-and-negative-tests",
+      "result": "PASS",
+      "evidence": {
+        "profit_first_ranking_tests": "3/3 PASS",
+        "tactical_evidence_ledger_tests": "8/8 PASS",
+        "scanner_self_test": "PASS",
+        "independent_metric_precedence_fixtures": "6/6 PASS",
+        "independent_permutation_determinism": "PASS",
+        "independent_hard_gate_negative_fixture": "PASS",
+        "strategy_version_mismatch_negative_fixture": "PASS"
+      }
+    },
+    {
+      "id": "global-installed-skill-integrity",
+      "result": "PASS",
+      "evidence": {
+        "check_only": true,
+        "workspace_manifest_file_count": 268,
+        "installed_manifest_file_count": 268,
+        "workspace_manifest_sha256": "64de4be7f0ee50f98b63fd2216115ecc7aa968d470a940308949e418b67a912a",
+        "installed_manifest_sha256": "64de4be7f0ee50f98b63fd2216115ecc7aa968d470a940308949e418b67a912a",
+        "missing_installed": [],
+        "extra_installed": [],
+        "hash_mismatches": [],
+        "workspace_validation_errors": [],
+        "installed_validation_errors": [],
+        "copied": [],
+        "smoke_passed": true
+      }
+    },
+    {
+      "id": "read-only-verifier",
+      "result": "PASS",
+      "evidence": {
+        "project_files_modified_by_verifier": false,
+        "project_files_repaired": false,
+        "runtime_scan_reexecuted": false,
+        "tests_used_in_memory_or_temporary_state": true,
+        "installed_sync_was_check_only": true,
+        "artifact_sha256_after_verification": "49f1c21ca44d0371d82e4daf9bedddef9649556500fa679b3f41ae89e7076cf2"
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T04:43:03Z"
+}

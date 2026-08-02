@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-profit-first-near-miss-ranking-v7",
+  "title": "全部候选未通过时仍按保守盈利证据选择唯一研究 Top1",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "同一冻结快照中有三个验证候选且保守 EV 均不为正",
+    "技术阶段或形态分最强的候选不是保守 EV 最高者"
+  ],
+  "steps": [
+    "对候选运行验证阶段利润优先排序",
+    "生成 validated_top1、deep_research_candidate_symbol 和 ranked_historical_comparison"
+  ],
+  "expected": [
+    "保守 EV 最高的近失候选成为唯一研究 Top1",
+    "三个 Top1 投影指向同一 symbol",
+    "正式 current_action 为 NO_TRADE 且 trade_plan 为空",
+    "技术阶段和形态分只在利润证据相同时裁决"
+  ],
+  "evidence": [
+    "确定性单元测试",
+    "真实 Crypto 1–7 日运行产物"
+  ]
+}

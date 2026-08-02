@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-expired-catalyst-hard-gate-v6",
+  "goal_id": "tactical-profit-first-top1-ranking-v7",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+  "source_digest": "8c3913745a7347e3ef5e13ac1a0c6987f20451eef7b9473d589482d287ad1f38",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-expired-catalyst-hard-gate-v6-runtime_verified-da7022fe",
-  "independent_verification_id": "verify-tactical-expired-catalyst-hard-gate-v6-independent-803e5e7a",
-  "updated_at": "2026-08-02T04:12:33.215081Z"
+  "last_verification_id": "verify-tactical-profit-first-top1-ranking-v7-runtime_verified-2085a8dc",
+  "independent_verification_id": "verify-tactical-profit-first-top1-ranking-v7-independent-019fbc78-8c391374",
+  "updated_at": "2026-08-02T04:47:43.791129Z"
 }

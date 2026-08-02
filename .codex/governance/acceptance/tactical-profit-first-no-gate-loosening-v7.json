@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-profit-first-no-gate-loosening-v7",
+  "title": "利润优先排序不放宽正式交易硬门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "真实扫描产生唯一研究 Top1",
+    "至少一个价值、催化、保守 EV、实时、流动性或风险硬门未通过"
+  ],
+  "steps": [
+    "运行完整动态 Crypto 1–7 日扫描",
+    "检查正式动作、TradePlan、Paper/真钱边界和安全字段"
+  ],
+  "expected": [
+    "current_action 仅为 ENTER_NOW、WAIT_FOR_ENTRY 或 NO_TRADE",
+    "任一硬门失败时 current_action 为 NO_TRADE 且 trade_plan 为空",
+    "live_orders_enabled=false 且 private_api_used=false",
+    "Paper 样本不进入真钱 ROI 或 BUSINESS_READY"
+  ],
+  "evidence": [
+    "真实运行 JSON",
+    "领域测试与同步 smoke",
+    "不同线程只读独立复验"
+  ]
+}

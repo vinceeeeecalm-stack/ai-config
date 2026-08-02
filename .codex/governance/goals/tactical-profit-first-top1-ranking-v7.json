@@ -1,0 +1,38 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-profit-first-top1-ranking-v7",
+  "title": "让 Crypto 1–7 日验证阶段按保守盈利证据选择唯一研究 Top1",
+  "business_outcome": "把有限的催化、估值和委员会深研资源优先用于费用后保守 EV 最强的候选，避免技术形态分覆盖赚钱北极星并持续选择错误 Top1。",
+  "scope": [
+    "修正 impulse_capture_scanner 验证阶段 Top3 到唯一 Top1 的确定性排序",
+    "先应用历史质量硬门，再依次比较保守 EV、费用后预期回报、胜率下界、Profit Factor、回撤，最后才使用当前技术阶段与形态分作为平局裁决",
+    "使 validated_top1、deep_research_candidate_symbol 和 ranked_historical_comparison 使用同一排序",
+    "增加正向、负向与确定性排序回归测试",
+    "用新的真实 Crypto 1–7 日扫描验证正式动作仍由全部价值、催化、实时、回归、流动性和风险门共同决定"
+  ],
+  "non_goals": [
+    "不改变历史样本、目标、止损、持有期或摩擦计算方法",
+    "不降低正保守 EV、样本、回报风险、催化、估值、实时、流动性或风险门",
+    "不把研究 Top1、Paper、watch 或技术形态分升级为真钱动作",
+    "不自动下单、转账、充值、卖出、换仓或质押",
+    "不修改真钱 ROI、长期路径或账户权威数据"
+  ],
+  "constraints": [
+    "每轮仍保留唯一 research_top1；无候选通过硬门时正式 current_action 必须为 NO_TRADE",
+    "同一 snapshot_id、strategy_version、config_digest 和 source_digest 必须产生确定性相同排序",
+    "价格和催化过期不得因排序修复而恢复为当前证据",
+    "Paper 与真钱账本继续严格隔离，live_orders_enabled 必须为 false",
+    "所有发布证据不得包含秘密或个人账户数据"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-profit-first-near-miss-ranking-v7",
+    "tactical-profit-first-qualified-ranking-v7",
+    "tactical-profit-first-no-gate-loosening-v7"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-expired-catalyst-hard-gate-v6",
+  "frozen_at": "2026-08-02T04:30:20.455367Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "859d57bf7435275983f5e311c57221a00d89d222b2dbc5b0b19e941a57c16386"
+}
