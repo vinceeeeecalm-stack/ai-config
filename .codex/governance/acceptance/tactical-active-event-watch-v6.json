@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-active-event-watch-v6",
+  "title": "有效新链事件继续跨场所发现且不放宽安全门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "verified event 的 watch_until 晚于当前 cutoff_at"
+  ],
+  "steps": [
+    "以固定当前时间运行 live event scan",
+    "注入一项合格或受阻 DEX 候选并检查结果"
+  ],
+  "expected": [
+    "event_status=active 且 current_catalyst_eligible=true",
+    "跨场所候选仍经过市场、安全和容量硬门",
+    "局部来源失败只降级受影响来源",
+    "Active 最高仍为 paper_only/watch/risk_alert",
+    "live_orders_enabled=false"
+  ],
+  "evidence": [
+    "有效窗口回归测试",
+    "现有 CASHCAT replay 与 self-test"
+  ]
+}

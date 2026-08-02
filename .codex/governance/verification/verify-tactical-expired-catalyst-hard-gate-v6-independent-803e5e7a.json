@@ -1,0 +1,168 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-expired-catalyst-hard-gate-v6-independent-803e5e7a",
+  "goal_id": "tactical-expired-catalyst-hard-gate-v6",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "acceptance_scenarios": [
+          "tactical-expired-event-watch-v6",
+          "tactical-active-event-watch-v6"
+        ],
+        "authoritative_source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+        "current_source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+        "verification_stale": false,
+        "open_deviations": 0,
+        "radar_source_sha256": "c22c25842a478efbfe08f2aea8231ae3488dbccbc0ca75f4a46aae70bef41d67"
+      }
+    },
+    {
+      "id": "tactical-expired-event-watch-v6",
+      "result": "PASS",
+      "evidence": {
+        "real_registry_event_id": "robinhood-chain-mainnet-20260701",
+        "runtime_cutoff_at": "2026-08-02T04:08:22+00:00",
+        "watch_until": "2026-08-01T23:59:59-04:00",
+        "event_status": "expired",
+        "event_stage": "watch_expired",
+        "current_catalyst_eligible": false,
+        "candidates": [],
+        "source_status": [],
+        "dex_source_calls_after_expiry": 0,
+        "max_active_action": "watch",
+        "why_now_present": false,
+        "forecast_probability_present": false,
+        "data_quality_status": "expired_not_scanned",
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "historical_baseline_mutation_allowed": false
+      }
+    },
+    {
+      "id": "invalid-event-window-negative-tests",
+      "result": "PASS",
+      "evidence": {
+        "missing_watch_until": "invalid_window_and_not_scanned",
+        "unparseable_watch_until": "invalid_window_and_not_scanned",
+        "timezone_less_watch_until": "invalid_window_and_not_scanned",
+        "timezone_less_cutoff": "BLOCKED:captured_at_timezone_required",
+        "dex_calls_for_invalid_windows": 0,
+        "candidates_for_invalid_windows": 0,
+        "current_catalyst_eligible": false
+      }
+    },
+    {
+      "id": "tactical-active-event-watch-v6",
+      "result": "PASS",
+      "evidence": {
+        "fixed_cutoff_at": "2026-08-02T04:00:00+00:00",
+        "watch_until": "2026-08-02T04:00:01+00:00",
+        "event_status": "active",
+        "current_catalyst_eligible": true,
+        "event_stage": "asset_watch",
+        "cross_venue_calls": 3,
+        "injected_source_failure": "geckoterminal_new_pools",
+        "healthy_sources_retained": [
+          "geckoterminal_trending_pools",
+          "dexscreener_search"
+        ],
+        "data_quality_status": "partial_local_degrade",
+        "candidate_count": 1,
+        "blocked_candidate_action": "watch",
+        "forecast_probability_pct": null,
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "active-security-capacity-ceiling",
+      "result": "PASS",
+      "evidence": {
+        "fully_qualified_candidate_action": "paper_only",
+        "max_active_action": "paper_only",
+        "forecast_probability_pct": null,
+        "human_confirmation_required": true,
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "historical_baseline_mutation_allowed": false
+      }
+    },
+    {
+      "id": "historical-immutability",
+      "result": "PASS",
+      "evidence": {
+        "registry_sha256_before": "eaa73064b20b066809de86ce471139b898a67ab47d26ef5fb0321c51698789a2",
+        "registry_sha256_after": "eaa73064b20b066809de86ce471139b898a67ab47d26ef5fb0321c51698789a2",
+        "cashcat_replay_sha256_before": "48913427191dbd5e4e2f35d3e258dba47b8db7fc776ad6dca723eaf88ce5dcf3",
+        "cashcat_replay_sha256_after": "48913427191dbd5e4e2f35d3e258dba47b8db7fc776ad6dca723eaf88ce5dcf3",
+        "historical_experiment_sha256_before": "05fce52c26a5fb202f7c787ee18f6ede37898461199012ba7a2f67c7066c2c05",
+        "historical_experiment_sha256_after": "05fce52c26a5fb202f7c787ee18f6ede37898461199012ba7a2f67c7066c2c05",
+        "historical_runtime_sha256_before": "45bdb8eba04b0e98526f3b6de43f3b2d014e53a38d21b0171ea3e1dc94a9ef1c",
+        "historical_runtime_sha256_after": "45bdb8eba04b0e98526f3b6de43f3b2d014e53a38d21b0171ea3e1dc94a9ef1c",
+        "cashcat_replay_passed": true,
+        "counterfactual_predictability_claimed": false
+      }
+    },
+    {
+      "id": "active-manual-paper-live-boundaries",
+      "result": "PASS",
+      "evidence": {
+        "active_generates_live_investment_decision": false,
+        "active_generates_investment_outcome_status": false,
+        "maximum_positive_candidate_action": "paper_only",
+        "manual_arbitration_required": true,
+        "human_confirmation_required": true,
+        "tactical_observation_count": 13,
+        "paper_trade_sample_count": 0,
+        "live_trade_sample_count": 0,
+        "real_money_roi_sample_count": 0,
+        "paper_live_separated": true,
+        "trade_ledger": "absent_zero_row"
+      }
+    },
+    {
+      "id": "regression-suite",
+      "result": "PASS",
+      "evidence": {
+        "monorepo_policy": "PASS",
+        "event_freshness_tests": "3/3 PASS",
+        "active_alpha_tests": "15/15 PASS",
+        "manual_operator_tests": "191/191 PASS",
+        "governance_tests": "14/14 PASS",
+        "new_chain_radar_self_test": "PASS"
+      }
+    },
+    {
+      "id": "global-installed-skill-integrity",
+      "result": "PASS",
+      "evidence": {
+        "workspace_manifest_file_count": 268,
+        "installed_manifest_file_count": 268,
+        "workspace_manifest_sha256": "73501e9d48e53d60eca40499eafae4ecf05fa0fe384bc167c3da5bcff1ea35da",
+        "installed_manifest_sha256": "73501e9d48e53d60eca40499eafae4ecf05fa0fe384bc167c3da5bcff1ea35da",
+        "missing_installed": [],
+        "extra_installed": [],
+        "hash_mismatches": [],
+        "validation_errors": [],
+        "smoke_passed": true
+      }
+    },
+    {
+      "id": "read-only-verifier",
+      "result": "PASS",
+      "evidence": {
+        "project_files_modified": false,
+        "tests_used_in_memory_or_temporary_state": true,
+        "runtime_live_check_used_output_path": false
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": null
+}

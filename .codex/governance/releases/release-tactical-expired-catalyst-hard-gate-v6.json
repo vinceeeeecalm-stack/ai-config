@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-tactical-expired-catalyst-hard-gate-v6",
+  "project_id": "investing-monorepo",
+  "goal_id": "tactical-expired-catalyst-hard-gate-v6",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "0d6ed3f97260ae83cbba3847cfce0af0d623fe62",
+    "branch": "main",
+    "dirty": true
+  },
+  "source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+  "build_version": "803e5e7a",
+  "runtime_version": "new-chain-robinhood-expired-20260802T040431Z",
+  "database_version": "not_applicable_append_only_jsonl",
+  "last_verification_id": "verify-tactical-expired-catalyst-hard-gate-v6-runtime_verified-da7022fe",
+  "independent_verification_id": "verify-tactical-expired-catalyst-hard-gate-v6-independent-803e5e7a",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T04:12:57.518080Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
