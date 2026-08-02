@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import gzip
+import hashlib
 import json
 import math
 import statistics
@@ -38,9 +39,11 @@ from risk_adjusted_path_quality import (
     apply_cross_sectional_adjustments,
     calculate_risk_adjusted_path,
 )
+from tactical_evidence_ledger import append_observation, build_scanner_observation
 
 
 ROOT = Path(__file__).resolve().parent.parent
+TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v4"
 BINANCE_PUBLIC_BASES = (
     "https://data-api.binance.vision",
     "https://api1.binance.com",
@@ -1103,6 +1106,10 @@ def parse_args(argv):
     parser.add_argument("--discovery-only", action="store_true")
     parser.add_argument("--timeout", type=int, default=8)
     parser.add_argument("--output-dir", default=str(ROOT))
+    parser.add_argument(
+        "--observation-ledger",
+        help="Append-only tactical_1_7d ObservationSampleV1 ledger; defaults under output-dir/runtime",
+    )
     parser.add_argument("--no-write", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--recommendation-history", default=str(DEFAULT_RECOMMENDATION_HISTORY))
@@ -1428,9 +1435,34 @@ def main(argv=None):
     top1_card_timing = phase_budget_status(run_started, "deep_research")
     top1_card_timing["phase"] = "top1_card"
     signals.sort(key=signal_ranking_key, reverse=True)
+    config_digest = hashlib.sha256(json.dumps({
+        "request_mode": args.request_mode,
+        "dynamic_top": args.dynamic_top,
+        "top": args.top,
+        "symbols": args.symbols,
+        "risk_free_rate_pct": args.risk_free_rate_pct,
+        "historical_target_pct": 10.0 if args.request_mode == "tactical_1_7d" else 3.0,
+        "historical_stop_pct": 5.0 if args.request_mode == "tactical_1_7d" else 1.5,
+    }, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    ledger_source = Path(__file__).with_name("tactical_evidence_ledger.py")
+    source_digest = hashlib.sha256(
+        Path(__file__).read_bytes() + ledger_source.read_bytes()
+    ).hexdigest()
+    snapshot_id = "snapshot-" + hashlib.sha256(json.dumps({
+        "captured_at": captured.isoformat(),
+        "request_mode": args.request_mode,
+        "candidates": [
+            {"symbol": item.get("symbol"), "price": item.get("current_price")}
+            for item in top_signals[:3]
+        ],
+    }, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()[:20]
     result = {
         "run_type": "impulse_capture_scan",
         "request_mode": args.request_mode,
+        "snapshot_id": snapshot_id,
+        "strategy_version": TACTICAL_STRATEGY_VERSION,
+        "config_digest": config_digest,
+        "source_digest": source_digest,
         "captured_at": captured.isoformat().replace("+00:00", "Z"),
         "live_orders_enabled": False,
         "private_api_used": False,
@@ -1489,6 +1521,32 @@ def main(argv=None):
         },
         "max_allowed_action": "watch",
     }
+    if args.request_mode == "tactical_1_7d":
+        result["observation_samples"] = [
+            build_scanner_observation(
+                signal,
+                rank=rank,
+                snapshot_id=snapshot_id,
+                strategy_version=TACTICAL_STRATEGY_VERSION,
+                config_digest=config_digest,
+                source_digest=source_digest,
+                observed_at=result["captured_at"],
+                committee_degraded=result["research_committee_degraded"],
+            )
+            for rank, signal in enumerate(top_signals[:3], start=1)
+        ]
+        if not args.no_write:
+            observation_ledger = Path(args.observation_ledger) if args.observation_ledger else (
+                Path(args.output_dir) / "runtime" / "tactical_1_7d_observations.jsonl"
+            )
+            result["observation_ledger"] = str(observation_ledger.resolve())
+            result["observation_append_results"] = [
+                {
+                    "observation_id": item["observation_id"],
+                    "status": append_observation(observation_ledger, item),
+                }
+                for item in result["observation_samples"]
+            ]
     if not args.no_write:
         report_path, experiment_path = write_outputs(result, args.output_dir)
         result["report_path"] = str(report_path)

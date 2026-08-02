@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-evidence-ledger-v4-coded-9abdfc5a",
+  "goal_id": "tactical-evidence-ledger-v4",
+  "level": "CODED",
+  "source_digest": "5088cb9dab266b816ecdd12182e486fdfd7f0de4825bf8498bd3f0dc45451f95",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T02:58:35.911462Z"
+}

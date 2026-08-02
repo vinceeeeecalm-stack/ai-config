@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-paper-live-isolation-v4",
+  "title": "Paper TradeSample 与真钱结果严格隔离",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "存在一个通过校验的 tactical_1_7d ObservationSampleV1",
+    "提供显式 Paper entry/exit fill 夹具"
+  ],
+  "steps": [
+    "追加与 observation 身份绑定的 TradeSampleV1",
+    "尝试追加 live、未知期限、不同策略版本和不同 snapshot 的记录",
+    "生成观察与交易样本摘要"
+  ],
+  "expected": [
+    "只有 paper/tactical_1_7d/同绑定记录可追加",
+    "live、legacy UNKNOWN、跨 snapshot 和跨 strategy 记录全部被拒绝",
+    "TradeSample 明确 formal_action_eligible=false、real_money_roi_eligible=false",
+    "Paper 样本不能改变真钱利润或 BUSINESS_READY"
+  ],
+  "evidence": [
+    "active-alpha-paper-monitor/tests/test_tactical_evidence_ledger.py",
+    "negative contract smoke"
+  ]
+}

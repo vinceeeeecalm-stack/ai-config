@@ -117,6 +117,7 @@ description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 
 - V2 到期时间只读取结构化 `review_due_at / latest_exit_or_review_at / entry_deadline`。
 - 每个 active lifecycle 必须有 `next_check_at`；新扫描不得跳过旧生命周期、到期项或待确认复盘。
 - 观察样本与交易样本使用独立分母；未触发、不行动、Legacy observation、Paper 和真钱不得混算。
+- `active-alpha-paper-monitor/scripts/tactical_evidence_ledger.py` 是 `tactical_1_7d` 观察与 Paper TradeSample 的确定性来源；Manual 只读取其摘要和绑定证据，不把观察或 Paper 样本升级为真钱动作。
 - 复盘分开记录观察触发、真实执行、目标/止损先后、窗口状态、MFE、MAE、滑点和事件跳空。
 - 一次性价格和新闻留在当日报告。明确 schema、安全或数据错误可立即修复；分析启发式需三次独立复现或回测证据后才可晋升。
 - 每次规则晋升记录：`漏项 → 根因 → 通用规则 → 受影响组件 → 验证结果`。

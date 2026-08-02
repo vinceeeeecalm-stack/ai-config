@@ -1,0 +1,26 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-eul-no-trade-observation-v4",
+  "title": "EUL NO_TRADE 决策形成可复盘观察而非伪交易",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "EUL 为唯一 research_top1",
+    "保守 EV 为负、无 1–7 日催化且 5 分钟突破未确认"
+  ],
+  "steps": [
+    "冻结 EUL 扫描快照",
+    "由 Manual V3 仲裁为 NO_TRADE",
+    "读取观察、Paper trade 和真钱结果三个分母"
+  ],
+  "expected": [
+    "观察账本存在一条带完整 blocker 的 EUL ObservationSampleV1",
+    "Paper TradeSample 行数不因 NO_TRADE 增加",
+    "真钱成交与真钱 ROI 行数不变",
+    "用户输出不包含伪目标、止损或伪成交卡"
+  ],
+  "evidence": [
+    "EUL frozen observation runtime fixture",
+    "ledger isolation summary",
+    "Manual NO_TRADE decision"
+  ]
+}
