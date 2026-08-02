@@ -1575,6 +1575,49 @@ def to_discovery_candidate(signal, captured_at):
     )
 
 
+def build_derivatives_shadow_handoff(signals, top_symbols, captured_at):
+    """Expose pre-ranking spot context only for the opt-in derivatives shadow.
+
+    This handoff is deliberately excluded from DiscoveryCandidateV1 scoring and
+    cannot authorize a user action.  It lets the shadow collector test whether
+    derivatives would have added early information without changing production.
+    """
+
+    by_symbol = {str(item.get("symbol") or ""): item for item in signals}
+    rows = []
+    for rank, symbol in enumerate(top_symbols, start=1):
+        signal = by_symbol.get(symbol) or {}
+        rows.append(
+            {
+                "schema_version": "DerivativesShadowSpotHandoffV1",
+                "symbol": symbol,
+                "discovery_rank": rank,
+                "captured_at": captured_at.isoformat().replace("+00:00", "Z"),
+                "current_price": signal.get("current_price"),
+                "return_1m_pct": signal.get("return_1m_pct"),
+                "return_5m_pct": signal.get("return_5m_pct"),
+                "return_15m_pct": signal.get("return_15m_pct"),
+                "relative_volume_5m": signal.get("volume_multiple_5m_vs_median"),
+                "spot_taker_buy_ratio_5m": signal.get("taker_buy_ratio_5m"),
+                "orderbook_imbalance": signal.get("depth_1pct_imbalance"),
+                "higher_lows": signal.get("higher_lows"),
+                "breakout_close": signal.get("breakout_close"),
+                "spread_bps": signal.get("spread_bps"),
+                "depth_bid_usd": signal.get("depth_1pct_bid_usd") or signal.get("top_bid_depth_usd"),
+                "depth_ask_usd": signal.get("depth_1pct_ask_usd") or signal.get("top_ask_depth_usd"),
+                "data_quality": signal.get("data_quality"),
+                "production_signal_stage": signal.get("stage"),
+                "production_impulse_score_points": signal.get("impulse_score_points"),
+                "formal_action_eligible": False,
+                "production_ranking_input": False,
+                "live_orders_enabled": False,
+                "private_api_used": False,
+                "human_confirmation_required": True,
+            }
+        )
+    return rows
+
+
 def write_outputs(result, output_dir):
     output_dir = Path(output_dir)
     reports = output_dir / "reports"
@@ -1648,6 +1691,11 @@ def parse_args(argv):
         default="intraday_scalp",
     )
     parser.add_argument("--discovery-only", action="store_true")
+    parser.add_argument(
+        "--derivatives-shadow-handoff",
+        action="store_true",
+        help="Attach shadow-only spot factors for derivatives evidence collection; never changes ranking.",
+    )
     parser.add_argument("--timeout", type=int, default=8)
     parser.add_argument("--output-dir", default=str(ROOT))
     parser.add_argument(
@@ -2004,6 +2052,14 @@ def main(argv=None):
         "no_write": args.no_write,
     }
     top_symbols = [item["symbol"] for item in discovery["top_candidates"]]
+    if args.derivatives_shadow_handoff:
+        discovery["derivatives_shadow_handoff"] = build_derivatives_shadow_handoff(
+            signals,
+            top_symbols,
+            captured,
+        )
+        discovery["derivatives_shadow_handoff_enabled"] = True
+        discovery["production_rule_changed"] = False
     if args.discovery_only:
         print(json.dumps(discovery, ensure_ascii=False, indent=2))
         return 0

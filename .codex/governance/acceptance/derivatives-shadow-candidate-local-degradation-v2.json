@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-candidate-local-degradation-v2",
+  "title": "单个候选或来源失败只局部降级",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["至少两个候选", "为其中一个候选注入超时或无合约映射"],
+  "steps": ["运行并发 shadow collector", "检查成功候选与失败候选"],
+  "expected": ["成功候选仍生成完整记录", "失败候选生成 source_status=DEGRADED 和明确原因", "整轮在一百二十秒内结束"],
+  "evidence": ["故障注入测试", "公共运行局部降级摘要"]
+}

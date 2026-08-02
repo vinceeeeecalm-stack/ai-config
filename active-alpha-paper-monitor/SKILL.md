@@ -21,6 +21,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 |---|---|
 | 通用主动扫描与 handoff | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/ACTIVE_ALPHA_SIGNAL_POLICY.md`、`references/HANDOFF_PROTOCOL.md` |
 | Crypto 异动/新链机会 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/IMPULSE_CAPTURE_ENGINE_POLICY.md`、`references/DYNAMIC_SCAN_POOL_POLICY.md`、`references/NEW_CHAIN_EVENT_TO_ASSET_DISCOVERY_POLICY.md` |
+| 统一短期衍生品前置影子证据 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/IMPULSE_CAPTURE_ENGINE_POLICY.md`、`references/DERIVATIVES_SHADOW_EVIDENCE_POLICY.md` |
 | 美国 crypto 法案、监管投票或周末政策催化 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/US_CRYPTO_LEGISLATIVE_EVENT_RADAR_POLICY.md`、`references/DYNAMIC_SCAN_POOL_POLICY.md` |
 | 美股开盘/财报候选 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/US_OPEN_DYNAMIC_SCANNER_POLICY.md`、`references/RESEARCH_COMMITTEE_POLICY.md` |
 | Paper/验证复盘 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/PAPER_MONITOR_WORKFLOW.md`、`references/VALIDATION_PROGRESS_RUNNER.md`、`references/DUAL_SAMPLE_AND_FORWARD_VALIDATION_POLICY.md` |
@@ -42,6 +43,11 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 4. 对候选运行当前信号、无前视历史验证、摩擦压力和微观结构检查。Discovery Top3 必须使用同一历史口径生成可比较摘要：样本数、样本外胜率区间、保守 EV、预期回报、Profit Factor、回撤、流动性和稳定性；不得只给 discovery score。
    需要评估 Sharpe 时，调用 `scripts/risk_adjusted_path_quality.py`，
    保留基础排名与调整后排名；不得把路径分数映射成概率或公允价值。
+   统一短期阶段一影子采集使用
+   `impulse_capture_scanner.py --discovery-only --derivatives-shadow-handoff`
+   输出最多二十个同轮现货因子，再交给
+   `scripts/derivatives_shadow_collector.py` 补充 OI、funding、basis 和合约主动成交。
+   该数据不进入当前 discovery score、Top1 或正式 handoff 动作；OI 单独上升只能输出冲突标签。
 5. 运行 paper 风险、容量和 recovery gate；失败时保留 blocked candidate 和明确原因。
 6. 每个冻结候选写 ObservationSampleV1；只有可复现的 Paper fill 写 TradeSampleV1。
 7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan；walk-forward 与 Paper 统一封装为 `RegressionEvidenceV1`。
@@ -116,6 +122,7 @@ Runtime 产物应保存在工作区或显式 `INVESTING_RUNTIME_ROOT`，迁移�
 - Crypto paper runner：`scripts/validation_progress_runner.py`
 - 当前信号：`scripts/current_signal_probe.py`
 - 异动扫描：`scripts/impulse_capture_scanner.py`
+- 全候选衍生品影子采集：`scripts/derivatives_shadow_collector.py`；只消费显式 shadow handoff，候选级局部降级，绝不改变生产排名或动作。
 - 新链事件到资产：`scripts/new_chain_opportunity_radar.py`
 - 美国 crypto 立法事件：`scripts/us_crypto_legislative_event_radar.py`
 - 美股开盘扫描：`scripts/us_open_dynamic_scanner.py`

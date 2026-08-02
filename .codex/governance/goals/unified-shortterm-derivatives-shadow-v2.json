@@ -1,0 +1,44 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "unified-shortterm-derivatives-shadow-v2",
+  "title": "全候选衍生品前移的只读影子证据链",
+  "business_outcome": "在不改变生产排序、入场、止损或退出规则的前提下，为统一短期候选池前置采集 OI、资金费率、基差和合约主动成交，验证这些因子能否更早识别动能积累且不被 OI 单因子误导。",
+  "scope": [
+    "从 impulse discovery-only 输出读取同一轮最多二十个合格候选，而不是只补充 Top3",
+    "使用公开只读衍生品市场接口采集 OI 的一小时、四小时和二十四小时变化、资金费率、永续基差、合约主动成交和合约成交量",
+    "生成 ShortTermDerivativesShadowSnapshotV1，并与 discovery 的同一 snapshot_id、strategy_version、config_digest、source_digest 绑定",
+    "按候选局部降级；单个 symbol 或单个来源失败不得拖死整轮，也不得用缺失值伪造零变化",
+    "生成追加式 DerivativesShadowObservationV1 账本和覆盖率/延迟/方向冲突摘要，供阶段一后续晋升判断",
+    "保持 production_rule_changed=false、formal_action_eligible=false，并验证 OI 单独上涨不能成为正式或影子入场授权"
+  ],
+  "non_goals": [
+    "不在本目标内把任何衍生品因子加入生产候选分数、Top1 排序或正式动作",
+    "不改变现有价值、催化、实时、回归、流动性、风险、目标、止损和最长退出门",
+    "不创建真实订单、Paper 成交或真钱成交，不调用私有账户或交易接口",
+    "不实现阶段二排名加速度、阶段三自适应持有时钟或阶段六主动提醒的生产晋升",
+    "不把影子观察计入 Paper 或真钱 ROI，不为追求月度目标降低任何门槛"
+  ],
+  "constraints": [
+    "阶段一核心规则最早只能在 2026-08-16T04:30:20Z 后另建 superseding GoalContract 晋升；本目标只积累影子证据",
+    "每个候选单来源超时不超过十二秒，整轮硬期限不超过一百二十秒",
+    "所有来源必须是公开只读市场数据，live_orders_enabled=false、private_api_used=false、human_confirmation_required=true",
+    "OI 变化必须来自至少两个时点；缺少历史点时为 missing，不得写成 0",
+    "资金费率过热、现货买盘弱或价格结构不支持时，OI 上升只能输出冲突/拥挤标签",
+    "同一轮只允许一个 snapshot/config/source/strategy 绑定，绑定变化令旧影子观察失效",
+    "追加式账本重复同 ID 同内容返回 NO_UPDATE，同 ID 不同内容必须阻断"
+  ],
+  "acceptance_scenario_ids": [
+    "derivatives-shadow-all-candidate-coverage-v2",
+    "derivatives-shadow-oi-alone-conflict-v2",
+    "derivatives-shadow-candidate-local-degradation-v2",
+    "derivatives-shadow-binding-and-append-v2",
+    "derivatives-shadow-production-isolation-v2",
+    "derivatives-shadow-public-runtime-v2"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "unified-short-term-opportunity-engine-v1",
+  "frozen_at": "2026-08-02T11:54:36.285802Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "02855663e8fc418be502ab2e4da1c77dcfde5ad392488415770346eb5cfaecd6"
+}

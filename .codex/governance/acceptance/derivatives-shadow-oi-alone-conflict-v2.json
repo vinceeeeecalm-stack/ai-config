@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-oi-alone-conflict-v2",
+  "title": "OI 单独上涨只形成燃料或冲突标签",
+  "level": "TESTED",
+  "preconditions": ["OI 上升但现货主动买盘弱或价格结构不支持", "或资金费率达到拥挤阈值"],
+  "steps": ["构建绑定的 spot factor 与 derivatives snapshot", "运行方向一致性分类"],
+  "expected": ["directional_state 不得为 CONFIRMED_LONG", "formal_action_eligible=false", "不得输出 ENTER_NOW 或 WAIT_FOR_ENTRY"],
+  "evidence": ["OI-only、弱现货、过热 funding 三组负向测试"]
+}

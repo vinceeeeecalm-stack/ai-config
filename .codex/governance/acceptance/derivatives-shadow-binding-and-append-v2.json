@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-binding-and-append-v2",
+  "title": "影子记录同轮绑定且追加不可覆盖",
+  "level": "TESTED",
+  "preconditions": ["有效 discovery payload 和衍生品结果"],
+  "steps": ["生成影子观察", "重复写入", "修改同 ID 内容后再写入", "混入其他 snapshot 后重算"],
+  "expected": ["四摘要完整", "等价写入 NO_UPDATE", "冲突写入阻断", "跨 snapshot 混合阻断"],
+  "evidence": ["合同和 JSONL 回归测试"]
+}
