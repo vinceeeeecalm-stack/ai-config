@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-stablecoin-opportunity-exclusion-v8-coded-8b732d50",
+  "goal_id": "tactical-stablecoin-opportunity-exclusion-v8",
+  "level": "CODED",
+  "source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T05:40:42.164370Z"
+}

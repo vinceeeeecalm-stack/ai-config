@@ -1,0 +1,38 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-stablecoin-opportunity-exclusion-v8",
+  "title": "把稳定币从 Crypto 1–7 日上涨机会排序中前置排除",
+  "business_outcome": "确保唯一 research_top1 只在具备价格重估空间的风险资产中产生，避免美元锚定资产因低波动或较小历史亏损占用深度研究资源并偏离提升月度 ROI 的北极星。",
+  "scope": [
+    "修正 impulse_capture_scanner 动态发现阶段的稳定币资格硬门，使新识别的 United Stables U/USDT 不进入上涨机会候选池",
+    "保留稳定币作为市场结构或结算资产的观察能力，但禁止其进入 tactical_1_7d 机会排名、唯一 research_top1、Paper 入场或真钱动作",
+    "扩展 scanner self-test 与确定性单元测试，覆盖 U、RLUSD、常见稳定币、法币样资产、杠杆代币和普通现货资产",
+    "运行新的全市场动态扫描，证明 UUSDT 不再出现在 discovery Top3、validated_top1、ranked_historical_comparison 或 observation opportunity samples",
+    "验证无合格候选时仍输出唯一非稳定币 research_top1 与 NO_TRADE，且所有价值、催化、实时、回归、流动性和风险门保持不变"
+  ],
+  "non_goals": [
+    "不把稳定币收益、脱锚交易或套利策略引入当前 1–7 日上涨策略",
+    "不改变历史样本、目标、止损、持有期、摩擦、利润优先排序或月度 ROI 公式",
+    "不因排除稳定币而放宽正保守 EV、价值、催化、实时、流动性、风险或委员会门",
+    "不自动下单、转账、充值、卖出、换仓、质押或启用私有 API",
+    "不删除或改写既有 UUSDT 观察记录；旧记录保留为追加式审计历史且 accepted=false"
+  ],
+  "constraints": [
+    "稳定币识别是候选资格硬门，不得只在排序后降分",
+    "普通现货资产不得仅因价格接近 1 美元而被误删；排除必须基于明确资产代码或身份规则",
+    "同一 snapshot_id、strategy_version、config_digest 和 source_digest 必须产生确定性相同排序",
+    "Paper 与真钱账本继续严格隔离，live_orders_enabled=false 且 private_api_used=false",
+    "运行产物、账户数据和秘密不得进入 Git 或发布证据"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-stablecoin-u-excluded-v8",
+    "tactical-stablecoin-no-price-heuristic-v8",
+    "tactical-stablecoin-no-gate-loosening-v8"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-profit-first-top1-ranking-v7",
+  "frozen_at": "2026-08-02T04:57:49.062328Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "32e8ab7f21fe5e34ded2a5ad05ea62b7b6c40ded13abc109688fb566e1b06339"
+}

@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-profit-first-top1-ranking-v7",
+  "goal_id": "tactical-stablecoin-opportunity-exclusion-v8",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "8c3913745a7347e3ef5e13ac1a0c6987f20451eef7b9473d589482d287ad1f38",
+  "source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-profit-first-top1-ranking-v7-runtime_verified-2085a8dc",
-  "independent_verification_id": "verify-tactical-profit-first-top1-ranking-v7-independent-019fbc78-8c391374",
-  "updated_at": "2026-08-02T04:47:43.791129Z"
+  "last_verification_id": "verify-tactical-stablecoin-opportunity-exclusion-v8-runtime_verified-c32fbf66",
+  "independent_verification_id": "verify-tactical-stablecoin-opportunity-exclusion-v8-independent-019fbc78-92d59e1e",
+  "updated_at": "2026-08-02T05:47:11.732473Z"
 }
