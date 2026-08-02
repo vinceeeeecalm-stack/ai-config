@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "dynamic-exchangeinfo-batch-poison-recovery-v15",
+  "title": "批量 exchangeInfo 空响应由同源全量快照恢复",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["ticker 预选同时包含有效现货和无效或历史交易对", "批量 symbols exchangeInfo 返回空 definitions 或错误 payload"],
+  "steps": ["执行动态 discovery", "触发 Binance 全量 exchangeInfo fallback", "按预选 symbols 过滤并继续身份门"],
+  "expected": ["有效 active spot 候选被恢复", "无效候选不污染同批其他标的", "审计记录 batch 失败、full snapshot PASS 和恢复数量", "结果仍在 15 秒预算内"],
+  "evidence": ["确定性回归测试", "真实 discovery-only 宽池运行包"]
+}

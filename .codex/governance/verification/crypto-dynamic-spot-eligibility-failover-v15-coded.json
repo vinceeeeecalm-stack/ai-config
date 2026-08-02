@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-dynamic-spot-eligibility-failover-v15-coded-c390b33a",
+  "goal_id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "level": "CODED",
+  "source_digest": "e7f663b01726701d906c68830a058f8b8ec897ec8f333f03b00c58f87b5d0cab",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T10:34:13.242035Z"
+}

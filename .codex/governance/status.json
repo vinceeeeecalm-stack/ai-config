@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-top1-research-handoff-v14",
+  "goal_id": "crypto-dynamic-spot-eligibility-failover-v15",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "80f115691f6b1c8d3416d7441f457c1261f58ac37f88ca108c121f74a03ce362",
+  "source_digest": "e7f663b01726701d906c68830a058f8b8ec897ec8f333f03b00c58f87b5d0cab",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-top1-research-handoff-v14-runtime_verified-241dc0f6",
-  "independent_verification_id": null,
-  "updated_at": "2026-08-02T09:48:51.368855Z"
+  "last_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-runtime_verified-8a492942",
+  "independent_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-independent-round2-019fbc78",
+  "updated_at": "2026-08-02T10:40:06.273209Z"
 }

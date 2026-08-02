@@ -1,0 +1,63 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-dynamic-spot-eligibility-failover-v15-independent-round2-019fbc78",
+  "goal_id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "e7f663b01726701d906c68830a058f8b8ec897ec8f333f03b00c58f87b5d0cab",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "patch-and-governance-identity",
+      "status": "PASS",
+      "evidence": "Round 2 diff SHA-256 4d93c2f10a33146c9121619dd31b2d3d717c4528380e80be7a8bc01758bcabf1 and independently recomputed source digest matched."
+    },
+    {
+      "id": "missing-spot-permission-regression",
+      "status": "PASS",
+      "evidence": "Missing, empty or non-SPOT permissions fail closed as spot_permission_missing; full-snapshot counterexample selects no candidate and records the rejection."
+    },
+    {
+      "id": "identity-boundaries",
+      "status": "PASS",
+      "evidence": "Valid SPOT passes; leveraged, inactive, spot-disabled, stablecoin, commodity and security-like identities remain excluded."
+    },
+    {
+      "id": "batch-poison-and-total-failure",
+      "status": "PASS",
+      "evidence": "A poisoned batch recovers through the same exchangeInfo authority; dual failure returns no dynamic candidates with formal_identity_relaxed=false."
+    },
+    {
+      "id": "full-regression",
+      "status": "PASS",
+      "evidence": "Active 62 of 62 and Manual 214 of 214 tests passed."
+    },
+    {
+      "id": "wide-discovery-no-write-runtime",
+      "status": "PASS",
+      "evidence": "The bound artifact records dynamic_top=80, top=10, discovery_only=true and no_write=true; 701 tickers recovered 160 definitions and Top10 in 13.992754 seconds without ledger output."
+    },
+    {
+      "id": "independent-wide-runtime",
+      "status": "PASS",
+      "evidence": "Independent no-write execution produced 701 tickers, 160 recovered definitions and Top10 in 13.232681 seconds; git status remained byte-identical."
+    },
+    {
+      "id": "explicit-safety-invariants",
+      "status": "PASS",
+      "evidence": "Discovery and formal artifacts explicitly set human_confirmation_required=true, live_orders_enabled=false and private_api_used=false."
+    },
+    {
+      "id": "manual-handoff-reproduction",
+      "status": "PASS",
+      "evidence": "The formal no-write scanner reproduced the Manual handoff: JSTUSDT, PRE_RESEARCH_GATES_FAILED, NO_TRADE, null decision card, NO_DEPLOY_CASH and paper/live separation."
+    },
+    {
+      "id": "deviation-governance",
+      "status": "PASS",
+      "evidence": "Round 1 P1 and P2 findings have append-only deviations and closed superseding records."
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T10:38:20Z"
+}

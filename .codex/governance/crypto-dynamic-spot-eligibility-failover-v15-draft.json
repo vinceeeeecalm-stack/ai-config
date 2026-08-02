@@ -1,0 +1,41 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "title": "Crypto 动态池现货身份权威源安全故障转移",
+  "business_outcome": "让 Crypto 1–7 日扫描在 Binance 批量 exchangeInfo 被单个无效或历史交易对污染、返回空结果时，仍能使用同一官方现货身份源的全量快照恢复动态候选覆盖，避免把 701 行新鲜 ticker 错误缩成静态 5 币，同时不放宽稳定币、商品代币、杠杆产品、证券代币、非活跃或非现货边界。",
+  "scope": [
+    "为 discovery exchangeInfo 增加同一 Binance 官方端点的全量现货快照 fallback，仅在批量 symbols 响应为空或无有效定义时触发",
+    "全量快照在本轮内过滤到预选 symbols，不持久化为正式市场或账户数据",
+    "明确记录 batch/full snapshot 的来源、状态、恢复数量和失败原因，宽池结果可审计",
+    "恢复后继续执行 active TRADING、spot allowed、SPOT permission、LEVERAGED permission、稳定币/商品和证券身份硬门",
+    "批量和全量身份源都失败时继续保守排除动态候选，只保留显式安全基线并报告 degraded，不伪造全市场覆盖",
+    "增加批量污染恢复、双源失败、身份边界不放宽和真实 80 币宽池运行回归",
+    "同步全局 Skill 镜像并发布 GitHub main"
+  ],
+  "non_goals": [
+    "不使用 ticker 存在、价格可取或成交量本身冒充现货产品身份",
+    "不将 CoinGecko、新闻、社交或模型推断升级为 Binance 现货权威定义",
+    "不放宽 tokenized security、leveraged token、stablecoin、fiat-like 或 low-beta commodity 排除",
+    "不修改盈利、估值、催化、风险、回撤、walk-forward 或真钱动作硬门",
+    "不自动下单、转账、充值、卖出、换仓、质押或使用私有 API",
+    "不把本次宽池发现直接计入 Paper 或真钱 ROI"
+  ],
+  "constraints": [
+    "同一工作树只允许当前 CODEX_THREAD_ID 写入",
+    "fallback 必须仍来自 Binance /api/v3/exchangeInfo，并保留端点传输审计",
+    "只有 status=TRADING、isSpotTradingAllowed 不为 false、无 LEVERAGED permission 且具备 SPOT permission 的定义可进入动态池",
+    "证券后缀冲突仍需 Binance 产品目录或精确公共 Crypto 身份证据；证据失败时候选级排除",
+    "全部身份路径失败时不得把 ticker 行直接晋升为正式机会候选",
+    "Discovery 墙钟继续不超过 15 秒，单端点故障不得拖死全轮",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "acceptance_scenario_ids": [
+    "dynamic-exchangeinfo-batch-poison-recovery-v15",
+    "dynamic-exchangeinfo-identity-boundary-v15",
+    "dynamic-exchangeinfo-total-failure-v15",
+    "dynamic-exchangeinfo-wide-runtime-v15"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-top1-research-handoff-v14"
+}

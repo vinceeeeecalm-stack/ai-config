@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "dynamic-exchangeinfo-identity-boundary-v15",
+  "title": "故障转移不放宽现货与资产身份边界",
+  "level": "TESTED",
+  "preconditions": ["全量 snapshot 同时含 active spot、inactive、spot disabled、LEVERAGED、稳定币、商品和证券后缀冲突"],
+  "steps": ["运行 fallback identity filter", "检查候选和拒绝审计"],
+  "expected": ["只有 active spot 普通 Crypto 进入动态候选", "其他类别分别保留明确拒绝原因", "价格或成交量不能覆盖身份拒绝"],
+  "evidence": ["身份边界回归测试"]
+}
