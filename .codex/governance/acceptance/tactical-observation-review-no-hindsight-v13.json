@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-observation-review-no-hindsight-v13",
+  "title": "旧样本和未到期样本不使用后见数据",
+  "level": "TESTED",
+  "preconditions": ["旧观察缺少诊断阈值或观察尚未到期"],
+  "steps": ["运行复盘器", "检查时间截断和字段来源"],
+  "expected": ["未到期样本不结算最终结果", "旧样本阈值不从当前配置倒填", "未来或未闭合 K 线被拒绝", "缺失信息明确 DATA_BLOCKED"],
+  "evidence": ["负向测试", "故障恢复测试"]
+}

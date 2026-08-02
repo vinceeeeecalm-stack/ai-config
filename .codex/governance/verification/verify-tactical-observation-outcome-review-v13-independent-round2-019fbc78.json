@@ -1,0 +1,63 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-observation-outcome-review-v13-independent-round2-019fbc78",
+  "goal_id": "tactical-observation-outcome-review-v13",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "36fbcc04f109616a9ecfdf00e7e4264ad822164430ee317c8be772813f4b9ab9",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "status": "PASS",
+      "evidence": "Frozen goal and five scenarios read; independently computed source digest matched."
+    },
+    {
+      "id": "active-regression-suite",
+      "status": "PASS",
+      "evidence": "57 of 57 tests passed, including the new orphan-outcome regression."
+    },
+    {
+      "id": "previous-p1-orphan-outcome-summary-path",
+      "status": "PASS",
+      "evidence": "Empty observation ledger plus valid outcome ledger was rejected: outcome review requires an existing observation."
+    },
+    {
+      "id": "previous-p1-orphan-outcome-restart-path",
+      "status": "PASS",
+      "evidence": "Restart loading rejected the same orphan outcome with the same contract error."
+    },
+    {
+      "id": "no-hindsight-threshold-and-legacy",
+      "status": "PASS",
+      "evidence": "Future/post-due bars were blocked; three new observations bind frozen thresholds; 58 legacy observations remain PATH_ONLY with null thresholds."
+    },
+    {
+      "id": "same-bar-stop-first",
+      "status": "PASS",
+      "evidence": "Same-bar target and stop resolves to AMBIGUOUS_STOP_FIRST and PROTECTED_DOWNSIDE."
+    },
+    {
+      "id": "candidate-local-recovery-and-idempotency",
+      "status": "PASS",
+      "evidence": "One provider failure remained retryable without blocking the other candidate; recovery appended once; restart produced zero duplicates."
+    },
+    {
+      "id": "paper-and-real-money-isolation",
+      "status": "PASS",
+      "evidence": "Outcome reviews did not enter Paper trades, live trades, real-money ROI or business readiness."
+    },
+    {
+      "id": "scan-before-settlement",
+      "status": "PASS",
+      "evidence": "The 2026-08-02 scan recorded prior review before appending three new observations."
+    },
+    {
+      "id": "current-runtime-honesty",
+      "status": "PASS",
+      "evidence": "61 observations, zero due; NEARUSDT research_top1 remained NO_TRADE with no card, NO_DEPLOY_CASH and UNMEASURED live profit."
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T09:11:00Z"
+}

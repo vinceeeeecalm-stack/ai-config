@@ -41,7 +41,11 @@ from risk_adjusted_path_quality import (
     apply_cross_sectional_adjustments,
     calculate_risk_adjusted_path,
 )
-from tactical_evidence_ledger import append_observation, build_scanner_observation
+from tactical_evidence_ledger import (
+    append_observation,
+    build_scanner_observation,
+    review_due_observations,
+)
 from crypto_candidate_identity import (
     fetch_binance_public_product_identity,
     product_identity_rejection_reason,
@@ -1556,6 +1560,10 @@ def parse_args(argv):
         "--observation-ledger",
         help="Append-only tactical_1_7d ObservationSampleV1 ledger; defaults under output-dir/runtime",
     )
+    parser.add_argument(
+        "--observation-outcome-ledger",
+        help="Append-only ObservationOutcomeReviewV1 ledger; defaults under output-dir/runtime",
+    )
     parser.add_argument("--no-write", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--recommendation-history", default=str(DEFAULT_RECOMMENDATION_HISTORY))
@@ -1712,6 +1720,56 @@ def main(argv=None):
         result = run_self_test()
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["status"] == "ok" else 1
+    prior_observation_review = None
+    if args.request_mode == "tactical_1_7d" and not args.no_write:
+        observation_ledger = Path(args.observation_ledger) if args.observation_ledger else (
+            Path(args.output_dir) / "runtime" / "tactical_1_7d_observations.jsonl"
+        )
+        outcome_ledger = (
+            Path(args.observation_outcome_ledger)
+            if args.observation_outcome_ledger
+            else Path(args.output_dir) / "runtime" / "tactical_1_7d_observation_outcomes.jsonl"
+        )
+        review_cutoff = utc_now().isoformat().replace("+00:00", "Z")
+
+        def review_bar_provider(observation, as_of):
+            observed = datetime.fromisoformat(observation["observed_at"].replace("Z", "+00:00"))
+            due = datetime.fromisoformat(observation["review_due_at"].replace("Z", "+00:00"))
+            cutoff = min(due, datetime.fromisoformat(as_of.replace("Z", "+00:00")))
+            params = urlencode({
+                "symbol": observation["symbol"],
+                "interval": "15m",
+                "startTime": int(observed.timestamp() * 1000),
+                "endTime": int(cutoff.timestamp() * 1000),
+                "limit": 1000,
+            })
+            bounded_timeout = min(max(float(args.timeout), 0.5), 12.0)
+            completed = subprocess.run(
+                [
+                    "curl", "--compressed", "--connect-timeout", "0.75",
+                    "--max-time", str(bounded_timeout), "--retry", "0", "-sS",
+                    f"https://data-api.binance.vision/api/v3/klines?{params}",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=bounded_timeout + 0.25,
+            )
+            if completed.returncode != 0:
+                raise RuntimeError("observation review market source unavailable")
+            payload = json.loads(completed.stdout)
+            if not isinstance(payload, list):
+                raise RuntimeError("observation review market payload invalid")
+            return summarize_klines(payload)
+
+        prior_observation_review = review_due_observations(
+            observation_ledger=observation_ledger,
+            outcome_ledger=outcome_ledger,
+            as_of=review_cutoff,
+            bar_provider=review_bar_provider,
+            max_workers=min(max(args.max_workers, 1), 6),
+            write=True,
+        )
     run_started = time.monotonic()
     discovery_deadline = run_started + DISCOVERY_WALL_CLOCK_BUDGET_SECONDS - 0.5
     symbols = [item.strip().upper() for item in args.symbols.split(",") if item.strip()]
@@ -2050,6 +2108,7 @@ def main(argv=None):
         "max_allowed_action": "watch",
     }
     if args.request_mode == "tactical_1_7d":
+        result["prior_observation_review"] = prior_observation_review
         result["observation_samples"] = [
             build_scanner_observation(
                 signal,
