@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-live-manual-arbitration-v12-coded-3af0c87d",
+  "goal_id": "tactical-live-manual-arbitration-v12",
+  "level": "CODED",
+  "source_digest": "670e0feb2366ddae390975d962ec6d4020d17cecbd89326b7681b23fdbd099bb",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T08:21:42.155302Z"
+}

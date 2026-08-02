@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-production-entry-v12",
+  "title": "真实扫描包进入唯一 Manual 正式仲裁入口",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Active scanner 产生真实 tactical_1_7d Top3 与历史比较", "账户保持只读"],
+  "steps": ["运行 universal_investment_core 生产输入命令", "读取唯一 research_top1、正式动作和四轴状态"],
+  "expected": ["真实 scanner 文件可被消费", "每轮恰有一个 research_top1", "正式动作只属于 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE", "NO_TRADE 不含 decision_card", "不调用私有 API 或下单"],
+  "evidence": ["生产 CLI 输出", "确定性回归测试", "真实运行包"]
+}

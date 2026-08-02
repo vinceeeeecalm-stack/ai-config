@@ -12,7 +12,7 @@ description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 
 用户说“按赚钱导向双区闭环运行”、只运行短期/长期或复盘赚钱目标时，必须读取 `references/PROFIT_ORIENTED_DUAL_SLEEVE_LOOP.md` 和 `config/profit_objective_v1.json`。本 Skill 是用户唯一日常入口，内部按需调用 `active-alpha-paper-monitor` 获取扫描、历史验证和 paper 证据；只有修改 Skill、策略、数据链、配置或产品时才调用 `closed-loop-delivery-governor` 取得锁并验收。
 
 - 短期只使用 Crypto `tactical_1_7d`，输出一个研究 Top1，并以 `ENTER_NOW` 或 `WAIT_FOR_ENTRY` 给出同一证据快照上的完整交易卡。
-- 如果没有证据合格标的，允许保留研究 Top1，但正式 TradePlan 必须为 `NO_FRESH_DECISION` 或不生成；不得编造价格、催化、样本、目标或止损，也不得复用过期计划。
+- 如果没有证据合格标的，允许保留研究 Top1，但正式动作必须为 `NO_TRADE` 且不生成 `decision_card`；不得编造价格、催化、样本、目标或止损，也不得复用过期计划。旧 `NO_FRESH_DECISION` 只可作为内部拒绝原因，不能作为用户动作。
 - 长期使用用户确认的持仓、现金、成本和质押快照，比较 5 年 10 倍主路径与 10 年 10 倍兜底；每轮只给一个主要新增资金方向和最多一个次要方向。
 - 成交、月度资金加权 ROI、短转长独立重估、双周单假设和四轴状态均由 `scripts/profit_oriented_dual_sleeve.py` 的确定性合同完成。真实运行账本不得写入 Git。
 - 每次结论同时显示：系统交付、账户执行准备、短期 Paper/真钱利润、长期目标路径、业务结果、完整阻断、首要阻断和唯一下一步。`RUNTIME_VERIFIED` 不得与外部输入缺失压成一个笼统 `BLOCKED`；未有真实结果时不得写 `BUSINESS_READY` 或声称目标达成。
@@ -22,6 +22,16 @@ description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 
 ### V3 权威分析内核与正式动作
 
 `scripts/universal_investment_core.py` 是跨 Crypto/美股、短期/长期的唯一确定性分析入口。链路固定为：`目标/期限 → 同时点 EvidenceSnapshot → 估值区间/折价 → 催化/兑现时间 → 下行/失效 → RegressionEvidenceV1 → 跨候选硬门与排名 → 当前实时信号 → LiveInvestmentDecisionV1 → 生命周期/真钱归因`。
+
+真实短期扫描必须通过生产命令进入该内核：
+
+```text
+python3 scripts/universal_investment_core.py \
+  --input <UniversalInvestmentRunInputV1.json> \
+  --output <UniversalInvestmentRunResultV1.json>
+```
+
+`scanner_result` 必须是 Active 当前扫描的真实 Top3 与历史比较；`research_by_symbol` 必须以相同 `snapshot_id / strategy_version / config_digest / source_digest` 补齐估值、未来 1–7 日催化、下行、流动性、风险、实时双源和当前计划。缺少任一硬门时仍输出唯一 `research_top1`，但只能输出 `NO_TRADE` 且不得生成交易卡。不得用 shadow fixture、Paper 动作或模型自由文本代替生产输入。
 
 - 同一推荐的 `snapshot_id / strategy_version / config_digest / source_digest` 必须完全一致；绑定冲突直接拒绝。
 - 每轮保留唯一 `research_top1`。综合分数不得绕过价值、催化、费用后正 EV、回归完整性、流动性、数据质量、风险或实时硬门。

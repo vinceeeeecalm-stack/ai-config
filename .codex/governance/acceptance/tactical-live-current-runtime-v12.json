@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-current-runtime-v12",
+  "title": "当前真实 Crypto 宽域扫描得到诚实正式结果",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["公共行情可用或能安全降级", "真实账户写入和订单关闭"],
+  "steps": ["运行最新宽域 scanner", "准备同快照研究包", "运行生产 Manual 仲裁", "写入 ObservationSample 而非真钱成交"],
+  "expected": ["输出唯一 research_top1", "证据完整则 ENTER_NOW/WAIT_FOR_ENTRY，否则准确 NO_TRADE", "缺失官方催化或双源价格不能复用旧计划", "live_orders_enabled=false 且 private_api_used=false", "运行结果绑定当前 main 源码"],
+  "evidence": ["真实 scanner artifact", "UniversalInvestmentRunResultV1", "观察账本", "独立只读复验"]
+}

@@ -13,6 +13,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -23,6 +24,8 @@ ACCOUNT_EXECUTION_VALUES = {"CASH_READY", "NO_DEPLOY_CASH", "SETTLEMENT_BLOCKED"
 LIVE_PROFIT_VALUES = {"UNMEASURED", "EXPERIMENT_RUNNING", "NOT_ON_TRACK", "GOAL_HIT", "FAILED"}
 LONG_PATH_VALUES = {"DATA_DEGRADED", "BASELINE_DEFINED", "ON_5Y_PATH", "ON_10Y_PATH", "NOT_ON_TRACK"}
 BINDING_FIELDS = ("snapshot_id", "strategy_version", "config_digest", "source_digest")
+PRODUCTION_INPUT_SCHEMA = "UniversalInvestmentRunInputV1"
+PRODUCTION_OUTPUT_SCHEMA = "UniversalInvestmentRunResultV1"
 
 
 class InvestmentContractError(ValueError):
@@ -352,7 +355,12 @@ def build_live_decision(
             elif not (now < parse_time(plan["latest_exit_at"]) <= now + dt.timedelta(days=7)):
                 reasons.append("rebuilt_tactical_exit_invalid")
             else:
-                action = "ENTER_NOW" if plan["entry_low"] <= decision_price <= plan["entry_high"] else "WAIT_FOR_ENTRY"
+                in_entry_range = plan["entry_low"] <= decision_price <= plan["entry_high"]
+                action = (
+                    "ENTER_NOW"
+                    if in_entry_range and top_case.get("current_signal_complete", True) is True
+                    else "WAIT_FOR_ENTRY"
+                )
                 card = {key: plan[key] for key in required}
         else:
             required = ["buy_low", "buy_high", "tranches", "wait_condition", "review_at", "thesis_invalidation"]
@@ -492,6 +500,480 @@ def validate_outcome_status(data: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
+def _finite_number(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    if number != number or number in {float("inf"), float("-inf")}:
+        return None
+    return number
+
+
+def _binding_object(data: dict[str, Any]) -> dict[str, str]:
+    return {field: str(data.get(field) or "") for field in BINDING_FIELDS}
+
+
+def _account_execution(account: dict[str, Any]) -> tuple[str, float]:
+    cash = account.get("deployable_cash")
+    if isinstance(cash, bool) or not isinstance(cash, (int, float)) or cash <= 0:
+        return "NO_DEPLOY_CASH", 0.0
+    if account.get("settled") is not True:
+        return "SETTLEMENT_BLOCKED", 0.0
+    amount = min(float(cash), float(account.get("max_manual_amount", cash)))
+    return "CASH_READY", round(amount, 2)
+
+
+def _scanner_signal(scanner: dict[str, Any], symbol: str) -> dict[str, Any]:
+    return next(
+        (
+            item
+            for item in scanner.get("signals", [])
+            if isinstance(item, dict) and item.get("symbol") == symbol
+        ),
+        {},
+    )
+
+
+def _scanner_price(scanner: dict[str, Any], symbol: str, signal: dict[str, Any]) -> float | None:
+    price = _finite_number(signal.get("mid")) or _finite_number(signal.get("current_price"))
+    if price is not None and price > 0:
+        return price
+    for item in scanner.get("discovery_top3", []):
+        if isinstance(item, dict) and item.get("symbol") == symbol:
+            price = _finite_number(item.get("current_price"))
+            return price if price is not None and price > 0 else None
+    return None
+
+
+def _plan_reward_risk(plan: dict[str, Any] | None, current_price: float) -> float | None:
+    if not isinstance(plan, dict):
+        return None
+    target = _finite_number(plan.get("target_1"))
+    stop = _finite_number(plan.get("stop_price"))
+    if target is None or stop is None or not (stop < current_price < target):
+        return None
+    risk = current_price - stop
+    return (target - current_price) / risk if risk > 0 else None
+
+
+def _research_binding_failures(
+    research: dict[str, Any], binding: dict[str, str]
+) -> list[str]:
+    supplied = research.get("binding")
+    if not isinstance(supplied, dict):
+        return ["research_binding_missing"]
+    return [
+        f"research_binding_mismatch:{field}"
+        for field in BINDING_FIELDS
+        if str(supplied.get(field) or "") != binding[field]
+    ]
+
+
+def _tactical_research_record(
+    *,
+    scanner: dict[str, Any],
+    row: dict[str, Any],
+    research: dict[str, Any],
+    binding: dict[str, str],
+    decided_at: dt.datetime,
+) -> tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]:
+    symbol = str(row.get("symbol") or "")
+    if not symbol:
+        raise InvestmentContractError("scanner_history:symbol_required")
+    signal = _scanner_signal(scanner, symbol)
+    history = signal.get("historical_comparison") or {}
+    current_price = _scanner_price(scanner, symbol, signal)
+    if current_price is None:
+        raise InvestmentContractError(f"scanner_candidate:current_price_required:{symbol}")
+
+    failures = _research_binding_failures(research, binding)
+    evidence_ids = list(
+        dict.fromkeys(
+            [
+                *[str(item) for item in row.get("evidence_ids", []) if item],
+                *[str(item) for item in research.get("evidence_ids", []) if item],
+            ]
+        )
+    )
+    if not evidence_ids:
+        failures.append("candidate_evidence_missing")
+
+    conservative_ev = _finite_number(row.get("conservative_expected_value_pct"))
+    expected_return = _finite_number(row.get("expected_return_pct"))
+    max_drawdown = _finite_number(row.get("max_drawdown_pct"))
+    drawdown_abs = abs(max_drawdown) if max_drawdown is not None else None
+    profit_factor = _finite_number(row.get("profit_factor"))
+    sample_size = row.get("sample_size")
+    walk_positive = row.get("walk_forward_positive_windows")
+    walk_total = row.get("walk_forward_total_windows")
+    reward_risk = _finite_number(row.get("reward_risk_ratio"))
+    if conservative_ev is None or conservative_ev <= 0:
+        failures.append("non_positive_conservative_ev")
+    if isinstance(sample_size, bool) or not isinstance(sample_size, int) or sample_size < 30:
+        failures.append("regression_sample_below_30")
+    if history.get("untouched_holdout") is not True:
+        failures.append("untouched_holdout_missing")
+    if history.get("lookahead_free") is not True:
+        failures.append("lookahead_free_evidence_missing")
+    if _finite_number(history.get("friction_pct")) is None:
+        failures.append("fees_and_slippage_evidence_missing")
+    if profit_factor is None or profit_factor <= 1:
+        failures.append("profit_factor_not_above_one")
+    if (
+        isinstance(walk_positive, bool)
+        or not isinstance(walk_positive, int)
+        or isinstance(walk_total, bool)
+        or not isinstance(walk_total, int)
+        or walk_total < 3
+        or walk_positive < 3
+    ):
+        failures.append("walk_forward_stability_failed")
+    if drawdown_abs is None or drawdown_abs > 15:
+        failures.append("max_drawdown_above_15pct")
+    if reward_risk is None or reward_risk < 2:
+        failures.append("historical_reward_risk_below_two")
+
+    fair = research.get("fair_value")
+    discount_pct = None
+    if not isinstance(fair, dict):
+        failures.append("fair_value_missing")
+    else:
+        base = _finite_number(fair.get("base"))
+        low = _finite_number(fair.get("low"))
+        high = _finite_number(fair.get("high"))
+        if (
+            low is None
+            or base is None
+            or high is None
+            or not (0 < low <= base <= high)
+        ):
+            failures.append("fair_value_interval_invalid")
+        else:
+            discount_pct = (base / current_price - 1) * 100
+            if discount_pct <= 0:
+                failures.append("not_below_base_fair_value")
+
+    catalyst = research.get("catalyst")
+    catalyst_certainty = 0.0
+    if not isinstance(catalyst, dict) or catalyst.get("verified") is not True:
+        failures.append("verified_1_7d_catalyst_missing")
+    else:
+        catalyst_certainty = _finite_number(catalyst.get("time_certainty")) or 0.0
+        try:
+            realization = parse_time(catalyst.get("realization_by"))
+            if not (decided_at < realization <= decided_at + dt.timedelta(days=7)):
+                failures.append("catalyst_outside_1_7d")
+        except InvestmentContractError:
+            failures.append("catalyst_time_invalid")
+
+    if research.get("liquidity_status") != "verified":
+        failures.append("liquidity_not_verified")
+    if research.get("data_quality_status") != "verified":
+        failures.append("data_quality_not_verified")
+    if research.get("risk_gate_pass") is not True:
+        failures.append("risk_gate_failed")
+    if research.get("source_failures"):
+        failures.append("candidate_source_failure")
+
+    plan = research.get("plan")
+    plan_reward_risk = _plan_reward_risk(plan, current_price)
+    if not isinstance(plan, dict):
+        failures.append("current_tactical_plan_missing")
+    elif plan_reward_risk is None or plan_reward_risk < 2:
+        failures.append("current_plan_reward_risk_below_two")
+    if isinstance(plan, dict):
+        max_loss = _finite_number(plan.get("max_allowed_loss_pct"))
+        if max_loss is None or max_loss <= 0 or max_loss > 0.5:
+            failures.append("max_allowed_loss_above_policy")
+
+    signal_as_of = research.get("signal_as_of")
+    try:
+        signal_age = (decided_at - parse_time(signal_as_of)).total_seconds()
+        if signal_age < 0 or signal_age > 60:
+            failures.append("current_signal_stale")
+    except InvestmentContractError:
+        failures.append("current_signal_time_invalid")
+
+    if not isinstance(research.get("fundamentals"), dict):
+        failures.append("crypto_fundamentals_missing")
+    if not isinstance(research.get("downside"), dict):
+        failures.append("downside_case_missing")
+
+    case = None
+    regression = None
+    live = research.get("live_evidence") if isinstance(research.get("live_evidence"), dict) else None
+    regression_id = f"reg-live-{digest([binding, symbol, row])[:16]}"
+    if not failures:
+        case = {
+            "schema_version": "UniversalInvestmentCaseV1",
+            "case_id": f"case-live-{digest([binding, symbol, research])[:16]}",
+            **binding,
+            "asset_class": "crypto",
+            "horizon": "tactical_1_7d",
+            "symbol": symbol,
+            "as_of": signal_as_of,
+            "current_price": current_price,
+            "fair_value": copy.deepcopy(fair),
+            "catalyst": copy.deepcopy(catalyst),
+            "downside": copy.deepcopy(research["downside"]),
+            "fundamentals": copy.deepcopy(research["fundamentals"]),
+            "plan": copy.deepcopy(plan),
+            "regression_evidence_id": regression_id,
+            "evidence_ids": evidence_ids,
+            "liquidity_status": research["liquidity_status"],
+            "data_quality_status": research["data_quality_status"],
+            "risk_gate_pass": research["risk_gate_pass"],
+            "source_failures": list(research.get("source_failures") or []),
+            "current_signal_complete": research.get("current_signal_complete") is True,
+            "live_orders_enabled": False,
+        }
+        regression = {
+            "schema_version": "RegressionEvidenceV1",
+            "regression_id": regression_id,
+            **binding,
+            "symbol": symbol,
+            "horizon": "tactical_1_7d",
+            "mode": "historical_walkforward",
+            "as_of": signal_as_of,
+            "sample_size": sample_size,
+            "conservative_ev_pct": conservative_ev,
+            "max_drawdown_pct": max_drawdown,
+            "holdout_pass": history.get("untouched_holdout") is True,
+            "no_lookahead": history.get("lookahead_free") is True,
+            "fees_included": _finite_number(history.get("friction_pct")) is not None,
+            "paper_live_separated": True,
+            "formal_action_eligible": False,
+        }
+        try:
+            validate_universal_case(case)
+            validate_regression_evidence(regression)
+        except InvestmentContractError as exc:
+            failures.append(f"production_case_contract_invalid:{exc}")
+            case = None
+            regression = None
+
+    ev_to_drawdown = (
+        conservative_ev / drawdown_abs
+        if conservative_ev is not None and drawdown_abs not in {None, 0}
+        else None
+    )
+    record = {
+        "symbol": symbol,
+        "scanner_rank": row.get("rank"),
+        "current_price": current_price,
+        "price_as_of": signal_as_of or scanner.get("captured_at"),
+        "setup_quality_score": _finite_number(row.get("setup_quality_score")),
+        "conservative_ev_pct": conservative_ev,
+        "expected_return_pct": expected_return,
+        "profit_factor": profit_factor,
+        "max_drawdown_pct": max_drawdown,
+        "ev_to_drawdown": round(ev_to_drawdown, 9) if ev_to_drawdown is not None else None,
+        "sample_size": sample_size,
+        "walk_forward_positive_windows": walk_positive,
+        "walk_forward_total_windows": walk_total,
+        "value_discount_pct": round(discount_pct, 6) if discount_pct is not None else None,
+        "catalyst_time_certainty": catalyst_certainty,
+        "current_signal_complete": research.get("current_signal_complete") is True,
+        "liquidity_status": research.get("liquidity_status") or "missing",
+        "data_quality_status": research.get("data_quality_status") or "missing",
+        "eligible": not failures,
+        "hard_gate_failures": list(dict.fromkeys(failures)),
+        "evidence_ids": evidence_ids,
+    }
+    return record, case, regression, live
+
+
+def build_tactical_research_ranking(
+    *,
+    scanner: dict[str, Any],
+    research_by_symbol: dict[str, Any],
+    decided_at: str,
+) -> tuple[dict[str, Any], dict[str, tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]]]:
+    if scanner.get("request_mode") != "tactical_1_7d":
+        raise InvestmentContractError("production:scanner_request_mode_must_be_tactical_1_7d")
+    if scanner.get("live_orders_enabled") is not False or scanner.get("private_api_used") is not False:
+        raise InvestmentContractError("production:scanner_safety_boundary_violated")
+    _validate_binding(scanner, "production_scanner")
+    parse_time(scanner.get("captured_at"))
+    history = scanner.get("ranked_historical_comparison") or {}
+    rows = history.get("rows") or []
+    if not isinstance(rows, list) or not rows:
+        raise InvestmentContractError("production:scanner_ranked_history_required")
+    if not isinstance(research_by_symbol, dict):
+        raise InvestmentContractError("production:research_by_symbol_object_required")
+    binding = _binding_object(scanner)
+    now = parse_time(decided_at)
+    records: list[dict[str, Any]] = []
+    prepared: dict[str, tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]] = {}
+    seen: set[str] = set()
+    for raw in rows:
+        if not isinstance(raw, dict):
+            raise InvestmentContractError("production:scanner_history_row_object_required")
+        symbol = str(raw.get("symbol") or "")
+        if symbol in seen:
+            raise InvestmentContractError(f"production:duplicate_candidate:{symbol}")
+        seen.add(symbol)
+        research = research_by_symbol.get(symbol)
+        if not isinstance(research, dict):
+            research = {}
+        record, case, regression, live = _tactical_research_record(
+            scanner=scanner,
+            row=raw,
+            research=research,
+            binding=binding,
+            decided_at=now,
+        )
+        records.append(record)
+        prepared[symbol] = (case, regression, live)
+
+    def ranking_key(item: dict[str, Any]) -> tuple[Any, ...]:
+        return (
+            int(item["eligible"]),
+            item["conservative_ev_pct"] if item["conservative_ev_pct"] is not None else -1e12,
+            item["ev_to_drawdown"] if item["ev_to_drawdown"] is not None else -1e12,
+            item["value_discount_pct"] if item["value_discount_pct"] is not None else -1e12,
+            item["catalyst_time_certainty"],
+            item["sample_size"] if isinstance(item["sample_size"], int) else -1,
+            item["setup_quality_score"] if item["setup_quality_score"] is not None else -1e12,
+            item["symbol"],
+        )
+
+    records.sort(key=ranking_key, reverse=True)
+    for index, item in enumerate(records, start=1):
+        item["rank"] = index
+    ranking = {
+        "schema_version": "TacticalResearchRankingV1",
+        **binding,
+        "ranking_id": f"tactical-live-rank-{digest([binding, records])[:16]}",
+        "ranked_at": decided_at,
+        "ranking_order": [
+            "hard_gate_eligibility",
+            "conservative_net_ev",
+            "ev_to_drawdown",
+            "value_discount",
+            "catalyst_time_certainty",
+            "sample_quality",
+            "setup_quality_tiebreaker",
+        ],
+        "ranked_candidates": records,
+        "research_top1": records[0]["symbol"],
+        "qualified_alternative_symbols": [
+            item["symbol"] for item in records[1:3] if item["eligible"]
+        ],
+    }
+    return ranking, prepared
+
+
+def _no_trade_live_decision(
+    *,
+    ranking: dict[str, Any],
+    account: dict[str, Any],
+    decided_at: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    top = ranking["ranked_candidates"][0]
+    account_status, _ = _account_execution(account)
+    decision = {
+        "schema_version": "LiveInvestmentDecisionV1",
+        "decision_id": f"live-decision-{digest([ranking, account, decided_at, reasons])[:16]}",
+        **{field: ranking[field] for field in BINDING_FIELDS},
+        "decided_at": decided_at,
+        "research_top1": ranking["research_top1"],
+        "ranking_id": ranking["ranking_id"],
+        "current_action": "NO_TRADE",
+        "no_trade_reasons": list(dict.fromkeys(reasons)),
+        "decision_price": top.get("current_price"),
+        "price_as_of": top.get("price_as_of"),
+        "decision_card": None,
+        "account_execution": account_status,
+        "executable_amount": 0.0,
+        "regression_evidence_ids": [],
+        "paper_action_exposed": False,
+        "live_orders_enabled": False,
+        "ranking": ranking,
+    }
+    return validate_live_decision(decision)
+
+
+def run_production_input(data: dict[str, Any]) -> dict[str, Any]:
+    if data.get("schema_version") != PRODUCTION_INPUT_SCHEMA:
+        raise InvestmentContractError(f"{PRODUCTION_INPUT_SCHEMA}_required")
+    _require(
+        data,
+        [
+            "decided_at",
+            "scanner_result",
+            "research_by_symbol",
+            "account",
+            "delivery_status",
+            "live_profit_status",
+            "long_path_status",
+            "regression_status",
+        ],
+        "production_input",
+    )
+    parse_time(data["decided_at"])
+    if not isinstance(data["account"], dict):
+        raise InvestmentContractError("production_input:account_object_required")
+    ranking, prepared = build_tactical_research_ranking(
+        scanner=data["scanner_result"],
+        research_by_symbol=data["research_by_symbol"],
+        decided_at=data["decided_at"],
+    )
+    top = ranking["ranked_candidates"][0]
+    case, regression, live = prepared[ranking["research_top1"]]
+    if not top["eligible"] or case is None or regression is None:
+        decision = _no_trade_live_decision(
+            ranking=ranking,
+            account=data["account"],
+            decided_at=data["decided_at"],
+            reasons=top["hard_gate_failures"] or ["qualified_case_missing"],
+        )
+    else:
+        try:
+            decision = build_live_decision(
+                cases=[case],
+                regressions=[regression],
+                live_evidence_by_symbol={case["symbol"]: live} if live else {},
+                account=data["account"],
+                decided_at=data["decided_at"],
+            )
+            decision["ranking_id"] = ranking["ranking_id"]
+            decision["research_top1"] = ranking["research_top1"]
+            decision["ranking"] = ranking
+            decision["decision_id"] = f"live-decision-{digest([ranking, live, data['account'], data['decided_at'], decision['current_action']])[:16]}"
+            validate_live_decision(decision)
+        except InvestmentContractError as exc:
+            decision = _no_trade_live_decision(
+                ranking=ranking,
+                account=data["account"],
+                decided_at=data["decided_at"],
+                reasons=[f"live_evidence_contract_invalid:{exc}"],
+            )
+
+    status = build_investment_outcome_status(
+        delivery_status=data["delivery_status"],
+        decision=decision,
+        live_profit_status=data["live_profit_status"],
+        long_path_status=data["long_path_status"],
+        regression_status=data["regression_status"],
+        as_of=data["decided_at"],
+    )
+    return {
+        "schema_version": PRODUCTION_OUTPUT_SCHEMA,
+        "generated_at": data["decided_at"],
+        "input_digest": digest(data),
+        **{field: ranking[field] for field in BINDING_FIELDS},
+        "research_ranking": ranking,
+        "decision": decision,
+        "status": status,
+        "paper_live_separated": True,
+        "human_confirmation_required": True,
+        "live_orders_enabled": False,
+        "private_api_used": False,
+    }
+
+
 def _atomic_write(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -608,13 +1090,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Universal investment analysis kernel")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--shadow-suite")
+    parser.add_argument("--input", help="UniversalInvestmentRunInputV1 JSON path, or - for stdin")
+    parser.add_argument("--output", help="Optional output path for UniversalInvestmentRunResultV1")
     args = parser.parse_args()
+    if args.input:
+        payload = json.load(sys.stdin) if args.input == "-" else json.loads(
+            Path(args.input).expanduser().resolve().read_text(encoding="utf-8")
+        )
+        package = run_production_input(payload)
+        if args.output:
+            _atomic_write(Path(args.output).expanduser().resolve(), package)
+        print(json.dumps(package, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
     if args.self_test or args.shadow_suite:
         output = Path(args.shadow_suite).expanduser().resolve() if args.shadow_suite else None
         package = run_shadow_suite(output)
         print(json.dumps({"passed": package["passed"], "checks": package["checks"]}, ensure_ascii=False, sort_keys=True))
         return 0 if package["passed"] else 1
-    parser.error("use --self-test or --shadow-suite")
+    parser.error("use --input, --self-test or --shadow-suite")
     return 2
 
 

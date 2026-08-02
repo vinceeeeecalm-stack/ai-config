@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "crypto-discovery-transport-reliability-v11",
+  "goal_id": "tactical-live-manual-arbitration-v12",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "4635f6d8c8be24f748a4705806794e2843d47b8614066bf4bab717e9e1b9de19",
+  "source_digest": "670e0feb2366ddae390975d962ec6d4020d17cecbd89326b7681b23fdbd099bb",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-crypto-discovery-transport-reliability-v11-runtime_verified-0f9e7bba",
-  "independent_verification_id": "verify-crypto-discovery-transport-reliability-v11-independent-final-019fbc78",
-  "updated_at": "2026-08-02T07:56:52.113736Z"
+  "last_verification_id": "verify-tactical-live-manual-arbitration-v12-runtime_verified-c0867c8f",
+  "independent_verification_id": "verify-tactical-live-manual-arbitration-v12-independent-019fbc78",
+  "updated_at": "2026-08-02T08:32:50.749478Z"
 }

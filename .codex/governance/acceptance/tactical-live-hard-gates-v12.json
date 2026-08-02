@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-hard-gates-v12",
+  "title": "赚钱方向不能绕过价值催化与风险硬门",
+  "level": "TESTED",
+  "preconditions": ["候选包含完整或部分研究证据"],
+  "steps": ["分别移除估值、催化、正 EV、回归、流动性和风险证据", "运行正式仲裁"],
+  "expected": ["任一硬门失败都输出 NO_TRADE", "综合分数不能绕过硬门", "正例完整包可输出 ENTER_NOW 或 WAIT_FOR_ENTRY", "目标止损盈亏比低于 2 时不得进入"],
+  "evidence": ["逐门负向测试", "完整正向夹具测试"]
+}
