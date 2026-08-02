@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-tactical-bounded-pool-dryrun-safety-v9",
+  "project_id": "investing-monorepo",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "9ad585ad2a3c5ca4d7d142f4bf2428def0c6e7f2",
+    "branch": "main",
+    "dirty": true
+  },
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "build_version": "source-96e24b2e",
+  "runtime_version": "pool-only-v9",
+  "database_version": "no-database-change",
+  "last_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-runtime_verified-ab9184b8",
+  "independent_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-independent-019fbc78-96e24b2e",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T06:29:10.195895Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

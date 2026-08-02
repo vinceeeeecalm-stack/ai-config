@@ -1,0 +1,87 @@
+{
+  "schema_version": "VerificationResultV1",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "result": "PASS",
+  "highest_proven_level": "RUNTIME_VERIFIED",
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "goal_contract_digest": "b12dfe1e3a276cdd2fd21e7b434b7875caf6b5a815794843c92ce5cd89a3d6c6",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent": true,
+  "read_only": true,
+  "checks": [
+    {
+      "id": "default-pool-only-stale-social",
+      "result": "PASS",
+      "evidence": {
+        "refresh_social_handoff_calls": 0,
+        "refresh_enabled": false,
+        "status": "skipped_read_only_pool_only"
+      }
+    },
+    {
+      "id": "dry-run-recovery-prefetch",
+      "result": "PASS",
+      "evidence": {
+        "recovery_symbols_present": true,
+        "run_command_calls": 0,
+        "status": "skipped_dry_run"
+      }
+    },
+    {
+      "id": "default-pool-only-runtime",
+      "result": "PASS",
+      "evidence": {
+        "artifact": "/tmp/v9-pool-only-default-runtime.json",
+        "elapsed_seconds": 9.321509,
+        "budget_seconds": 120,
+        "within_budget": true,
+        "missing_required_fields": [],
+        "child_runs": [],
+        "persistent_write_allowed": false,
+        "formal_action_created": false,
+        "paper_fill_created": false,
+        "live_order_created": false,
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "cache-and-runtime-write-invariance",
+      "result": "PASS",
+      "evidence": {
+        "cache_file_count": 83,
+        "cache_manifest_before_after_equal": true,
+        "post_runtime_report_experiment_handoff_paper_files": 0
+      }
+    },
+    {
+      "id": "skill-structure-and-installed-mirror",
+      "result": "PASS",
+      "evidence": {
+        "workspace_file_count": 268,
+        "installed_file_count": 268,
+        "manifest_sha256": "a4ad641b689e5d5f94c5cf309b173bb9320cc1d426f1dd293e148238e4b49d39",
+        "missing_installed": [],
+        "extra_installed": [],
+        "hash_mismatches": []
+      }
+    },
+    {
+      "id": "public-repository-safety",
+      "result": "PASS",
+      "evidence": {
+        "secret_finding_count": 0,
+        "privacy_finding_count": 0,
+        "trackable_file_count": 672,
+        "history_blob_count": 928
+      }
+    }
+  ],
+  "findings_by_severity": {
+    "P0": [],
+    "P1": []
+  },
+  "findings": [],
+  "business_ready": false
+}

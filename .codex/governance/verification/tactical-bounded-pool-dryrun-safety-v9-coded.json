@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-bounded-pool-dryrun-safety-v9-coded-3ec61713",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "level": "CODED",
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T06:23:32.648262Z"
+}

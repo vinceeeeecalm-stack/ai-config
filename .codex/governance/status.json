@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-stablecoin-opportunity-exclusion-v8",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-stablecoin-opportunity-exclusion-v8-runtime_verified-c32fbf66",
-  "independent_verification_id": "verify-tactical-stablecoin-opportunity-exclusion-v8-independent-019fbc78-92d59e1e",
-  "updated_at": "2026-08-02T05:47:11.732473Z"
+  "last_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-runtime_verified-ab9184b8",
+  "independent_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-independent-019fbc78-96e24b2e",
+  "updated_at": "2026-08-02T06:28:47.883611Z"
 }

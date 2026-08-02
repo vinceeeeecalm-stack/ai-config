@@ -1,0 +1,35 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-bounded-pool-dryrun-safety-v9",
+  "title": "Bound tactical dynamic-pool challenge and keep dry-run write-free",
+  "business_outcome": "让 Crypto 1–7 日候选池挑战在 120 秒正式决策预算内返回，并保证 dry-run 不启动持久 K 线缓存写入，减少用户等待且不放宽赚钱硬门。",
+  "scope": [
+    "为 validation_progress_runner 增加只构建动态候选池并立即输出的 bounded pool-only 路径",
+    "dry-run 禁止自动或显式启动持久 binance_kline_cache_builder，并输出确定性跳过审计",
+    "真实 pool-only 运行必须在 120 秒内返回市场氛围、池形状、候选列表和降级原因",
+    "保持价值、催化、正保守 EV、流动性、风险、Paper/真钱隔离与人工确认门不变"
+  ],
+  "non_goals": [
+    "不修改候选 alpha 排名、目标、止损、估值或催化规则",
+    "不打开 Paper 或真钱仓位",
+    "不删除已生成的运行缓存、观察、Paper、真钱或治理历史",
+    "不修改 V8 冻结合同或发布证据"
+  ],
+  "constraints": [
+    "同一工作树保持单写入者",
+    "pool-only 与 dry-run 都不得写报告、实验、缓存、Paper 或真钱账本",
+    "超时或局部数据源失败必须输出准确降级，不能伪装成新鲜全市场判断",
+    "live_orders_enabled 与 private_api_used 始终为 false"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-bounded-dynamic-pool-v9",
+    "tactical-dryrun-no-cache-write-v9",
+    "tactical-runtime-budget-no-gate-loosening-v9"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-stablecoin-opportunity-exclusion-v8",
+  "frozen_at": "2026-08-02T06:04:13.306121Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "b12dfe1e3a276cdd2fd21e7b434b7875caf6b5a815794843c92ce5cd89a3d6c6"
+}

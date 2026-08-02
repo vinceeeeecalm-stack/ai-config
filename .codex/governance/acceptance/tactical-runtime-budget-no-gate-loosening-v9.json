@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-runtime-budget-no-gate-loosening-v9",
+  "title": "Runtime optimization does not create trade authority",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["V8 candidate eligibility and profit gates are installed"],
+  "steps": [
+    "Run pool-only dynamic challenge",
+    "Run a fresh tactical_1_7d scan and inspect the formal action"
+  ],
+  "expected": [
+    "Pool-only output is research selection only",
+    "It cannot emit ENTER_NOW, WAIT_FOR_ENTRY, TradePlan, Paper fill or real-money ROI",
+    "Formal scanner still rejects negative conservative EV or missing catalyst candidates as NO_TRADE"
+  ],
+  "evidence": ["pool-only output, tactical runtime artifact and Paper/live ledger summary"]
+}

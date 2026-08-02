@@ -1965,6 +1965,16 @@ def recovery_shadow_prefetch_plan(args: argparse.Namespace) -> dict[str, Any]:
 def recovery_shadow_kline_prefetch(args: argparse.Namespace, plan: dict[str, Any]) -> dict[str, Any]:
     symbols = plan.get("symbols") or []
     intervals = plan.get("intervals") or []
+    if args.dry_run:
+        return skipped_child(
+            "recovery_shadow_kline_prefetch",
+            {
+                "status": "skipped_dry_run",
+                "operator_note": "Dry-run never launches the persistent recovery-shadow K-line cache builder.",
+            },
+            script_cmd("binance_kline_cache_builder.py"),
+            skipped_status="skipped_dry_run",
+        )
     if args.offline_fixture:
         return skipped_child(
             "recovery_shadow_kline_prefetch",
@@ -2223,6 +2233,78 @@ def skipped_child(
         "stdout_parse_error": None,
         "stderr_tail": "",
         "status": "skipped",
+    }
+
+
+def dynamic_cache_execution_plan(
+    *,
+    dry_run: bool,
+    include_dynamic_kline_cache: bool,
+    auto_current_signal_refresh_required: bool,
+) -> dict[str, Any]:
+    auto_prefetch_requested = (
+        auto_current_signal_refresh_required
+        and not include_dynamic_kline_cache
+    )
+    cache_requested = include_dynamic_kline_cache or auto_prefetch_requested
+    return {
+        "cache_requested": cache_requested,
+        "execute": cache_requested and not dry_run,
+        "auto_prefetch_requested": auto_prefetch_requested,
+        "auto_prefetch_enabled": auto_prefetch_requested and not dry_run,
+        "skip_reason": "skipped_dry_run" if cache_requested and dry_run else None,
+    }
+
+
+def pool_only_output(
+    *,
+    run_id: str,
+    started_monotonic: float,
+    dynamic_scan_pool_enabled: bool,
+    dynamic_scan_universe: dict[str, Any],
+    effective_symbols: str,
+) -> dict[str, Any]:
+    elapsed_seconds = round(time.monotonic() - started_monotonic, 6)
+    required_fields = (
+        "market_regime",
+        "market_atmosphere",
+        "short_term_state",
+        "sentiment_state",
+        "pool_width_policy",
+        "pool_shape_policy",
+        "selected_symbols",
+        "top_dynamic_candidates",
+    )
+    missing_fields = [
+        field
+        for field in required_fields
+        if dynamic_scan_universe.get(field) is None
+    ]
+    within_budget = elapsed_seconds <= 120.0
+    return {
+        "schema_version": "DynamicPoolOnlyResultV1",
+        "run_id": run_id,
+        "status": (
+            "PASS"
+            if dynamic_scan_pool_enabled and not missing_fields and within_budget
+            else "DEGRADED"
+        ),
+        "pool_only": True,
+        "dry_run": True,
+        "dynamic_scan_pool_enabled": dynamic_scan_pool_enabled,
+        "dynamic_scan_universe": dynamic_scan_universe,
+        "effective_symbols": effective_symbols,
+        "elapsed_seconds": elapsed_seconds,
+        "budget_seconds": 120.0,
+        "within_budget": within_budget,
+        "missing_required_fields": missing_fields,
+        "child_runs": [],
+        "persistent_write_allowed": False,
+        "formal_action_created": False,
+        "paper_fill_created": False,
+        "live_order_created": False,
+        "live_orders_enabled": False,
+        "private_api_used": False,
     }
 
 
@@ -2947,6 +3029,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-fast", action="store_true")
     parser.add_argument("--skip-validation-after", action="store_true")
     parser.add_argument("--dry-run", action="store_true", help="Pass dry-run to child scripts and skip runner artifact writes")
+    parser.add_argument(
+        "--pool-only",
+        action="store_true",
+        help="Build and print only the dynamic research pool; implies dry-run and executes no child workflow or persistent write.",
+    )
     parser.add_argument("--offline-fixture", action="store_true", help="Pass offline-fixture to child scripts")
     parser.add_argument("--no-lock", action="store_true")
     parser.add_argument("--external-agent-outputs-json", default="")
@@ -3035,12 +3122,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
+    started_monotonic = time.monotonic()
+    if args.pool_only:
+        args.dry_run = True
     now = local_now()
     stamp = artifact_stamp(now)
     run_id = f"{stamp}-validation-progress-runner"
     startup_lock_state: dict[str, Any] = {"status": "not_checked", "path": str(SHARED_PAPER_LOCK_PATH)}
     stale_lock_cleanup: dict[str, Any] = {"status": "not_needed"}
-    if not args.no_lock:
+    if not args.no_lock and not args.pool_only:
         startup_lock_state = shared_paper_lock_state()
         if startup_lock_state.get("status") == "held":
             return emit_lock_held_run(args, now, run_id)
@@ -3048,6 +3138,11 @@ def main() -> int:
             stale_lock_cleanup = clear_stale_shared_paper_lock(startup_lock_state)
             if stale_lock_cleanup.get("status") == "failed":
                 return emit_lock_held_run(args, now, run_id)
+    elif args.pool_only:
+        startup_lock_state = {
+            "status": "skipped_read_only_pool_only",
+            "path": str(SHARED_PAPER_LOCK_PATH),
+        }
     explicit_symbols_initial = split_symbols(args.symbols)
     use_dynamic_scan_pool = not args.disable_dynamic_scan_pool and not args.offline_fixture
     dynamic_social_refresh: dict[str, Any] = {
@@ -3062,12 +3157,21 @@ def main() -> int:
     }
     if use_dynamic_scan_pool:
         social_state = social_handoff_state(args.dynamic_social_stale_hours)
+        social_refresh_enabled = (
+            not args.disable_dynamic_social_refresh and not args.pool_only
+        )
         dynamic_social_refresh = {
-            "enabled": not args.disable_dynamic_social_refresh,
+            "enabled": social_refresh_enabled,
             "handoff_state_before": social_state,
-            "status": "skipped_fresh_handoff" if not social_state.get("should_refresh") else "pending",
+            "status": (
+                "skipped_read_only_pool_only"
+                if args.pool_only and social_state.get("should_refresh")
+                else "skipped_fresh_handoff"
+                if not social_state.get("should_refresh")
+                else "pending"
+            ),
         }
-        if not args.disable_dynamic_social_refresh and social_state.get("should_refresh"):
+        if social_refresh_enabled and social_state.get("should_refresh"):
             seed_symbols = [
                 *load_open_symbols(),
                 *split_symbols(args.symbols),
@@ -3088,6 +3192,16 @@ def main() -> int:
         dynamic_scan_universe["dynamic_social_refresh"] = dynamic_social_refresh
         args.symbols = dynamic_symbols
     args.dynamic_scan_universe = dynamic_scan_universe
+    if args.pool_only:
+        output = pool_only_output(
+            run_id=run_id,
+            started_monotonic=started_monotonic,
+            dynamic_scan_pool_enabled=bool(use_dynamic_scan_pool),
+            dynamic_scan_universe=dynamic_scan_universe,
+            effective_symbols=args.symbols,
+        )
+        print(json.dumps(output, ensure_ascii=False, indent=2))
+        return 0 if output["within_budget"] else 1
     child_runs: list[dict[str, Any]] = []
 
     pre_validation = validation_audit("pre_validation_sample_audit", args)
@@ -3151,12 +3265,16 @@ def main() -> int:
         auto_current_signal_refresh_enabled
         and bool(current_signal_refresh_state.get("should_refresh"))
     )
-    auto_current_signal_kline_prefetch_enabled = (
-        auto_current_signal_refresh_required
-        and not args.include_dynamic_kline_cache
+    dynamic_cache_plan = dynamic_cache_execution_plan(
+        dry_run=args.dry_run,
+        include_dynamic_kline_cache=args.include_dynamic_kline_cache,
+        auto_current_signal_refresh_required=auto_current_signal_refresh_required,
     )
+    auto_current_signal_kline_prefetch_enabled = dynamic_cache_plan[
+        "auto_prefetch_enabled"
+    ]
     auto_current_signal_refresh_consumed = False
-    if args.include_dynamic_kline_cache or auto_current_signal_kline_prefetch_enabled:
+    if dynamic_cache_plan["execute"]:
         child = dynamic_kline_cache_builder(args)
         child["auto_current_signal_kline_prefetch"] = auto_current_signal_kline_prefetch_enabled
         apply_dynamic_kline_prefetch_filter(
@@ -3166,6 +3284,18 @@ def main() -> int:
             dynamic_scan_universe=dynamic_scan_universe,
         )
         child_runs.append(child)
+    elif dynamic_cache_plan["skip_reason"]:
+        child_runs.append(
+            skipped_child(
+                "binance_kline_cache_builder",
+                {
+                    "reason": dynamic_cache_plan["skip_reason"],
+                    "operator_note": "Dry-run never launches the persistent dynamic K-line cache builder.",
+                },
+                script_cmd("binance_kline_cache_builder.py"),
+                skipped_status="skipped_dry_run",
+            )
+        )
     cycles = max(1, args.cycles)
     for index in range(cycles):
         if not args.skip_exit:

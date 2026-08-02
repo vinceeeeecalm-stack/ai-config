@@ -1,0 +1,33 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-bounded-pool-dryrun-safety-v9-independent-019fbc78-96e24b2e",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "default-pool-only-stale-social",
+      "result": "PASS",
+      "evidence": "refresh_social_handoff calls=0 and status=skipped_read_only_pool_only"
+    },
+    {
+      "id": "dry-run-recovery-prefetch",
+      "result": "PASS",
+      "evidence": "run_command calls=0 and child stdout status=skipped_dry_run"
+    },
+    {
+      "id": "default-pool-only-runtime",
+      "result": "PASS",
+      "evidence": "9.321509 seconds, child_runs empty, cache/runtime manifests unchanged, all authority flags false"
+    },
+    {
+      "id": "regression-skill-public-safety",
+      "result": "PASS",
+      "evidence": "full regression exit 0; 268-file installed mirror hash a4ad641b; secret/privacy findings 0"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T06:26:00Z"
+}

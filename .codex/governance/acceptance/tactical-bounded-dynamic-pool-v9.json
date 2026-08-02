@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-bounded-dynamic-pool-v9",
+  "title": "Dynamic candidate-pool challenge returns within the tactical budget",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Public market data is reachable or degrades explicitly"],
+  "steps": [
+    "Run validation_progress_runner with --pool-only --dry-run and bounded source timeouts",
+    "Measure wall-clock duration and inspect the output contract"
+  ],
+  "expected": [
+    "The command returns within 120 seconds",
+    "Output includes market regime, atmosphere, short-term state, sentiment state, pool width, pool shape, selected symbols and top dynamic candidates",
+    "No validation, cache-builder, Paper, recovery or learning child runs execute"
+  ],
+  "evidence": ["bounded pool-only runtime JSON and wall-clock measurement"]
+}

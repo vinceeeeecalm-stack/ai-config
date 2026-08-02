@@ -1,0 +1,36 @@
+{
+  "schema_version": "VerificationResultV1",
+  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "result": "FAIL",
+  "highest_proven_level": "CODED",
+  "source_digest": "ccb9b3c3953bbf740eb19778b90e939cbd8382eccdd5bfe21587ae1ea51bb0a8",
+  "goal_contract_digest": "b12dfe1e3a276cdd2fd21e7b434b7875caf6b5a815794843c92ce5cd89a3d6c6",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent": true,
+  "read_only": true,
+  "checked_at": "2026-08-02T06:20:00Z",
+  "findings_by_severity": {
+    "P0": [],
+    "P1": [
+      {
+        "id": "dry-run-recovery-prefetch-launches-persistent-builder",
+        "impact": "recovery_shadow_kline_prefetch could invoke the persistent K-line builder under dry-run when recovery symbols were present"
+      },
+      {
+        "id": "pool-only-default-can-write-social-artifacts",
+        "impact": "default pool-only could call refresh_social_handoff while the handoff was stale"
+      }
+    ]
+  },
+  "evidence": {
+    "limited_pool_only_runtime_seconds": 23.326888,
+    "limited_runtime_used_disable_dynamic_social_refresh": true,
+    "cache_file_count": 83,
+    "cache_manifest_sha256": "41e924a8e67a417690c905616b6dc28e5f13d3480d603f5403230fcc9d76d406",
+    "skill_manifest_sha256": "5276244348874bae745d7a51cea4f63061aae101f6af32fd3821b5e4b141f1dd",
+    "secret_finding_count": 0,
+    "privacy_finding_count": 0
+  },
+  "business_ready": false
+}
