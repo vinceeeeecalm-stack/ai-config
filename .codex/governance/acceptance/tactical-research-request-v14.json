@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-research-request-v14",
+  "title": "真实扫描生成唯一 Top1 的确定性深研请求",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["真实 tactical_1_7d scanner 包含 Top3 与同口径历史比较"],
+  "steps": ["读取最终历史排名", "确定 provisional research_top1", "生成四角色研究任务和证据需求"],
+  "expected": ["每轮只有一个 provisional Top1", "请求绑定 scanner 四摘要", "不生成交易动作或伪估值", "相同输入产生相同请求 ID"],
+  "evidence": ["请求合同测试", "真实 request-only 运行包"]
+}

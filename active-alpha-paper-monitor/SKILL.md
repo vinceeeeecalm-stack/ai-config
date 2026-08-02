@@ -45,7 +45,11 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 5. 运行 paper 风险、容量和 recovery gate；失败时保留 blocked candidate 和明确原因。
 6. 每个冻结候选写 ObservationSampleV1；只有可复现的 Paper fill 写 TradeSampleV1。
 7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan；walk-forward 与 Paper 统一封装为 `RegressionEvidenceV1`。
-8. Manual V3 重新读取持仓、现金、长期目标和风险门后，才可形成研究/执行双轨结论。
+8. Manual V3 先用 `tactical_research_handoff.py` 读取当前 Top3/历史比较并生成唯一
+   `TacticalResearchRequestV1`。预研究回归门失败时停止昂贵深研；通过时才收集四角色
+   dossier，并在慢速研究后重新运行本 scanner 生成最终 fresh snapshot。最终 Top1
+   改变时旧 dossier 不得转移到新标的。Manual 再读取持仓、现金、长期目标和风险门，
+   形成研究/执行双轨结论。
 9. 到期观察复盘记录 MFE、MAE、诊断目标/止损先后和拒绝质量；到期 Paper 复盘另行记录真实模拟成交、费用、滑点和事件跳空。观察结果不得进入 Paper 或真钱收益分母。
 
 ## EvidenceSnapshotV2

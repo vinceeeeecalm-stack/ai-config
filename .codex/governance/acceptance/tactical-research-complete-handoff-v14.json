@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-research-complete-handoff-v14",
+  "title": "完整深研和最终市场认证进入唯一正式仲裁",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Top1 未改变", "四角色 dossier 完整", "最终双源行情新鲜一致", "所有既有硬门通过"],
+  "steps": ["校验 dossier 和字段证据", "绑定最终 snapshot", "重建当前计划", "组装 UniversalInvestmentRunInputV1", "调用 universal_investment_core"],
+  "expected": ["research_by_symbol 非空且只含当前 Top1", "正式动作只为 ENTER_NOW 或 WAIT_FOR_ENTRY", "决策卡完整", "现金为零只影响 account_execution 和金额"],
+  "evidence": ["ENTER fixture", "WAIT fixture", "生产输入/输出摘要绑定"]
+}
