@@ -1,0 +1,31 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-market-source-failover-v5",
+  "title": "公共行情源局部超时时仍产出可审计的 Crypto 1–7 日候选轮次",
+  "business_outcome": "避免单个 Binance 公共端点超时把整轮候选错误清空，使赚钱导向扫描能持续保留唯一研究 Top1 或准确的候选级拒绝证据。",
+  "scope": [
+    "为 impulse_capture_scanner 的公共 Binance 端点增加健康感知、快速熔断和确定性回退",
+    "将局部端点失败限制在受影响请求，健康镜像可继续完成候选发现与验证",
+    "为重复超时、镜像回退、整轮候选不被错误清空增加回归与运行证据"
+  ],
+  "non_goals": [
+    "不修改选标、估值、催化、EV、止损、目标或风险阈值",
+    "不创建 Paper 或真钱成交，不启用私有 API 或自动下单",
+    "不把静态 fallback 列表伪装成新鲜全市场扫描"
+  ],
+  "constraints": [
+    "同一工作树保持单写入者",
+    "首选端点失败后必须在单源 12 秒和整轮时限内切换至健康公共镜像",
+    "任何回退必须写入 public_endpoint_audit，不得隐藏数据源降级",
+    "若所有端点均失败，输出 NO_FRESH_DECISION，不复用旧 TradePlan",
+    "live_orders_enabled=false 且 private_api_used=false"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-binance-endpoint-circuit-breaker-v5",
+    "tactical-partial-source-round-survival-v5",
+    "tactical-source-failover-safety-v5"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-evidence-ledger-v4"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-market-source-failover-v5-coded-ec30be97",
+  "goal_id": "tactical-market-source-failover-v5",
+  "level": "CODED",
+  "source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T03:46:02.373042Z"
+}

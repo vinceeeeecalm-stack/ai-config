@@ -1,0 +1,26 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-binance-endpoint-circuit-breaker-v5",
+  "title": "首选公共行情端点超时后快速切换健康镜像",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "首选 Binance 公共端点连续超时",
+    "至少一个后续官方公共镜像健康"
+  ],
+  "steps": [
+    "执行 tactical_1_7d 动态扫描",
+    "注入或复现首选端点超时",
+    "读取端点审计、候选与阶段用时"
+  ],
+  "expected": [
+    "超时端点在本轮被快速熔断，不继续消耗每个候选的完整超时",
+    "后续健康镜像被实际调用并产生成功计数",
+    "端点失败与回退顺序完整保留",
+    "整轮不超过策略总时限"
+  ],
+  "evidence": [
+    "deterministic endpoint failure fixture",
+    "public_endpoint_audit",
+    "runtime scan artifact"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-source-failover-safety-v5",
+  "title": "行情回退不放宽交易与证据硬门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "扫描通过公共镜像取得候选数据"
+  ],
+  "steps": [
+    "检查候选来源、时效、历史与正式动作",
+    "检查观察、Paper 和真钱分母"
+  ],
+  "expected": [
+    "回退来源仍是公开只读端点并记录来源",
+    "价值、催化、双源价格、正保守 EV、流动性和风险门保持不变",
+    "Active 不生成正式真钱动作",
+    "live_orders_enabled=false、private_api_used=false",
+    "观察样本不进入 Paper 或真钱 ROI"
+  ],
+  "evidence": [
+    "scanner self-test",
+    "ledger isolation tests",
+    "runtime invariant audit"
+  ]
+}

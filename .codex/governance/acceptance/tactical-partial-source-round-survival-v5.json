@@ -1,0 +1,26 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-partial-source-round-survival-v5",
+  "title": "局部源失败不会把可验证候选错误清空",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "市场宽度数据可用",
+    "部分 K 线或盘口端点失败但至少一个镜像可用"
+  ],
+  "steps": [
+    "构建动态候选池",
+    "对候选并发获取闭合 K 线与盘口",
+    "形成 Top3、唯一研究 Top1 或候选级拒绝记录"
+  ],
+  "expected": [
+    "健康候选继续完成验证",
+    "失败只降级受影响候选或证据源",
+    "不得把局部超时解释为全市场无机会",
+    "若存在可验证候选则写入 ObservationSampleV1"
+  ],
+  "evidence": [
+    "deterministic mixed-health fixture",
+    "real dynamic scan",
+    "tactical observation ledger summary"
+  ]
+}
