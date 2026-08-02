@@ -23,6 +23,12 @@ from typing import Any
 SCHEMA_VERSION = "DerivativesShadowCollectorV2"
 DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "config" / "derivatives_shadow_v2.json"
 BINANCE_FUTURES_BASE = "https://fapi.binance.com"
+PUBLIC_SOURCE_NAMES = [
+    "Binance Futures public premiumIndex",
+    "openInterestHist",
+    "takerlongshortRatio",
+    "ticker/24hr",
+]
 FORBIDDEN_KEYS = {"api_key", "apikey", "secret", "token", "password", "private_key", "account"}
 
 
@@ -36,6 +42,19 @@ def canonical_json(value: Any) -> str:
 
 def sha256_json(value: Any) -> str:
     return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def public_source_lineage_digest() -> str:
+    """Identify the source implementation, not one snapshot's changing values."""
+
+    return sha256_json(
+        {
+            "collector_version": SCHEMA_VERSION,
+            "transport": "public_rest_only",
+            "venue": "binance_futures",
+            "public_sources": PUBLIC_SOURCE_NAMES,
+        }
+    )
 
 
 def parse_time(value: Any, field: str) -> dt.datetime:
@@ -421,7 +440,7 @@ def build_record(
         "oi_alone_can_authorize": False,
         "source_status": source_status,
         "source_errors": errors,
-        "public_sources": ["Binance Futures public premiumIndex", "openInterestHist", "takerlongshortRatio", "ticker/24hr"],
+        "public_sources": list(PUBLIC_SOURCE_NAMES),
         "production_rule_changed": False,
         "formal_action_eligible": False,
         "paper_roi_eligible": False,
@@ -441,6 +460,7 @@ def validate_record(record: dict[str, Any]) -> dict[str, Any]:
         text(record, field)
     digest(record.get("config_digest"), "config_digest")
     digest(record.get("source_digest"), "source_digest")
+    digest(record.get("source_lineage_digest"), "source_lineage_digest")
     parse_time(record.get("captured_at"), "captured_at")
     captured_at = parse_time(record.get("captured_at"), "captured_at")
     review_due_at = parse_time(record.get("review_due_at"), "review_due_at")
@@ -483,11 +503,32 @@ def run_shadow(discovery: dict[str, Any], config: dict[str, Any], sources: dict[
         "strategy_version": config["strategy_version"],
         "config_digest": sha256_json(config),
         "source_digest": sha256_json({symbol: sources.get(symbol) for symbol in symbols}),
+        "source_lineage_digest": public_source_lineage_digest(),
     }
-    records = [
-        build_record(handoff, sources.get(handoff["symbol"]) if isinstance(sources.get(handoff["symbol"]), dict) else {"errors": ["candidate_source_missing"]}, binding=binding, config=config)
-        for handoff in handoffs
-    ]
+    records = []
+    for handoff in handoffs:
+        source = sources.get(handoff["symbol"])
+        if not isinstance(source, dict):
+            source = {"errors": ["candidate_source_missing"]}
+        try:
+            record = build_record(handoff, source, binding=binding, config=config)
+        except DerivativesShadowError as exc:
+            # A malformed public candidate payload is candidate-local.  Keep
+            # the frozen spot handoff and explicitly degrade derivatives data.
+            degraded_source = {
+                "derivatives_symbol": source.get("derivatives_symbol") or handoff["symbol"],
+                "errors": sorted(
+                    set(
+                        [
+                            *(str(item) for item in (source.get("errors") or [])),
+                            f"candidate_payload_invalid:{exc}",
+                        ]
+                    )
+                ),
+                "global_errors": [str(item) for item in (source.get("global_errors") or [])],
+            }
+            record = build_record(handoff, degraded_source, binding=binding, config=config)
+        records.append(record)
     status_counts = {status: sum(record["source_status"] == status for record in records) for status in ("COMPLETE", "PARTIAL", "DEGRADED")}
     state_counts = {state: sum(record["directional_state"] == state for record in records) for state in ("CONFIRMED_LONG", "CROWDED_CONFLICT", "OI_ONLY_CONFLICT", "DATA_INSUFFICIENT", "NO_FUEL")}
     lead_candidates = [
@@ -540,6 +581,7 @@ def run_shadow(discovery: dict[str, Any], config: dict[str, Any], sources: dict[
 def append_observations(path: Path, run: dict[str, Any]) -> dict[str, int]:
     path.parent.mkdir(parents=True, exist_ok=True)
     existing: dict[str, dict[str, Any]] = {}
+    existing_natural_keys: set[tuple[str, str]] = set()
     if path.exists():
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
             if not line.strip():
@@ -550,26 +592,30 @@ def append_observations(path: Path, run: dict[str, Any]) -> dict[str, int]:
                 raise DerivativesShadowError(f"invalid_jsonl:{line_number}") from exc
             observation_id = text(item, "observation_id")
             existing[observation_id] = item
+            existing_natural_keys.add((text(item, "snapshot_id"), text(item, "symbol")))
     appended = 0
     no_update = 0
     for record in run["records"]:
         observation = {
             "schema_version": "DerivativesShadowObservationV1",
             "observation_id": "derivatives-observation-" + sha256_json(
-                {"derivatives_snapshot_id": record["derivatives_snapshot_id"], "symbol": record["symbol"]}
+                {"snapshot_id": record["snapshot_id"], "symbol": record["symbol"]}
             )[:20],
             "observed_at": record["captured_at"],
             **{key: value for key, value in record.items() if key != "schema_version"},
         }
         observation_id = observation["observation_id"]
-        if observation_id in existing:
-            if canonical_json(existing[observation_id]) != canonical_json(observation):
-                raise DerivativesShadowError(f"append_only_collision:{observation_id}")
+        natural_key = (observation["snapshot_id"], observation["symbol"])
+        if observation_id in existing or natural_key in existing_natural_keys:
+            # First observation wins for a frozen discovery snapshot.  Public
+            # derivatives values can refresh during a retry, but must not turn
+            # one point-in-time snapshot into multiple observations.
             no_update += 1
             continue
         with path.open("a", encoding="utf-8") as handle:
             handle.write(canonical_json(observation) + "\n")
         existing[observation_id] = observation
+        existing_natural_keys.add(natural_key)
         appended += 1
     return {"APPENDED": appended, "NO_UPDATE": no_update}
 

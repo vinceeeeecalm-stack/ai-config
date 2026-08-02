@@ -141,7 +141,7 @@ class DerivativesShadowCollectorTests(unittest.TestCase):
         self.assertFalse(result["real_money_roi_eligible"])
         self.assertEqual(result["derivatives_lead_candidate_count"], 2)
 
-    def test_append_is_idempotent_and_collision_is_blocked(self):
+    def test_append_is_idempotent_and_same_snapshot_refresh_is_no_update(self):
         result = M.run_shadow(discovery(["AUSDT"]), CONFIG, {"AUSDT": source()})
         with tempfile.TemporaryDirectory() as temp:
             ledger = Path(temp) / "derivatives.jsonl"
@@ -149,8 +149,24 @@ class DerivativesShadowCollectorTests(unittest.TestCase):
             self.assertEqual(M.append_observations(ledger, result), {"APPENDED": 0, "NO_UPDATE": 1})
             changed = copy.deepcopy(result)
             changed["records"][0]["directional_state"] = "NO_FUEL"
-            with self.assertRaisesRegex(M.DerivativesShadowError, "append_only_collision"):
-                M.append_observations(ledger, changed)
+            self.assertEqual(M.append_observations(ledger, changed), {"APPENDED": 0, "NO_UPDATE": 1})
+            self.assertEqual(len(ledger.read_text().splitlines()), 1)
+
+    def test_source_payload_digest_varies_but_source_lineage_is_stable(self):
+        first = M.run_shadow(discovery(["AUSDT"]), CONFIG, {"AUSDT": source(funding="0.0001")})
+        second = M.run_shadow(discovery(["AUSDT"]), CONFIG, {"AUSDT": source(funding="0.0002")})
+        self.assertNotEqual(first["source_digest"], second["source_digest"])
+        self.assertEqual(first["source_lineage_digest"], second["source_lineage_digest"])
+
+    def test_malformed_candidate_payload_is_candidate_local(self):
+        payload = discovery(["GOODUSDT", "BADUSDT"])
+        bad = source()
+        bad["premium_index"]["lastFundingRate"] = "not-a-number"
+        result = M.run_shadow(payload, CONFIG, {"GOODUSDT": source(), "BADUSDT": bad})
+        by_symbol = {row["symbol"]: row for row in result["records"]}
+        self.assertEqual(by_symbol["GOODUSDT"]["source_status"], "COMPLETE")
+        self.assertEqual(by_symbol["BADUSDT"]["source_status"], "DEGRADED")
+        self.assertTrue(any("candidate_payload_invalid" in item for item in by_symbol["BADUSDT"]["source_errors"]))
 
     def test_twenty_candidate_bound_and_mixed_handoff_time_rejected(self):
         symbols = [f"C{index:02d}USDT" for index in range(20)]

@@ -1,0 +1,41 @@
+{
+  "schema_version": "VerificationResultV1",
+  "goal_id": "derivatives-shadow-continuous-sampling-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "14c5544703249b675aba039e782dfea902058a31689d6a6e3f0757e639e2a355",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "FAIL",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 4,
+    "P2": 1
+  },
+  "findings": [
+    {
+      "severity": "P1",
+      "summary": "自动化尚未扩展为持续采样闭环",
+      "evidence": "heartbeat 只执行 reviewer 和 promotion evaluator，且明确禁止新行情扫描。"
+    },
+    {
+      "severity": "P1",
+      "summary": "多轮样本无法累积进入冻结晋升门",
+      "evidence": "source_digest 同时充当每轮内容摘要与跨轮 lineage，多个快照会令分析池清空。"
+    },
+    {
+      "severity": "P1",
+      "summary": "同一 snapshot 在公开源刷新后不会 NO_UPDATE",
+      "evidence": "固定 discovery snapshot、只改变 funding 后仍追加第二组 observation。"
+    },
+    {
+      "severity": "P1",
+      "summary": "单候选畸形公共字段会拖死整轮",
+      "evidence": "一个非数值 lastFundingRate 会令 run_cycle 整轮抛错。"
+    },
+    {
+      "severity": "P2",
+      "summary": "discovery 整轮 timeout 可被设为任意大值",
+      "evidence": "--discovery-timeout 999999 被直接传给子进程。"
+    }
+  ],
+  "created_at": "2026-08-02T14:21:00Z"
+}

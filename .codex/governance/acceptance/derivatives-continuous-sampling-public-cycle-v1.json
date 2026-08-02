@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-continuous-sampling-public-cycle-v1",
+  "title": "同一入口完成动态 discovery 与公开衍生品影子采样",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["生产策略保持不变", "只允许公开市场数据"],
+  "steps": ["生成最多二十个 discovery shadow handoff", "补充公开 OI、funding、basis 与合约主动成交", "追加独立七天观察"],
+  "expected": ["每个候选绑定同一轮 snapshot 与版本摘要", "输出包含候选级来源状态和方向标签", "没有任何正式动作或生产排名变更"],
+  "evidence": ["cycle self-test", "bounded public runtime smoke", "append summary"]
+}

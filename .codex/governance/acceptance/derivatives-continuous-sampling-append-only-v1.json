@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-continuous-sampling-append-only-v1",
+  "title": "持续样本使用追加式账本且重复运行去重",
+  "level": "TESTED",
+  "preconditions": ["存在一个已冻结 discovery 快照"],
+  "steps": ["对同一快照运行采样两次", "读取 observation ledger"],
+  "expected": ["第一次追加所有新观察", "第二次全部 NO_UPDATE", "既有记录未被覆盖或重排"],
+  "evidence": ["deterministic fixture test", "ledger hash comparison"]
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-continuous-sampling-bounded-automation-v1",
+  "title": "自动采样有界运行并复用冻结结算与晋升门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["现有 heartbeat 已绑定当前 Active Goal"],
+  "steps": ["验证保留 created_at 的 RRULE", "更新同一 heartbeat 而不创建重复任务", "校验至少一个未来发生时间和 UTC 截止时间", "检查提示词只允许采样、结算和评估"],
+  "expected": ["任务在截止时间后不再运行", "不会启动阶段二或修改生产规则", "到期记录才进入 reviewer，评估仍使用预注册 gate"],
+  "evidence": ["automation RRULE guard", "automation view", "prompt safety audit"]
+}

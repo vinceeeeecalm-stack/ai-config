@@ -33,6 +33,12 @@ SAFETY_FLAGS = {
     "private_api_used": False,
     "human_confirmation_required": True,
 }
+PUBLIC_SOURCE_NAMES = [
+    "Binance Futures public premiumIndex",
+    "openInterestHist",
+    "takerlongshortRatio",
+    "ticker/24hr",
+]
 
 
 class ShadowOutcomeError(ValueError):
@@ -45,6 +51,23 @@ def canonical_json(value: Any) -> str:
 
 def sha256_json(value: Any) -> str:
     return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def source_lineage_digest(observation: dict[str, Any]) -> str:
+    explicit = observation.get("source_lineage_digest")
+    if isinstance(explicit, str) and len(explicit) == 64 and all(ch in "0123456789abcdef" for ch in explicit):
+        return explicit
+    public_sources = observation.get("public_sources")
+    if public_sources != PUBLIC_SOURCE_NAMES:
+        raise ShadowOutcomeError("source_lineage_unavailable")
+    return sha256_json(
+        {
+            "collector_version": "DerivativesShadowCollectorV2",
+            "transport": "public_rest_only",
+            "venue": "binance_futures",
+            "public_sources": PUBLIC_SOURCE_NAMES,
+        }
+    )
 
 
 def parse_time(value: Any, field: str) -> datetime:
@@ -335,6 +358,7 @@ def build_review(
         "strategy_version": observation["strategy_version"],
         "config_digest": observation["config_digest"],
         "source_digest": observation["source_digest"],
+        "source_lineage_digest": source_lineage_digest(observation),
         "reviewer_version": config["reviewer_version"],
         "review_config_digest": review_config_digest,
         "observed_at": observation["observed_at"],
@@ -374,6 +398,8 @@ def validate_review(record: dict[str, Any], observation: dict[str, Any], config:
     for field in ("observation_id", "symbol", "snapshot_id", "strategy_version", "config_digest", "source_digest"):
         if record.get(field) != observation.get(field):
             raise ShadowOutcomeError(f"review_binding_mismatch:{field}")
+    if record.get("source_lineage_digest") != source_lineage_digest(observation):
+        raise ShadowOutcomeError("review_binding_mismatch:source_lineage_digest")
     if record.get("review_due_at") != observation.get("review_due_at") or record.get("reviewed_at") != observation.get("review_due_at"):
         raise ShadowOutcomeError("review_due_binding_mismatch")
     if record.get("review_config_digest") != sha256_json(validate_config(config)):
@@ -579,6 +605,7 @@ def self_test() -> dict[str, Any]:
         "strategy_version": "unified-shortterm-derivatives-shadow-v2",
         "config_digest": "a" * 64,
         "source_digest": "b" * 64,
+        "public_sources": list(PUBLIC_SOURCE_NAMES),
         "observed_at": iso(observed),
         "captured_at": iso(observed),
         "review_due_at": iso(observed + timedelta(days=7)),

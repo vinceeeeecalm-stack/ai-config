@@ -47,6 +47,9 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
    `impulse_capture_scanner.py --discovery-only --derivatives-shadow-handoff`
    输出最多二十个同轮现货因子，再交给
    `scripts/derivatives_shadow_collector.py` 补充 OI、funding、basis 和合约主动成交。
+   持续前向采样必须通过 `scripts/derivatives_shadow_cycle.py` 运行同一冻结阶段一规则；
+   它只追加七天观察，不改变生产排名、正式动作或任何 ROI。重复快照必须 `NO_UPDATE`，
+   自动采样必须有明确截止时间，不能无限运行。
    该数据不进入当前 discovery score、Top1 或正式 handoff 动作；OI 单独上升只能输出冲突标签。
    达到冻结的七天 `review_due_at` 后，先运行
    `scripts/derivatives_shadow_outcome_reviewer.py`，用观察后的闭合 15m 现货 K 线同时结算
@@ -130,6 +133,7 @@ Runtime 产物应保存在工作区或显式 `INVESTING_RUNTIME_ROOT`，迁移�
 - 当前信号：`scripts/current_signal_probe.py`
 - 异动扫描：`scripts/impulse_capture_scanner.py`
 - 全候选衍生品影子采集：`scripts/derivatives_shadow_collector.py`；只消费显式 shadow handoff，候选级局部降级，绝不改变生产排名或动作。
+- 阶段一持续采样：`scripts/derivatives_shadow_cycle.py`；编排动态 discovery 与公开衍生品 collector，追加同一规则的七天观察，禁止进入生产动作或收益。
 - 衍生品影子到期结算：`scripts/derivatives_shadow_outcome_reviewer.py`；只结算已到期观察，输出追加式三路径诊断和因子 cohort，不进入 Paper/真钱 ROI。
 - 衍生品影子晋升门：`scripts/derivatives_shadow_promotion_evaluator.py`；只读、预注册、确定性，样本不足必须 `MORE_EVIDENCE_REQUIRED`，不得事后换主要指标。
 - 新链事件到资产：`scripts/new_chain_opportunity_radar.py`

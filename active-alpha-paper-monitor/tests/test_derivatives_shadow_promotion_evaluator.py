@@ -34,6 +34,7 @@ def review(index: int, *, experiment: bool, early: bool, trigger: str, snapshot:
         "strategy_version": "unified-shortterm-derivatives-shadow-v2",
         "config_digest": "a" * 64,
         "source_digest": "b" * 64,
+        "source_lineage_digest": "d" * 64,
         "reviewer_version": "derivatives-shadow-outcome-review-v1",
         "review_config_digest": "c42e46023e248a9053637f3b4543b29cc2ad3096c3f5952df6ebd0a4eb5a395e",
         "observed_at": "2026-07-01T00:00:00Z",
@@ -151,11 +152,17 @@ class PromotionEvaluatorTests(unittest.TestCase):
         future[0]["window_end_at"] = "2026-07-08T00:00:01Z"
         with self.assertRaisesRegex(M.PromotionGateError, "window_end_outside"):
             M.evaluate(future, self.config)
-        mixed = copy.deepcopy(rows)
-        mixed[0]["source_digest"] = "c" * 64
-        mixed_result = M.evaluate(mixed, self.config)
+        changing_values = copy.deepcopy(rows)
+        for index, row in enumerate(changing_values):
+            row["source_digest"] = f"{index:064x}"[-64:]
+        pooled = M.evaluate(changing_values, self.config)
+        self.assertEqual(pooled["decision"], "PROMOTION_REVIEW_ELIGIBLE")
+        self.assertTrue(pooled["evidence_pool_valid"])
+        mixed_lineage = copy.deepcopy(rows)
+        mixed_lineage[0]["source_lineage_digest"] = "e" * 64
+        mixed_result = M.evaluate(mixed_lineage, self.config)
         self.assertEqual(mixed_result["decision"], "MORE_EVIDENCE_REQUIRED")
-        self.assertIn("cross_review_lineage_mismatch:source_digest", mixed_result["all_blockers"])
+        self.assertIn("cross_review_lineage_mismatch:source_lineage_digest", mixed_result["all_blockers"])
         self.assertFalse(mixed_result["evidence_pool_valid"])
         self.assertEqual(mixed_result["primary_metrics"]["all_experiment"]["sample_count"], 0)
 

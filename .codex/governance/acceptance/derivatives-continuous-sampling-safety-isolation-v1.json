@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-continuous-sampling-safety-isolation-v1",
+  "title": "影子采样不能污染生产动作或收益",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["候选含 OI-only、拥挤、确认和数据缺失状态"],
+  "steps": ["运行采样编排", "检查顶层与每条 observation 安全字段", "检查生产输出与 ROI 账本边界"],
+  "expected": ["formal_action_eligible、Paper ROI、真钱 ROI 与生产规则变更均为 false", "live_orders_enabled 与 private_api_used 为 false", "OI-only 不生成用户动作"],
+  "evidence": ["negative safety tests", "runtime output", "public repo scan"]
+}
