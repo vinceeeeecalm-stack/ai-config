@@ -1,0 +1,49 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-top1-research-handoff-v14",
+  "title": "Crypto 1–7 日 Top1 深研证据到正式仲裁生产交接",
+  "business_outcome": "让每次真实 Crypto 1–7 日扫描在产生唯一研究 Top1 后，能够生成明确的深研请求，接收可追溯的估值、官方催化、基本面/链上、下行挑战与最终双源市场认证，并在最终新鲜快照上确定性组装 research_by_symbol 进入 Manual 唯一内核，消除真实运行长期结构性空研究，同时继续让不合格候选诚实 NO_TRADE。",
+  "scope": [
+    "新增 TacticalResearchRequestV1，固定 provisional Top1、四角色研究任务、证据字段和最终市场认证要求",
+    "新增 TacticalResearchDossierV1 校验，保存估值方法、官方催化、Crypto 基本面、下行、风险挑战、来源与字段证据映射",
+    "新增 TacticalMarketCertificationV1，绑定最终 scanner snapshot，要求 60 秒内至少两个公共价格源、差异不超过 1%、单源 12 秒和全轮 120 秒",
+    "慢速深研完成后必须用最终 fresh scanner 重新确认 Top1；Top1 改变时不得把旧候选 dossier 静默转移到新 Top1",
+    "对 Top1 未改变且证据有效的运行确定性构建 research_by_symbol、current plan 与 UniversalInvestmentRunInputV1，并调用 universal_investment_core",
+    "无 dossier、缺角色、证据过期、官方催化缺失、估值不可证、来源冲突或风险挑战失败时保留唯一 research_top1 并 NO_TRADE，不生成伪交易卡",
+    "更新 Manual Skill 标准流程和生产入口，保留 Active 只发现/回归、Manual 最终仲裁的权限边界",
+    "增加 request-only、完整 WAIT/ENTER、无催化、换榜、过期、双源冲突、局部失败与确定性测试",
+    "同步全局 Skill 镜像并发布到 GitHub main"
+  ],
+  "non_goals": [
+    "不自动真实下单、撤单、转账、充值、卖出、换仓、质押或调用私有交易 API",
+    "不由价格路径、风险分数、社交热度或模型信心直接生成合理价值",
+    "不放宽正保守 EV、Profit Factor、回撤、walk-forward、流动性、风险或时效硬门",
+    "不把 Paper/观察结果写入真钱 ROI 或 BUSINESS_READY",
+    "不自动信任搜索摘要、传闻或没有官方日期的未来催化",
+    "不修改长期持仓、体育、Polymarket 或无关自动化账本"
+  ],
+  "constraints": [
+    "最终 research packet、market certification、生产输入和决策必须绑定同一 snapshot_id、strategy_version、config_digest、source_digest",
+    "四角色至少覆盖 valuation_fundamentals、official_catalyst、market_liquidity、risk_challenge；缺失角色只允许 EVIDENCE_PENDING/NO_TRADE",
+    "合理价值必须有独立方法、假设和字段级证据，禁止使用历史价格目标、路径质量或 impulse score 冒充估值",
+    "verified catalyst 必须含至少一个官方来源和未来 1–7 日明确 realization_by；已发生或窗口外事件不得通过",
+    "最终 market certification 必须在所有慢速研究之后生成；过期价格不得复用",
+    "final Top1 与 dossier symbol 不一致时返回 TOP1_CHANGED，并为新 Top1 生成新请求，不得复制旧估值或催化",
+    "任何 source failure 只降级受影响字段，但被硬门依赖的字段失败必须阻断正式动作",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-research-request-v14",
+    "tactical-research-complete-handoff-v14",
+    "tactical-research-no-fake-evidence-v14",
+    "tactical-research-top1-rebind-v14",
+    "tactical-research-freshness-recovery-v14",
+    "tactical-research-current-zec-v14"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-observation-outcome-review-v13",
+  "frozen_at": "2026-08-02T09:23:01.197381Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "ccc875581b79df77ea5cd3fe95bd836747a14f5083fa69c716b4078adb6e876a"
+}

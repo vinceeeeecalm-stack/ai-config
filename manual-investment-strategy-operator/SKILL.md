@@ -31,6 +31,38 @@ python3 scripts/universal_investment_core.py \
   --output <UniversalInvestmentRunResultV1.json>
 ```
 
+真实运行不得再手工传入空 `research_by_symbol` 作为完整流程。使用
+`scripts/tactical_research_handoff.py` 分两段完成 Top1 深研交接：
+
+1. 先对当前 scanner 运行 request-only，生成唯一 `TacticalResearchRequestV1`。
+   若 `deep_research_recommended=false`，说明正保守 EV、样本、Profit Factor、
+   walk-forward、回撤或 R/R 已失败；直接保留 Top1 并 `NO_TRADE`，不要继续耗时深研。
+2. 只有预研究门通过时，按请求并行收集四个角色：
+   `valuation_fundamentals / official_catalyst / market_liquidity / risk_challenge`。
+   输出 `TacticalResearchDossierV1`；估值必须来自采用/费用/价值捕获/供应等
+   独立方法，价格路径、Impulse 分数和模型信心不能充当合理价值。
+3. 慢速研究完成后重新运行 fresh scanner，再做最终双源市场认证。保留原始
+   request 文件，并把它与 dossier、最终 scanner、`TacticalMarketCertificationV1`
+   一起交给 handoff。若最终 Top1 改变，返回 `TOP1_CHANGED` 并为新 Top1 生成新请求，
+   禁止把旧标的估值或催化复制给新标的。
+4. 只有 Top1 未改变、四角色 PASS、官方未来 1–7 日催化、非价格路径估值、
+   下行挑战和最终 60 秒双源价格全部通过，handoff 才组装非空
+   `research_by_symbol` 并调用唯一内核。
+
+```text
+python3 scripts/tactical_research_handoff.py \
+  --scanner <provisional-scanner.json> \
+  --output <request-result.json>
+
+python3 scripts/tactical_research_handoff.py \
+  --scanner <final-fresh-scanner.json> \
+  --research-request <original-request.json> \
+  --dossier <TacticalResearchDossierV1.json> \
+  --market-certification <TacticalMarketCertificationV1.json> \
+  --account <safe-account-axis.json> \
+  --output <final-handoff.json>
+```
+
 `scanner_result` 必须是 Active 当前扫描的真实 Top3 与历史比较；`research_by_symbol` 必须以相同 `snapshot_id / strategy_version / config_digest / source_digest` 补齐估值、未来 1–7 日催化、下行、流动性、风险、实时双源和当前计划。缺少任一硬门时仍输出唯一 `research_top1`，但只能输出 `NO_TRADE` 且不得生成交易卡。不得用 shadow fixture、Paper 动作或模型自由文本代替生产输入。
 
 - 同一推荐的 `snapshot_id / strategy_version / config_digest / source_digest` 必须完全一致；绑定冲突直接拒绝。
@@ -58,7 +90,7 @@ python3 scripts/universal_investment_core.py \
 |---|---|---|
 | `longterm_dca` | 5–10 年 DCA、质押复利、长期组合下一美元 | `references/V3_DECISION_CONTRACT.md`、`references/V3_DATA_AUTHORITY_AND_LEARNING.md`、`references/GOAL_ORIENTED_DCA_POLICY.md`、`references/LONG_TERM_PRICE_SCENARIO_POLICY.md` |
 | `intraday_scalp` | 几分钟至数小时、当天平仓的高流动性机会 | `references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
-| `tactical_1_7d` | 1–7 日快速交易、高 ROI、异动/回调 | `references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
+| `tactical_1_7d` | 1–7 日快速交易、高 ROI、异动/回调 | `references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md`、`references/TACTICAL_RESEARCH_HANDOFF_CONTRACT.md` |
 | `event_trade_1_3w` | 财报、监管、FOMC 前后 1–3 周事件交易 | `references/V3_DECISION_CONTRACT.md`、`references/US_EQUITY_TACTICAL_ALPHA_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
 | `existing_position_review` | 继续持有、减仓、退出、事故复盘 | `references/V3_DECISION_CONTRACT.md`、`references/V3_DATA_AUTHORITY_AND_LEARNING.md`、`references/POSITION_FIRST_RECOMMENDATION_FLOW.md`、`references/TACTICAL_DRAWDOWN_SENTINEL_POLICY.md` |
 | `daily_dual_window` | 08:30 晨报、23:30 晚报及学习闭环 | `references/V3_DECISION_CONTRACT.md`、`references/V3_DATA_AUTHORITY_AND_LEARNING.md`、`references/DAILY_DUAL_WINDOW_EXECUTION_AND_LEARNING_POLICY.md`、`references/RECOMMENDATION_LIFECYCLE_AND_DUAL_SAMPLE_POLICY.md`、`references/POSITION_FIRST_RECOMMENDATION_FLOW.md` |

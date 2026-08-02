@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-tactical-top1-research-handoff-v14",
+  "project_id": "investing-monorepo",
+  "goal_id": "tactical-top1-research-handoff-v14",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "5cff19c68d802a6a9aa2564238ff0e5778a6cdb9",
+    "branch": "codex/tactical-research-handoff-v14",
+    "dirty": true
+  },
+  "source_digest": "80f115691f6b1c8d3416d7441f457c1261f58ac37f88ca108c121f74a03ce362",
+  "build_version": "source-80f115691f6b",
+  "runtime_version": "snapshot-1857c035f4f7d21aea07",
+  "database_version": "no-migration",
+  "last_verification_id": "verify-tactical-top1-research-handoff-v14-runtime_verified-241dc0f6",
+  "independent_verification_id": null,
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T09:49:12.638331Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

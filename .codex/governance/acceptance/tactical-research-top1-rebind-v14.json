@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-research-top1-rebind-v14",
+  "title": "慢速研究后换榜不会错配候选证据",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["provisional dossier 属于旧 Top1", "最终 fresh scanner 的 Top1 已改变"],
+  "steps": ["比较 dossier symbol 与最终 Top1", "阻断旧证据绑定", "生成新 Top1 请求"],
+  "expected": ["状态 TOP1_CHANGED", "旧估值/催化不进入新候选", "正式动作 NO_TRADE", "新请求绑定最终 snapshot"],
+  "evidence": ["换榜 fixture", "绑定冲突测试"]
+}

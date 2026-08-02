@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-top1-research-handoff-v14-coded-1ac5cae8",
+  "goal_id": "tactical-top1-research-handoff-v14",
+  "level": "CODED",
+  "source_digest": "80f115691f6b1c8d3416d7441f457c1261f58ac37f88ca108c121f74a03ce362",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T09:38:56.555048Z"
+}
