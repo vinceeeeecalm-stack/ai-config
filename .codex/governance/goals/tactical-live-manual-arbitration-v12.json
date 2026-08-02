@@ -1,0 +1,45 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "tactical-live-manual-arbitration-v12",
+  "title": "真实 Crypto 扫描进入 Manual V3 正式仲裁",
+  "business_outcome": "让最新版 manual-investment-strategy-operator 能把真实 Crypto 1–7 日扫描、估值、催化、回归、双源报价、流动性和风险证据绑定到同一快照，稳定输出唯一 research_top1 与 ENTER_NOW、WAIT_FOR_ENTRY 或 NO_TRADE；缺失证据时明确拒绝，不再停留在影子夹具或固定 NO_TRADE。",
+  "scope": [
+    "为 universal_investment_core 增加确定性的生产输入命令与运行结果合同",
+    "把 Active 真实 scanner Top3 和同口径历史比较转换为 Manual 研究候选",
+    "允许显式缺失估值、催化或实时证据的候选参与唯一研究排名，但绝不生成伪造 TradePlan",
+    "完整候选继续使用 UniversalInvestmentCaseV1、RegressionEvidenceV1、LiveInvestmentDecisionV1 和 InvestmentOutcomeStatusV2",
+    "强化 1–7 日价值折价、未来催化、正保守 EV、目标止损盈亏比、双源实时、流动性、回归完整性和风险硬门",
+    "增加生产 CLI、回归测试、真实宽域 NO_TRADE 黄金路径和故障恢复证据",
+    "同步全局 Manual 与 Active Skill 镜像并发布到 GitHub main"
+  ],
+  "non_goals": [
+    "不自动下单、转账、充值、卖出、换仓、质押或使用私有交易 API",
+    "不自动把 Paper 或观察样本升级为真钱动作或真钱 ROI",
+    "不承诺月度翻倍，不为追求收益放宽价值、催化、EV、实时、流动性或风险门",
+    "不修改长期持仓权威，不把旧估算伪装成正式长期路径",
+    "不重构无关美股、体育、Polymarket 或微信链路"
+  ],
+  "constraints": [
+    "同一轮候选、排名、计划和决策必须共享 snapshot_id、strategy_version、config_digest、source_digest",
+    "正式动作只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE",
+    "NO_TRADE 的 decision_card 必须为空，缺失字段不得用占位价格或日期补齐",
+    "当前价格不超过 60 秒、至少两个公共来源、价差不超过 1%、单源不超过 12 秒、整轮不超过 120 秒",
+    "Paper/Walk-forward 仅为 RegressionEvidenceV1 内部证据，formal_action_eligible=false",
+    "现金为零不改变已通过市场门的动作，但账户轴为 NO_DEPLOY_CASH、金额为 0",
+    "live_orders_enabled=false、private_api_used=false、human confirmation 必须保持",
+    "用户反馈和复验失败必须追加偏差，冻结目标不得原地修改"
+  ],
+  "acceptance_scenario_ids": [
+    "tactical-live-production-entry-v12",
+    "tactical-live-hard-gates-v12",
+    "tactical-live-binding-freshness-v12",
+    "tactical-live-paper-profit-isolation-v12",
+    "tactical-live-current-runtime-v12"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "crypto-discovery-transport-reliability-v11",
+  "frozen_at": "2026-08-02T08:08:09.798512Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "d72f3140051b273653dfc189acfd228812d087b6dfffc171a783a50ad0cdbe37"
+}

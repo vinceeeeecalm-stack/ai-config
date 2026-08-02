@@ -1,0 +1,149 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-live-manual-arbitration-v12-independent-019fbc78",
+  "goal_id": "tactical-live-manual-arbitration-v12",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "670e0feb2366ddae390975d962ec6d4020d17cecbd89326b7681b23fdbd099bb",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-goal-and-acceptance",
+      "status": "PASS",
+      "evidence": {
+        "goal_contract_hash": "d72f3140051b273653dfc189acfd228812d087b6dfffc171a783a50ad0cdbe37",
+        "risk": "high",
+        "required_level": "RUNTIME_VERIFIED",
+        "acceptance_scenarios_read": 5
+      }
+    },
+    {
+      "id": "raw-diff-integrity",
+      "status": "PASS",
+      "evidence": {
+        "path": "/tmp/tactical-live-v12-full.diff",
+        "sha256": "581f7bf669acb8ec2e03d026fb4ce4d86cc482aab09a6a9edca00341365d0e24",
+        "expected_sha256_match": true,
+        "reverse_apply_check": "PASS",
+        "changed_files": [
+          "manual-investment-strategy-operator/SKILL.md",
+          "manual-investment-strategy-operator/scripts/universal_investment_core.py",
+          "manual-investment-strategy-operator/tests/test_universal_investment_production.py"
+        ]
+      }
+    },
+    {
+      "id": "governance-source-binding",
+      "status": "PASS",
+      "evidence": {
+        "independently_computed_source_digest": "670e0feb2366ddae390975d962ec6d4020d17cecbd89326b7681b23fdbd099bb",
+        "expected_digest_match": true
+      }
+    },
+    {
+      "id": "production-cli-exists-and-runs",
+      "status": "PASS",
+      "evidence": {
+        "entrypoint": "manual-investment-strategy-operator/scripts/universal_investment_core.py",
+        "input_mode": "--input -",
+        "output_transport": "stdout JSON",
+        "exit_code": 0,
+        "output_schema": "UniversalInvestmentRunResultV1",
+        "current_action": "ENTER_NOW",
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "manual-regression-suite",
+      "status": "PASS",
+      "evidence": {
+        "tests_run": 200,
+        "tests_passed": 200,
+        "tests_failed": 0,
+        "duration_seconds": 0.219
+      }
+    },
+    {
+      "id": "same-binding-determinism",
+      "status": "PASS",
+      "evidence": {
+        "identical_input_runs_equal": true,
+        "binding_mismatch_action": "NO_TRADE",
+        "binding_mismatch_reason": "research_binding_mismatch:source_digest",
+        "silent_rebinding_observed": false
+      }
+    },
+    {
+      "id": "hard-gates-cannot-be-scored-around",
+      "status": "PASS",
+      "evidence": {
+        "challenge_score": 1000000000.0,
+        "valuation_missing": "NO_TRADE",
+        "catalyst_unverified": "NO_TRADE",
+        "non_positive_conservative_ev": "NO_TRADE",
+        "untouched_holdout_missing": "NO_TRADE",
+        "liquidity_missing": "NO_TRADE",
+        "risk_gate_failed": "NO_TRADE",
+        "all_failure_cards_null": true
+      }
+    },
+    {
+      "id": "no-trade-wait-freshness-and-cash",
+      "status": "PASS",
+      "evidence": {
+        "no_trade_has_no_fake_card": true,
+        "wait_for_entry_has_complete_card": true,
+        "stale_quote_action": "NO_TRADE",
+        "dual_source_conflict_action": "NO_TRADE",
+        "expired_plan_action": "NO_TRADE",
+        "zero_cash_market_action": "ENTER_NOW",
+        "zero_cash_account_execution": "NO_DEPLOY_CASH",
+        "zero_cash_executable_amount": 0.0
+      }
+    },
+    {
+      "id": "paper-and-live-profit-isolation",
+      "status": "PASS",
+      "evidence": {
+        "regression_formal_action_eligible": false,
+        "paper_action_exposed": false,
+        "paper_live_separated": true,
+        "live_profit_status": "UNMEASURED",
+        "business_outcome_status": "EVIDENCE_PENDING",
+        "long_path_status": "DATA_DEGRADED"
+      }
+    },
+    {
+      "id": "real-home-runtime-is-honest-no-trade",
+      "status": "PASS",
+      "evidence": {
+        "runtime_sha256": "37fa594ad09b5b8ad4962218d33398b2ab810c2becb37e57c3a2b801e4f3cfb8",
+        "snapshot_id": "snapshot-9ba20b0b075a6c2c2f8a",
+        "research_top1": "HOMEUSDT",
+        "current_action": "NO_TRADE",
+        "decision_card": null,
+        "hard_gate_failure_count": 14,
+        "account_execution": "NO_DEPLOY_CASH",
+        "executable_amount": 0.0
+      }
+    },
+    {
+      "id": "safety-boundaries",
+      "status": "PASS",
+      "evidence": {
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "human_confirmation_required": true,
+        "paper_action_exposed": false
+      }
+    }
+  ],
+  "findings": [],
+  "finding_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0
+  },
+  "created_at": "2026-08-02T08:29:05.699563Z"
+}

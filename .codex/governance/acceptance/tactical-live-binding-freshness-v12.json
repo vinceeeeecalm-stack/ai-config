@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-binding-freshness-v12",
+  "title": "版本绑定、双源实时与故障恢复",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["候选、回归、报价和计划都有版本绑定"],
+  "steps": ["注入 binding mismatch", "注入超过 60 秒报价、单源、价差冲突和过期计划", "恢复为两路一致新鲜报价"],
+  "expected": ["异常状态全部 NO_TRADE 且无伪卡", "恢复后同一完整候选可重新得到市场动作", "候选局部源失败不拖死其他合格候选"],
+  "evidence": ["故障注入测试", "恢复路径输出"]
+}

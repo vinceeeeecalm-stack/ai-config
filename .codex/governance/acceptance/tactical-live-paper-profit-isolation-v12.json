@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-live-paper-profit-isolation-v12",
+  "title": "Paper、真钱利润和长期路径继续严格隔离",
+  "level": "TESTED",
+  "preconditions": ["输入含 historical_walkforward 或 forward_paper 回归证据"],
+  "steps": ["运行正式仲裁和 InvestmentOutcomeStatusV2", "检查正式动作、账户和利润状态"],
+  "expected": ["Paper 动作不出现在正式输出", "Paper 不能提升真钱利润或 BUSINESS_READY", "USDT=0 只令账户 NO_DEPLOY_CASH 和金额 0", "长期旧估算保持 DATA_DEGRADED"],
+  "evidence": ["状态合同测试", "Paper 隔离负向测试"]
+}
