@@ -15,6 +15,7 @@ import gzip
 import hashlib
 import json
 import math
+import re
 import statistics
 import subprocess
 import sys
@@ -54,7 +55,7 @@ from crypto_candidate_identity import (
 
 
 ROOT = Path(__file__).resolve().parent.parent
-TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v6"
+TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v7"
 BINANCE_PUBLIC_BASES = (
     "https://data-api.binance.vision",
     "https://api1.binance.com",
@@ -145,6 +146,7 @@ DEFAULT_MAX_WORKERS = 12
 MAX_SUFFIX_IDENTITY_LOOKUPS = 8
 DISCOVERY_WALL_CLOCK_BUDGET_SECONDS = 15.0
 DISCOVERY_PUBLIC_TIMEOUT_SECONDS = 1.0
+DISCOVERY_FULL_EXCHANGE_TIMEOUT_SECONDS = 3.0
 DISCOVERY_TICKER_TIMEOUT_SECONDS = 3.0
 DISCOVERY_PUBLIC_MAX_BASES = 2
 DISCOVERY_PRODUCT_TIMEOUT_SECONDS = 2.5
@@ -157,6 +159,7 @@ IMPULSE_STAGE_PRIORITY = {
     "fakeout_or_exhaustion": 1,
     "data_missing": 0,
 }
+BINANCE_BATCH_SYMBOL_PATTERN = re.compile(r"^[A-Z0-9_.-]{1,50}$")
 
 
 def utc_now() -> datetime:
@@ -825,7 +828,7 @@ def exchange_spot_rejection_reason(definition):
         return "not_active_spot_pair"
     if definition.get("isSpotTradingAllowed") is False:
         return "spot_not_allowed"
-    if permissions and "SPOT" not in permissions:
+    if "SPOT" not in permissions:
         return "spot_permission_missing"
     return None
 
@@ -962,6 +965,106 @@ def fetch_public_identity_search(symbol, timeout):
     }
 
 
+def fetch_discovery_exchange_definitions(preselected, timeout):
+    """Resolve active-spot identity without letting one bad batch erase the pool.
+
+    Binance's ``symbols`` query can return an error payload for the whole batch
+    when even one historical or invalid pair is present.  The ticker feed is
+    not an identity authority, so an empty batch must not promote ticker rows
+    directly.  Instead, retry the same authoritative ``exchangeInfo`` endpoint
+    without a symbol filter and retain only the preselected definitions.
+    """
+
+    requested = list(dict.fromkeys(str(item or "").upper() for item in preselected if item))
+    audit = {
+        "authority": "Binance /api/v3/exchangeInfo",
+        "requested_symbol_count": len(requested),
+        "batch_status": "not_attempted",
+        "batch_definition_count": 0,
+        "batch_error": None,
+        "batch_unsupported_symbol_count": 0,
+        "fallback_attempted": False,
+        "full_snapshot_status": "not_attempted",
+        "full_snapshot_symbol_count": 0,
+        "recovered_definition_count": 0,
+        "formal_identity_relaxed": False,
+    }
+    if not requested:
+        audit["batch_status"] = "no_candidates"
+        DISCOVERY_AUDIT["exchange_spot_identity"] = audit
+        return []
+
+    unsupported_batch_symbols = [
+        symbol for symbol in requested if not BINANCE_BATCH_SYMBOL_PATTERN.fullmatch(symbol)
+    ]
+    audit["batch_unsupported_symbol_count"] = len(unsupported_batch_symbols)
+    batch_rows = []
+    if unsupported_batch_symbols:
+        audit["batch_status"] = "skipped_illegal_symbols_parameter"
+        audit["batch_error"] = "one_or_more_symbols_not_accepted_by_batch_query_grammar"
+    else:
+        try:
+            batch_payload = fetch_json(
+                "/api/v3/exchangeInfo",
+                {"symbols": json.dumps(requested, separators=(",", ":"))},
+                timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+                max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+                transport="curl",
+            )
+            if isinstance(batch_payload, dict):
+                batch_rows = batch_payload.get("symbols") or []
+                if not batch_rows and (batch_payload.get("code") is not None or batch_payload.get("msg")):
+                    audit["batch_error"] = {
+                        "code": batch_payload.get("code"),
+                        "message": batch_payload.get("msg"),
+                    }
+            if batch_rows:
+                audit["batch_status"] = "verified"
+                audit["batch_definition_count"] = len(batch_rows)
+                audit["recovered_definition_count"] = len(batch_rows)
+                DISCOVERY_AUDIT["exchange_spot_identity"] = audit
+                return batch_rows
+            audit["batch_status"] = "empty_or_error_payload"
+        except Exception as exc:  # noqa: BLE001 - same-authority fallback handles it.
+            audit["batch_status"] = "transport_failed"
+            audit["batch_error"] = str(exc)
+
+    audit["fallback_attempted"] = True
+    full_rows = []
+    try:
+        full_payload = fetch_json(
+            "/api/v3/exchangeInfo",
+            timeout=min(timeout, DISCOVERY_FULL_EXCHANGE_TIMEOUT_SECONDS),
+            max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+            transport="curl",
+        )
+        if isinstance(full_payload, dict):
+            all_rows = full_payload.get("symbols") or []
+            audit["full_snapshot_symbol_count"] = len(all_rows)
+            requested_set = set(requested)
+            full_rows = [
+                item
+                for item in all_rows
+                if str(item.get("symbol") or "").upper() in requested_set
+            ]
+            if not all_rows and (full_payload.get("code") is not None or full_payload.get("msg")):
+                audit["full_snapshot_error"] = {
+                    "code": full_payload.get("code"),
+                    "message": full_payload.get("msg"),
+                }
+        if full_rows:
+            audit["full_snapshot_status"] = "verified_authoritative_fallback"
+            audit["recovered_definition_count"] = len(full_rows)
+        else:
+            audit["full_snapshot_status"] = "empty_or_no_requested_definitions"
+    except Exception as exc:  # noqa: BLE001 - conservative empty result is intentional.
+        audit["full_snapshot_status"] = "transport_failed"
+        audit["full_snapshot_error"] = str(exc)
+
+    DISCOVERY_AUDIT["exchange_spot_identity"] = audit
+    return full_rows
+
+
 def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
     """Select liquid active spot pairs without blocking the fast path on a large identity download.
 
@@ -997,16 +1100,7 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         symbol
         for symbol, _ in preselected_rows[: max(top_n * 2, top_n + 20)]
     ]
-    exchange_rows = (
-        fetch_json(
-            "/api/v3/exchangeInfo",
-            {"symbols": json.dumps(preselected, separators=(",", ":"))},
-            timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
-            max_bases=DISCOVERY_PUBLIC_MAX_BASES,
-            transport="curl",
-        ).get("symbols")
-        or []
-    )
+    exchange_rows = fetch_discovery_exchange_definitions(preselected, timeout)
     exchange_definitions = {
         str(item.get("symbol") or ""): item
         for item in exchange_rows
@@ -1899,6 +1993,16 @@ def main(argv=None):
     discovery["elapsed_seconds"] = round(discovery_elapsed, 6)
     discovery["within_budget"] = discovery_elapsed <= discovery["budget_seconds"]
     discovery.update(discovery_runtime_audit(errors))
+    discovery["human_confirmation_required"] = True
+    discovery["live_orders_enabled"] = False
+    discovery["private_api_used"] = False
+    discovery["runtime_mode"] = {
+        "request_mode": args.request_mode,
+        "dynamic_top": args.dynamic_top,
+        "top": args.top,
+        "discovery_only": args.discovery_only,
+        "no_write": args.no_write,
+    }
     top_symbols = [item["symbol"] for item in discovery["top_candidates"]]
     if args.discovery_only:
         print(json.dumps(discovery, ensure_ascii=False, indent=2))
@@ -2041,8 +2145,16 @@ def main(argv=None):
         "config_digest": config_digest,
         "source_digest": source_digest,
         "captured_at": captured.isoformat().replace("+00:00", "Z"),
+        "human_confirmation_required": True,
         "live_orders_enabled": False,
         "private_api_used": False,
+        "runtime_mode": {
+            "request_mode": args.request_mode,
+            "dynamic_top": args.dynamic_top,
+            "top": args.top,
+            "discovery_only": args.discovery_only,
+            "no_write": args.no_write,
+        },
         "decision_status": (
             "FRESH_RESEARCH_RESULT"
             if fresh_market_data_available

@@ -287,6 +287,215 @@ class StablecoinEligibilityTests(unittest.TestCase):
         self.assertEqual(rejected["SXPUPUSDT"], "leveraged_token")
         self.assertEqual(rejected["1INCHDOWNUSDT"], "leveraged_token")
 
+    def test_empty_batch_recovers_active_spot_from_authoritative_full_snapshot(self):
+        ticker_rows = [
+            {"symbol": "INVALIDOLDUSDT", "quoteVolume": "1200"},
+            {"symbol": "AAVEUSDT", "quoteVolume": "1100"},
+            {"symbol": "SXPUPUSDT", "quoteVolume": "1000"},
+            {"symbol": "OLDUSDT", "quoteVolume": "900"},
+        ]
+        batch_error = {"code": -1121, "msg": "Invalid symbol."}
+        full_snapshot = {
+            "symbols": [
+                {
+                    "symbol": "AAVEUSDT",
+                    "baseAsset": "AAVE",
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                },
+                {
+                    "symbol": "SXPUPUSDT",
+                    "baseAsset": "SXPUP",
+                    "status": "BREAK",
+                    "isSpotTradingAllowed": False,
+                    "permissionSets": [["LEVERAGED"]],
+                },
+                {
+                    "symbol": "OLDUSDT",
+                    "baseAsset": "OLD",
+                    "status": "BREAK",
+                    "isSpotTradingAllowed": False,
+                    "permissionSets": [["SPOT"]],
+                },
+            ]
+        }
+        M.DISCOVERY_AUDIT["spot_eligibility_rejected"].clear()
+
+        with (
+            patch.object(
+                M,
+                "fetch_json",
+                side_effect=[ticker_rows, batch_error, full_snapshot],
+            ),
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
+            selected = M.discover_symbols(4, 8)
+
+        self.assertEqual(selected, ["AAVEUSDT"])
+        audit = M.DISCOVERY_AUDIT["exchange_spot_identity"]
+        self.assertEqual(audit["batch_status"], "empty_or_error_payload")
+        self.assertTrue(audit["fallback_attempted"])
+        self.assertEqual(
+            audit["full_snapshot_status"],
+            "verified_authoritative_fallback",
+        )
+        self.assertEqual(audit["recovered_definition_count"], 3)
+        self.assertFalse(audit["formal_identity_relaxed"])
+        rejected = {
+            item["symbol"]: item["reason"]
+            for item in M.DISCOVERY_AUDIT["spot_eligibility_rejected"]
+        }
+        self.assertEqual(rejected["SXPUPUSDT"], "leveraged_token")
+        self.assertEqual(rejected["OLDUSDT"], "not_active_spot_pair")
+
+    def test_full_snapshot_missing_spot_permission_fails_closed(self):
+        ticker_rows = [{"symbol": "AAVEUSDT", "quoteVolume": "1100"}]
+        full_snapshot = {
+            "symbols": [
+                {
+                    "symbol": "AAVEUSDT",
+                    "baseAsset": "AAVE",
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                }
+            ]
+        }
+        M.DISCOVERY_AUDIT["spot_eligibility_rejected"].clear()
+
+        with (
+            patch.object(
+                M,
+                "fetch_json",
+                side_effect=[ticker_rows, {"symbols": []}, full_snapshot],
+            ),
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
+            selected = M.discover_symbols(1, 8)
+
+        self.assertEqual(selected, [])
+        self.assertIn(
+            {"symbol": "AAVEUSDT", "reason": "spot_permission_missing"},
+            M.DISCOVERY_AUDIT["spot_eligibility_rejected"],
+        )
+
+    def test_full_snapshot_fallback_keeps_security_and_stablecoin_boundaries(self):
+        ticker_rows = [
+            {"symbol": "SOXLBUSDT", "quoteVolume": "1400"},
+            {"symbol": "USDCUSDT", "quoteVolume": "1300"},
+            {"symbol": "PAXGUSDT", "quoteVolume": "1200"},
+            {"symbol": "AAVEUSDT", "quoteVolume": "1100"},
+        ]
+        full_snapshot = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("SOXLBUSDT", "USDCUSDT", "PAXGUSDT", "AAVEUSDT")
+            ]
+        }
+        product_identity = {
+            "SOXLBUSDT": {
+                "s": "SOXLBUSDT",
+                "an": "Semicon Bull 3X ETF (bStocks)",
+                "tags": ["bStocks"],
+            }
+        }
+        M.DISCOVERY_AUDIT["candidate_eligibility_rejected"].clear()
+        M.DISCOVERY_AUDIT["crypto_identity_rejected"].clear()
+
+        with (
+            patch.object(
+                M,
+                "fetch_json",
+                side_effect=[ticker_rows, {"symbols": []}, full_snapshot],
+            ),
+            patch.object(
+                M,
+                "fetch_binance_public_product_identity",
+                return_value=product_identity,
+            ),
+        ):
+            selected = M.discover_symbols(4, 8)
+
+        self.assertEqual(selected, ["AAVEUSDT"])
+        rejected_universe = {
+            item["symbol"]: item["reason"]
+            for item in M.DISCOVERY_AUDIT["candidate_eligibility_rejected"]
+        }
+        self.assertEqual(rejected_universe["USDCUSDT"], "stablecoin_or_fiat_like")
+        self.assertEqual(rejected_universe["PAXGUSDT"], "low_beta_commodity")
+        self.assertIn(
+            "SOXLBUSDT",
+            {item["symbol"] for item in M.DISCOVERY_AUDIT["crypto_identity_rejected"]},
+        )
+
+    def test_batch_and_full_exchangeinfo_failure_remains_conservative(self):
+        ticker_rows = [
+            {"symbol": "AAVEUSDT", "quoteVolume": "1100"},
+            {"symbol": "BTCUSDT", "quoteVolume": "1000"},
+        ]
+        M.DISCOVERY_AUDIT["spot_eligibility_rejected"].clear()
+
+        with (
+            patch.object(
+                M,
+                "fetch_json",
+                side_effect=[
+                    ticker_rows,
+                    TimeoutError("batch exchangeInfo unavailable"),
+                    TimeoutError("full exchangeInfo unavailable"),
+                ],
+            ),
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
+            selected = M.discover_symbols(2, 8)
+
+        self.assertEqual(selected, [])
+        audit = M.DISCOVERY_AUDIT["exchange_spot_identity"]
+        self.assertEqual(audit["batch_status"], "transport_failed")
+        self.assertEqual(audit["full_snapshot_status"], "transport_failed")
+        self.assertEqual(audit["recovered_definition_count"], 0)
+        self.assertFalse(audit["formal_identity_relaxed"])
+
+    def test_non_ascii_batch_symbol_skips_doomed_request_and_uses_full_snapshot(self):
+        ticker_rows = [
+            {"symbol": "币安人生USDT", "quoteVolume": "1200"},
+            {"symbol": "AAVEUSDT", "quoteVolume": "1100"},
+        ]
+        full_snapshot = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("币安人生USDT", "AAVEUSDT")
+            ]
+        }
+
+        with (
+            patch.object(M, "fetch_json", side_effect=[ticker_rows, full_snapshot]) as fetch,
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
+            selected = M.discover_symbols(2, 8)
+
+        self.assertEqual(selected, ["币安人生USDT", "AAVEUSDT"])
+        self.assertEqual(fetch.call_count, 2)
+        audit = M.DISCOVERY_AUDIT["exchange_spot_identity"]
+        self.assertEqual(audit["batch_status"], "skipped_illegal_symbols_parameter")
+        self.assertEqual(audit["batch_unsupported_symbol_count"], 1)
+        self.assertEqual(
+            audit["full_snapshot_status"],
+            "verified_authoritative_fallback",
+        )
+
     def test_suffix_collision_uses_public_identity_and_preserves_native_crypto(self):
         ticker_rows = [
             {"symbol": "SHIBUSDT", "quoteVolume": "1000"},
@@ -467,7 +676,7 @@ class StablecoinEligibilityTests(unittest.TestCase):
             self.assertEqual(transport, "curl")
 
     def test_strategy_version_isolated_after_candidate_universe_change(self):
-        self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v6")
+        self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v7")
 
     def test_positive_micro_price_is_not_rounded_to_zero(self):
         rounded = M.rounded(0.00000576)

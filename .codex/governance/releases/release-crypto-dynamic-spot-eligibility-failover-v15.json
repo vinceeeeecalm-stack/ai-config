@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-crypto-dynamic-spot-eligibility-failover-v15",
+  "project_id": "investing-monorepo",
+  "goal_id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "2ca2ae5331949866b8532dbebee21362771a31d6",
+    "branch": "codex/dynamic-spot-eligibility-failover-v15",
+    "dirty": true
+  },
+  "source_digest": "e7f663b01726701d906c68830a058f8b8ec897ec8f333f03b00c58f87b5d0cab",
+  "build_version": "impulse-capture-tactical-v7",
+  "runtime_version": "impulse-capture-tactical-v7",
+  "database_version": "not-applicable",
+  "last_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-runtime_verified-8a492942",
+  "independent_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-independent-round2-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T10:40:06.516840Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
