@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "derivatives-shadow-outcome-schedule-v1",
+  "project_id": "investing-monorepo",
+  "goal_id": "derivatives-shadow-outcome-schedule-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "26791fed776bf8ef78391440c5e4eab56077a3ab",
+    "branch": "codex/derivatives-shadow-outcome-schedule-v1",
+    "dirty": false
+  },
+  "source_digest": "0852489367c267c187c248c9c2e428e19be412992144a4faad212b9046b99eae",
+  "build_version": "26791fe",
+  "runtime_version": "CodexHeartbeatAutomationV1",
+  "database_version": "append-only-jsonl-v1",
+  "last_verification_id": "verify-derivatives-shadow-outcome-schedule-v1-runtime_verified-ca7393ae",
+  "independent_verification_id": "verify-derivatives-shadow-outcome-schedule-v1-independent-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 7,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T13:07:05.396419Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
