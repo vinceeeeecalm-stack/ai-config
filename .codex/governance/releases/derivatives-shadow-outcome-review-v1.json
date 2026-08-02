@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "derivatives-shadow-outcome-review-v1",
+  "project_id": "investing-monorepo",
+  "goal_id": "derivatives-shadow-outcome-review-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "ffe0d16f3b393d2f4839501fba388f05ae3a8abb",
+    "branch": "codex/derivatives-shadow-outcome-review-v1",
+    "dirty": false
+  },
+  "source_digest": "733f0b7ca999d019764db2c51308e3fb2d89c62856dd40074135dca434cb45aa",
+  "build_version": "ffe0d16",
+  "runtime_version": "DerivativesShadowOutcomeReviewV1",
+  "database_version": "append-only-jsonl-v1",
+  "last_verification_id": "verify-derivatives-shadow-outcome-review-v1-runtime_verified-95ca8508",
+  "independent_verification_id": "verify-derivatives-shadow-outcome-review-v1-independent-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 7,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T12:44:24.695800Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
