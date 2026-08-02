@@ -1,0 +1,12 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-candidate-identity-boundary-v10-independent-rerun-019fbc78-924d27a0",
+  "goal_id": "crypto-candidate-identity-boundary-v10",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "924d27a057c0c9d11c0041506d0bcb8b42d8f4c9e54d15749a8df6be72fd1a3d",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": null,
+  "findings": [],
+  "created_at": null
+}

@@ -45,6 +45,76 @@ def pool_fixture():
 
 
 class ValidationProgressPoolOnlyTests(unittest.TestCase):
+    def test_tokenized_security_suffixes_are_never_opportunity_ranked(self):
+        product_identity = {
+            symbol: {"s": symbol, "an": "Security (bStocks)", "tags": ["bStocks"]}
+            for symbol in ("SOXLBUSDT", "MUBUSDT", "EWYBUSDT")
+        }
+        for symbol in product_identity:
+            with self.subTest(symbol=symbol):
+                self.assertEqual(
+                    M.product_identity_rejection_reason(
+                        symbol, product_identity, source_available=True
+                    ),
+                    "tokenized_security_product",
+                )
+        self.assertTrue(M.is_scan_eligible_usdt_symbol("SHIBUSDT"))
+        self.assertTrue(M.is_scan_eligible_usdt_symbol("DGBUSDT"))
+
+    def test_invalid_protected_symbol_is_monitor_only_not_selected(self):
+        ticker_rows = [
+            {
+                "symbol": "SOXLBUSDT",
+                "quoteVolume": "100000000",
+                "priceChangePercent": "20",
+                "count": "100000",
+            },
+            {
+                "symbol": "BTCUSDT",
+                "quoteVolume": "90000000",
+                "priceChangePercent": "1",
+                "count": "90000",
+            },
+            {
+                "symbol": "SHIBUSDT",
+                "quoteVolume": "80000000",
+                "priceChangePercent": "5",
+                "count": "80000",
+            },
+        ]
+        product_identity = {
+            "SOXLBUSDT": {
+                "s": "SOXLBUSDT",
+                "an": "Semicon Bull 3X ETF (bStocks)",
+                "tags": ["bStocks"],
+            },
+            "BTCUSDT": {"s": "BTCUSDT", "an": "Bitcoin", "tags": []},
+            "SHIBUSDT": {"s": "SHIBUSDT", "an": "SHIBA INU", "tags": ["Meme"]},
+        }
+        with (
+            patch.object(M, "load_open_symbols", return_value=[]),
+            patch.object(
+                M,
+                "fetch_binance_public_product_identity",
+                return_value=product_identity,
+            ),
+            patch.object(M, "social_handoff_state", return_value={"status": "missing"}),
+            patch.object(M, "social_symbol_scores", return_value={}),
+            patch.object(M, "build_short_term_anchor_profile", return_value={}),
+            patch.object(M, "public_json", return_value=(ticker_rows, {"source": "fixture"})),
+        ):
+            selected_text, audit = M.build_dynamic_scan_universe(
+                "SOXLBUSDT,BTCUSDT", 5
+            )
+
+        self.assertNotIn("SOXLBUSDT", selected_text.split(","))
+        self.assertNotIn(
+            "SOXLBUSDT",
+            [item["symbol"] for item in audit["top_dynamic_candidates"]],
+        )
+        self.assertIn("SHIBUSDT", [item["symbol"] for item in audit["top_dynamic_candidates"]])
+        self.assertEqual(audit["identity_monitor_only_symbols"], ["SOXLBUSDT"])
+
     def test_dry_run_never_executes_automatic_or_explicit_cache_builder(self):
         automatic = M.dynamic_cache_execution_plan(
             dry_run=True,

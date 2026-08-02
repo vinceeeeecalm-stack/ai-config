@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tokenized-security-opportunity-excluded-v10",
+  "title": "Tokenized securities cannot contaminate Crypto opportunity ranking",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["The exchange universe includes SOXLBUSDT, MUBUSDT or EWYBUSDT"],
+  "steps": [
+    "Build the dynamic opportunity pool",
+    "Run the formal Crypto discovery identity gate"
+  ],
+  "expected": [
+    "Tokenized-security or unresolved suspicious suffix symbols do not enter ranked or top dynamic candidates",
+    "They do not enter formal Crypto ranking",
+    "Any protected symbol is recorded separately as monitor-only"
+  ],
+  "evidence": ["dynamic pool audit, formal discovery audit and regression tests"]
+}

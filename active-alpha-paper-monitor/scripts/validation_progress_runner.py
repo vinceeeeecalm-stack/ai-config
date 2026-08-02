@@ -22,6 +22,11 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from crypto_candidate_identity import (
+    fetch_binance_public_product_identity,
+    product_identity_rejection_reason,
+)
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ACTIVE_ROOT = SCRIPT_DIR.parent
@@ -1102,13 +1107,39 @@ def build_dynamic_scan_universe(existing_symbols: str, max_symbols: int) -> tupl
     open_symbols = load_open_symbols()
     explicit_symbols = split_symbols(existing_symbols)
     protected_symbols = [*open_symbols, *explicit_symbols]
+    try:
+        product_identity = fetch_binance_public_product_identity(timeout=8.0)
+        product_identity_status = "verified_binance_public_product_catalog"
+        product_identity_error = None
+    except Exception as exc:  # noqa: BLE001 - conservative symbol-local fallback.
+        product_identity = {}
+        product_identity_status = "degraded_unavailable"
+        product_identity_error = f"{type(exc).__name__}: {exc}"
+    identity_monitor_only_symbols = [
+        symbol
+        for symbol in protected_symbols
+        if product_identity_rejection_reason(
+            symbol,
+            product_identity,
+            source_available=product_identity_error is None,
+        ) is not None
+    ]
+    opportunity_protected_symbols = [
+        symbol
+        for symbol in protected_symbols
+        if product_identity_rejection_reason(
+            symbol,
+            product_identity,
+            source_available=product_identity_error is None,
+        ) is None
+    ]
     social_state = social_handoff_state(max_age_hours=12.0)
     social_scores = social_symbol_scores(max_age_hours=12.0)
     ticker_payload, ticker_meta = public_json("/api/v3/ticker/24hr")
     if not isinstance(ticker_payload, list):
         selected: list[str] = []
         seen: set[str] = set()
-        for symbol in [*protected_symbols, *CORE_LIQUIDITY_SYMBOLS, *DEFAULT_DYNAMIC_SCAN_SYMBOLS]:
+        for symbol in [*opportunity_protected_symbols, *CORE_LIQUIDITY_SYMBOLS, *DEFAULT_DYNAMIC_SCAN_SYMBOLS]:
             append_unique(selected, symbol, seen, max_symbols)
         return ",".join(selected), {
             "status": "fallback_static",
@@ -1121,11 +1152,55 @@ def build_dynamic_scan_universe(existing_symbols: str, max_symbols: int) -> tupl
             "social_symbol_scores": social_scores,
             "open_symbols": open_symbols,
             "explicit_symbols": explicit_symbols,
+            "identity_monitor_only_symbols": identity_monitor_only_symbols,
+            "candidate_identity_rejected": [
+                {
+                    "symbol": symbol,
+                    "reason": product_identity_rejection_reason(
+                        symbol,
+                        product_identity,
+                        source_available=product_identity_error is None,
+                    ),
+                }
+                for symbol in identity_monitor_only_symbols
+            ],
+            "product_identity_status": product_identity_status,
+            "product_identity_error": product_identity_error,
             "selection_policy": "protected_open_and_explicit_first_then_static_fallback",
             "selected_symbols": selected,
         }
 
-    rows = [row for row in ticker_payload if isinstance(row, dict) and is_scan_eligible_usdt_symbol(str(row.get("symbol") or ""))]
+    base_eligible_rows = [
+        row
+        for row in ticker_payload
+        if isinstance(row, dict)
+        and is_scan_eligible_usdt_symbol(str(row.get("symbol") or ""))
+    ]
+    candidate_identity_rejected = [
+        {
+            "symbol": str(row.get("symbol") or ""),
+            "reason": product_identity_rejection_reason(
+                str(row.get("symbol") or ""),
+                product_identity,
+                source_available=product_identity_error is None,
+            ),
+        }
+        for row in base_eligible_rows
+        if product_identity_rejection_reason(
+            str(row.get("symbol") or ""),
+            product_identity,
+            source_available=product_identity_error is None,
+        ) is not None
+    ]
+    rows = [
+        row
+        for row in base_eligible_rows
+        if product_identity_rejection_reason(
+            str(row.get("symbol") or ""),
+            product_identity,
+            source_available=product_identity_error is None,
+        ) is None
+    ]
     liquid_rows = [row for row in rows if (as_float(row.get("quoteVolume"), 0.0) or 0.0) >= 5_000_000]
     by_symbol = {str(row.get("symbol")): row for row in rows}
     short_term_profile = build_short_term_anchor_profile()
@@ -1136,7 +1211,7 @@ def build_dynamic_scan_universe(existing_symbols: str, max_symbols: int) -> tupl
     effective_max_symbols, pool_width_policy = dynamic_pool_effective_limit(
         mood,
         max_symbols,
-        protected_count=len(protected_symbols),
+        protected_count=len(opportunity_protected_symbols),
     )
 
     ranked: list[dict[str, Any]] = []
@@ -1194,7 +1269,7 @@ def build_dynamic_scan_universe(existing_symbols: str, max_symbols: int) -> tupl
     ranked.sort(key=lambda item: item["score"], reverse=True)
     selected, pool_shape_policy = select_symbols_by_dynamic_pool_policy(
         ranked,
-        protected_symbols,
+        opportunity_protected_symbols,
         DEFAULT_DYNAMIC_SCAN_SYMBOLS,
         explicit_symbols,
         effective_max_symbols,
@@ -1237,6 +1312,10 @@ def build_dynamic_scan_universe(existing_symbols: str, max_symbols: int) -> tupl
         ),
         "open_symbols": open_symbols,
         "explicit_symbols": explicit_symbols,
+        "identity_monitor_only_symbols": identity_monitor_only_symbols,
+        "candidate_identity_rejected": candidate_identity_rejected,
+        "product_identity_status": product_identity_status,
+        "product_identity_error": product_identity_error,
         "selection_policy": (
             "open_positions_and_explicit_symbols_are_preserved; remaining slots are ranked by "
             "market atmosphere, short-term anchor mood, sentiment state, breadth, 24h movement, liquidity, participation, "

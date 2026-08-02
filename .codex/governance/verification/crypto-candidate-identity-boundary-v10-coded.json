@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-candidate-identity-boundary-v10-coded-90cf9fa1",
+  "goal_id": "crypto-candidate-identity-boundary-v10",
+  "level": "CODED",
+  "source_digest": "924d27a057c0c9d11c0041506d0bcb8b42d8f4c9e54d15749a8df6be72fd1a3d",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T07:17:06.200734Z"
+}
