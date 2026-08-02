@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-unified-short-term-opportunity-engine-v1-coded-17ff7366",
+  "goal_id": "unified-short-term-opportunity-engine-v1",
+  "level": "CODED",
+  "source_digest": "aac78fee2a8be4efc1e96600cf6e64285fe35fbb5660a8fe8812e7aceafe0004",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T11:44:04.302239Z"
+}

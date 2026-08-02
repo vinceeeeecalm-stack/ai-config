@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-profit-isolation-v1",
+  "title": "所有短期持有时间共用一套资金加权真钱 ROI 且与 Paper 分离",
+  "level": "TESTED",
+  "preconditions": [
+    "存在不同持有分钟数的真钱、Paper 和观察记录"
+  ],
+  "steps": [
+    "计算 ShortTermProfitAttributionV1",
+    "尝试把 Paper 或观察记录放入真钱分母"
+  ],
+  "expected": [
+    "真钱 ROI 按统一战术池本金资金加权",
+    "持有时间只作为归因标签，不拆分资金池",
+    "Paper 和观察记录被排除或拒绝",
+    "短期结果不能写入长期底账"
+  ],
+  "evidence": [
+    "资金加权 ROI 单元测试"
+  ]
+}

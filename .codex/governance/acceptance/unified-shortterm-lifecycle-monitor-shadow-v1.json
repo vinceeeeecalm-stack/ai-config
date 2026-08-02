@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-lifecycle-monitor-shadow-v1",
+  "title": "短期候选状态变化可由生命周期监控发现且提醒去重",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "候选有 next_check_at、expires_at、目标、止损和最长七天复核时间",
+    "同一候选连续产生相同状态或状态升级"
+  ],
+  "steps": [
+    "运行 shadow 生命周期调度和事件重算",
+    "重复提交相同提醒并模拟目标、止损、过期或催化变化"
+  ],
+  "expected": [
+    "基础扫描、事件触发和 Top1 快速跟踪频率来自可配置且可回放的参数",
+    "相同状态提醒去重，状态升级产生新的提醒事件",
+    "计划过期、目标、止损和催化变化可被主动识别",
+    "监控仅生成只读提醒，不自动下单"
+  ],
+  "evidence": [
+    "生命周期状态机测试",
+    "提醒去重运行产物"
+  ]
+}

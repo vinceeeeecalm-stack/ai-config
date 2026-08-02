@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-adaptive-holding-shadow-v1",
+  "title": "统一排名按时间衰减选择预计持有时间但不为短而短",
+  "level": "TESTED",
+  "preconditions": [
+    "存在质量相近的盘内和多日机会，以及质量明显更好的两至三日机会"
+  ],
+  "steps": [
+    "计算单位时间单位风险净利润、信息衰减和隔夜负担",
+    "比较不同预计持有时间的 shadow 排名"
+  ],
+  "expected": [
+    "质量相近时更快兑现者优先",
+    "明显更差的盘内机会不能仅因时间短置顶",
+    "四至七日机会缺少持续催化或监控时不合格",
+    "所有持有时钟不超过七天"
+  ],
+  "evidence": [
+    "确定性排序夹具"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-contract-binding-v1",
+  "title": "统一短期七类合同共享同一证据绑定",
+  "level": "TESTED",
+  "preconditions": [
+    "构造候选、因子、近失、决策、生命周期、漏检和利润归因记录"
+  ],
+  "steps": [
+    "校验全部记录的 snapshot_id、strategy_version、config_digest 和 source_digest",
+    "注入一个跨快照或跨策略记录"
+  ],
+  "expected": [
+    "同绑定记录通过",
+    "任一绑定冲突直接失败",
+    "快照变化后旧决策不能继续作为当前动作"
+  ],
+  "evidence": [
+    "合同校验单元测试"
+  ]
+}

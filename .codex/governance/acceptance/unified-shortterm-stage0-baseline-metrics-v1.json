@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-stage0-baseline-metrics-v1",
+  "title": "阶段零对统一短期机会输出可审计基线指标",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "输入包含冻结的候选快照和 cutoff 之后的闭合结果价格路径",
+    "ADA 只作为普通 symbol 出现在候选集合"
+  ],
+  "steps": [
+    "对每个候选分别回放七天内 5%/3%、8%/4%、10%/5% 三组目标止损路径",
+    "汇总黄金机会识别率、发现时已消耗涨幅、提醒延迟、目标先于止损、MFE、MAE、频率和无效提醒"
+  ],
+  "expected": [
+    "每组阈值有独立分母和结果，不能直接相加",
+    "缺少成熟结果时明确 DATA_INSUFFICIENT，不伪造成功率",
+    "实现中不存在 ADA 特例或 symbol 专用阈值",
+    "阶段零报告明确 production_rule_changed=false"
+  ],
+  "evidence": [
+    "确定性历史回放夹具",
+    "真实运行目录基线报告",
+    "无 ADA 特例源码扫描"
+  ]
+}

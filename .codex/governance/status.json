@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "goal_id": "unified-short-term-opportunity-engine-v1",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "e7f663b01726701d906c68830a058f8b8ec897ec8f333f03b00c58f87b5d0cab",
+  "source_digest": "aac78fee2a8be4efc1e96600cf6e64285fe35fbb5660a8fe8812e7aceafe0004",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-runtime_verified-8a492942",
-  "independent_verification_id": "verify-crypto-dynamic-spot-eligibility-failover-v15-independent-round2-019fbc78",
-  "updated_at": "2026-08-02T10:40:06.273209Z"
+  "last_verification_id": "verify-unified-short-term-opportunity-engine-v1-runtime_verified-0c3fe3ed",
+  "independent_verification_id": "verify-unified-short-term-opportunity-engine-v1-independent-round3-019fbc78",
+  "updated_at": "2026-08-02T11:47:40.272129Z"
 }

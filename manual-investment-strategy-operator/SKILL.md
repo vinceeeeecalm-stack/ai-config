@@ -19,6 +19,20 @@ description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 
 - `$500` Paper 本金只属于新的 `tactical_1_7d` 独立账本；旧期限未知样本不得迁入。Paper 结果只能作为研究证据，永远不得提升真钱利润或业务就绪状态。
 - 当前 TradePlan 要求 60 秒内价格、至少两个公共价格源且价差不超过 1%、单源 12 秒和全轮 120 秒时限；失败时必须重新扫描。
 
+### 统一短期机会引擎（阶段 0）
+
+当用户要求分钟级、盘内、当日至最长 7 天的快速机会时，必须读取
+`references/UNIFIED_SHORT_TERM_OPPORTUNITY_ENGINE.md`。用户只需要请求“统一短期机会区”，
+不需要预先选择日内或 1–7 日；系统自行给出预计持有时间，但最长不得超过 7 天。
+
+当前 `unified-short-term-opportunity-engine-v1` 处于阶段 0：
+
+- `scripts/unified_short_term_opportunity.py` 提供七个确定性合同、三组冻结阈值的无前视基线回放、持续候选追加式记忆、排名/持有时钟影子计算和统一真钱资金池归因。
+- 正式生产规则暂不改变，统一请求在兼容层仍落到 `tactical_1_7d`；影子状态不得显示成用户动作或进入真钱/Paper ROI。
+- 每轮仍只能有一个 `research_top1`，正式动作只允许 `ENTER_NOW / WAIT_FOR_ENTRY / NO_TRADE`；OI 单独上涨永远不能授权入场。
+- 真实观察尚未到期时必须显示 `DATA_INSUFFICIENT`，不得用确定性夹具或未来数据补足。
+- 衍生品前移、持续候选晋升、自适应时钟、数据公平、时间匹配回归和提醒退出只能在后续 superseding GoalContract 中每 14 天晋升一个核心规则。
+
 ### V3 权威分析内核与正式动作
 
 `scripts/universal_investment_core.py` 是跨 Crypto/美股、短期/长期的唯一确定性分析入口。链路固定为：`目标/期限 → 同时点 EvidenceSnapshot → 估值区间/折价 → 催化/兑现时间 → 下行/失效 → RegressionEvidenceV1 → 跨候选硬门与排名 → 当前实时信号 → LiveInvestmentDecisionV1 → 生命周期/真钱归因`。
