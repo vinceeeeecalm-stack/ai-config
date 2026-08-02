@@ -1,0 +1,33 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "crypto-discovery-transport-reliability-v11",
+  "title": "Make bounded Crypto discovery transport reliable under real TLS conditions",
+  "business_outcome": "让 Crypto 1–7 日正式扫描在 15 秒预算内稳定取得新鲜公共行情，减少网络传输假阴性，同时绝不复用过期信号或放宽赚钱硬门。",
+  "scope": [
+    "为正式 discovery 的 Binance 公共请求增加有总墙钟上限的 curl 传输",
+    "健康探测、动态发现、anchor、exchangeInfo、盘口和发现期 K 线使用同一有界传输策略",
+    "保留既有端点审计、熔断、局部降级和候选身份硬门",
+    "真实扫描必须在 15 秒内返回新鲜 Top3 或准确 NO_FRESH_DECISION"
+  ],
+  "non_goals": [
+    "不修改估值、催化、保守 EV、排名、入场、目标、止损或风险阈值",
+    "不自动下单或使用私有 API",
+    "不修改 V10 冻结合同与发布证据",
+    "不把网络可用等同于可交易"
+  ],
+  "constraints": [
+    "同一工作树单写入者",
+    "discovery 墙钟预算 15 秒",
+    "每次公共请求必须同时具有 connect-timeout 与 total max-time",
+    "源失败继续准确 NO_FRESH_DECISION，不得复用旧价格",
+    "live_orders_enabled 与 private_api_used 始终为 false"
+  ],
+  "acceptance_scenario_ids": [
+    "crypto-discovery-curl-transport-fresh-v11",
+    "crypto-discovery-transport-failure-bounded-v11",
+    "crypto-discovery-transport-no-gate-loosening-v11"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "crypto-candidate-identity-boundary-v10"
+}

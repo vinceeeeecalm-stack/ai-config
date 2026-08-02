@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "crypto-discovery-transport-failure-bounded-v11",
+  "title": "Public transport failure remains bounded and honest",
+  "level": "TESTED",
+  "preconditions": ["All bounded public transports fail or time out"],
+  "steps": ["Inject curl failure", "Run formal discovery"],
+  "expected": ["The run ends within budget", "Current action is NO_TRADE with NO_FRESH_DECISION", "No stale price or trade plan is reused"],
+  "evidence": ["failure-injection regression"]
+}

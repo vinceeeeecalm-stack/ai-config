@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "crypto-candidate-identity-boundary-v10",
+  "goal_id": "crypto-discovery-transport-reliability-v11",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "924d27a057c0c9d11c0041506d0bcb8b42d8f4c9e54d15749a8df6be72fd1a3d",
+  "source_digest": "4635f6d8c8be24f748a4705806794e2843d47b8614066bf4bab717e9e1b9de19",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-crypto-candidate-identity-boundary-v10-runtime_verified-b9483bc6",
-  "independent_verification_id": "verify-crypto-candidate-identity-boundary-v10-independent-rerun-019fbc78-924d27a0",
-  "updated_at": "2026-08-02T07:22:57.057967Z"
+  "last_verification_id": "verify-crypto-discovery-transport-reliability-v11-runtime_verified-0f9e7bba",
+  "independent_verification_id": "verify-crypto-discovery-transport-reliability-v11-independent-final-019fbc78",
+  "updated_at": "2026-08-02T07:56:52.113736Z"
 }

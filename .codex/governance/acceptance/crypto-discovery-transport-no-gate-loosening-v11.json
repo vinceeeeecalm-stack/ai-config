@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "crypto-discovery-transport-no-gate-loosening-v11",
+  "title": "Transport reliability does not change investment gates",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Fresh market data is available"],
+  "steps": ["Compare frozen strategy/config and current formal decision"],
+  "expected": ["Strategy version and config digest are unchanged", "Fresh data alone cannot create ENTER_NOW or WAIT_FOR_ENTRY", "Negative EV or missing catalyst still yields NO_TRADE"],
+  "evidence": ["digest comparison and full tactical runtime result"]
+}

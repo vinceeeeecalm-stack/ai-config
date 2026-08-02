@@ -65,6 +65,7 @@ BINANCE_ENDPOINT_AUDIT = {
         "skipped_count": 0,
         "last_error": None,
         "last_success_at": None,
+        "last_transport": None,
     }
     for base in BINANCE_PUBLIC_BASES
 }
@@ -140,6 +141,7 @@ DEFAULT_MAX_WORKERS = 12
 MAX_SUFFIX_IDENTITY_LOOKUPS = 8
 DISCOVERY_WALL_CLOCK_BUDGET_SECONDS = 15.0
 DISCOVERY_PUBLIC_TIMEOUT_SECONDS = 1.0
+DISCOVERY_TICKER_TIMEOUT_SECONDS = 3.0
 DISCOVERY_PUBLIC_MAX_BASES = 2
 DISCOVERY_PRODUCT_TIMEOUT_SECONDS = 2.5
 DISCOVERY_IDENTITY_FALLBACK_TIMEOUT_SECONDS = 0.75
@@ -163,7 +165,10 @@ def fetch_json(
     timeout: float = 8,
     *,
     max_bases: int | None = None,
+    transport: str = "urllib",
 ):
+    if transport not in {"urllib", "curl"}:
+        raise ValueError(f"unsupported public transport: {transport}")
     last_error = None
     now = time.monotonic()
     with BINANCE_ENDPOINT_LOCK:
@@ -201,23 +206,51 @@ def fetch_json(
             last_error = TimeoutError(f"endpoint concurrency queue timed out: {base}")
             continue
         try:
-            request = Request(
-                url,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Codex research-only scanner)",
-                    "Accept-Encoding": "gzip",
-                },
-            )
-            with urlopen(request, timeout=timeout) as response:
-                raw_body = response.read()
-                if str(response.headers.get("Content-Encoding") or "").lower() == "gzip":
-                    raw_body = gzip.decompress(raw_body)
-                payload = json.loads(raw_body.decode("utf-8"))
+            if transport == "curl":
+                bounded_timeout = max(0.25, float(timeout))
+                result = subprocess.run(
+                    [
+                        "curl",
+                        "--compressed",
+                        "--connect-timeout",
+                        str(min(0.75, bounded_timeout)),
+                        "--max-time",
+                        str(bounded_timeout),
+                        "--retry",
+                        "0",
+                        "-sS",
+                        url,
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=bounded_timeout + 0.25,
+                )
+                if result.returncode != 0:
+                    raise RuntimeError(
+                        result.stderr.strip()
+                        or f"curl public endpoint returncode={result.returncode}"
+                    )
+                payload = json.loads(result.stdout)
+            else:
+                request = Request(
+                    url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Codex research-only scanner)",
+                        "Accept-Encoding": "gzip",
+                    },
+                )
+                with urlopen(request, timeout=timeout) as response:
+                    raw_body = response.read()
+                    if str(response.headers.get("Content-Encoding") or "").lower() == "gzip":
+                        raw_body = gzip.decompress(raw_body)
+                    payload = json.loads(raw_body.decode("utf-8"))
             with BINANCE_ENDPOINT_LOCK:
                 BINANCE_ENDPOINT_AUDIT[base]["success_count"] += 1
                 BINANCE_ENDPOINT_AUDIT[base]["last_success_at"] = (
                     utc_now().isoformat().replace("+00:00", "Z")
                 )
+                BINANCE_ENDPOINT_AUDIT[base]["last_transport"] = transport
                 BINANCE_ENDPOINT_STATE[base]["consecutive_failures"] = 0
                 BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] = 0.0
                 BINANCE_ENDPOINT_STATE[base]["last_success_monotonic"] = time.monotonic()
@@ -227,6 +260,7 @@ def fetch_json(
             with BINANCE_ENDPOINT_LOCK:
                 BINANCE_ENDPOINT_AUDIT[base]["failure_count"] += 1
                 BINANCE_ENDPOINT_AUDIT[base]["last_error"] = str(exc)
+                BINANCE_ENDPOINT_AUDIT[base]["last_transport"] = transport
                 BINANCE_ENDPOINT_STATE[base]["consecutive_failures"] += 1
                 if (
                     BINANCE_ENDPOINT_STATE[base]["consecutive_failures"]
@@ -257,6 +291,34 @@ def endpoint_audit_snapshot():
         }
 
 
+def discovery_runtime_audit(errors):
+    """Return the bounded discovery evidence required by the runtime contract."""
+
+    endpoint_audit = endpoint_audit_snapshot()
+    transport_successes = [
+        {
+            "base": base,
+            "success_count": int(audit.get("success_count") or 0),
+            "last_transport": audit.get("last_transport"),
+            "last_success_at": audit.get("last_success_at"),
+        }
+        for base, audit in endpoint_audit.items()
+        if int(audit.get("success_count") or 0) > 0
+    ]
+    return {
+        "ticker_rows_considered": int(
+            DISCOVERY_AUDIT.get("ticker_rows_considered") or 0
+        ),
+        "dynamic_discovery_audit": json.loads(json.dumps(DISCOVERY_AUDIT)),
+        "public_endpoint_audit": endpoint_audit,
+        "transport_successes": transport_successes,
+        "fresh_transport_verified": any(
+            item["last_transport"] == "curl" for item in transport_successes
+        ),
+        "errors": list(errors),
+    }
+
+
 def reset_endpoint_health_for_test():
     """Reset process-local endpoint health; used only by deterministic tests."""
 
@@ -269,6 +331,7 @@ def reset_endpoint_health_for_test():
                     "skipped_count": 0,
                     "last_error": None,
                     "last_success_at": None,
+                    "last_transport": None,
                 }
             )
             BINANCE_ENDPOINT_STATE[base].update(
@@ -667,7 +730,7 @@ def classify(metrics):
     return "no_current_impulse", "watch", score, reasons
 
 
-def anchor_state(timeout, *, max_bases=3):
+def anchor_state(timeout, *, max_bases=3, transport="urllib"):
     def fetch_anchor(symbol):
         try:
             raw = fetch_json(
@@ -675,6 +738,7 @@ def anchor_state(timeout, *, max_bases=3):
                 {"symbol": symbol, "interval": "1h", "limit": 5},
                 timeout=min(timeout, 2.0),
                 max_bases=max_bases,
+                transport=transport,
             )
             rows = summarize_klines(raw)
             return symbol, pct_change(rows[0]["open"], rows[-1]["close"])
@@ -783,7 +847,13 @@ def filter_exchange_spot_symbols(symbols, exchange_definitions):
     return accepted
 
 
-def fetch_exchange_definitions(symbols, timeout, *, max_bases=3):
+def fetch_exchange_definitions(
+    symbols,
+    timeout,
+    *,
+    max_bases=3,
+    transport="urllib",
+):
     """Fetch exchange identities in bounded batches for merged symbol inputs."""
 
     definitions = {}
@@ -795,6 +865,7 @@ def fetch_exchange_definitions(symbols, timeout, *, max_bases=3):
                 {"symbols": json.dumps(batch, separators=(",", ":"))},
                 timeout=min(timeout, 5.0),
                 max_bases=max_bases,
+                transport=transport,
             ).get("symbols")
             or []
         )
@@ -901,8 +972,9 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
     raw = fetch_json(
         "/api/v3/ticker/24hr",
         {"type": "MINI"},
-        timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+        timeout=min(timeout, DISCOVERY_TICKER_TIMEOUT_SECONDS),
         max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+        transport="curl",
     )
     preselected_rows = []
     for row in raw:
@@ -927,6 +999,7 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
             {"symbols": json.dumps(preselected, separators=(",", ":"))},
             timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
             max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+            transport="curl",
         ).get("symbols")
         or []
     )
@@ -1140,6 +1213,7 @@ def analyze_symbol(
     captured_at=None,
     book_snapshot=None,
     max_bases=3,
+    transport="urllib",
 ):
     captured_at = captured_at or utc_now()
     # Ninety rows are sufficient for a 60-minute discovery baseline plus the
@@ -1150,6 +1224,7 @@ def analyze_symbol(
         {"symbol": symbol, "interval": "1m", "limit": 90},
         timeout=min(timeout, 2.0),
         max_bases=max_bases,
+        transport=transport,
     )
     rows = completed_rows(summarize_klines(raw), int(captured_at.timestamp() * 1000))
     if len(rows) < 30:
@@ -1165,6 +1240,7 @@ def analyze_symbol(
             {"symbol": symbol, "limit": 100},
             timeout=min(timeout, 2.0),
             max_bases=max_bases,
+            transport=transport,
         )
         book = orderbook_metrics(depth)
     current = rows[-1]["close"]
@@ -1645,6 +1721,7 @@ def main(argv=None):
             "/api/v3/ping",
             timeout=min(args.timeout, 0.5),
             max_bases=1,
+            transport="curl",
         )
     except Exception as exc:  # noqa: BLE001
         bootstrap_errors.append({"source": "endpoint_health_probe", "error": str(exc)})
@@ -1654,6 +1731,7 @@ def main(argv=None):
             anchor_state,
             min(args.timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
             max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+            transport="curl",
         )
         discovery_future = (
             executor.submit(discover_symbols, args.dynamic_top, args.timeout)
@@ -1677,6 +1755,7 @@ def main(argv=None):
                 symbols,
                 min(args.timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
                 max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+                transport="curl",
             )
         except Exception as exc:  # noqa: BLE001
             bootstrap_errors.append(
@@ -1694,6 +1773,7 @@ def main(argv=None):
                 {"symbols": json.dumps(symbols, separators=(",", ":"))},
                 timeout=min(args.timeout, 0.75),
                 max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+                transport="curl",
             )
             if isinstance(raw_books, dict):
                 raw_books = [raw_books]
@@ -1720,6 +1800,7 @@ def main(argv=None):
                 captured,
                 book_by_symbol.get(symbol),
                 max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+                transport="curl",
             )
         except Exception as exc:  # noqa: BLE001 - scanner should continue and record failures.
             return {"symbol": symbol, "_scan_error": str(exc)}
@@ -1759,6 +1840,7 @@ def main(argv=None):
     discovery_elapsed = time.monotonic() - run_started
     discovery["elapsed_seconds"] = round(discovery_elapsed, 6)
     discovery["within_budget"] = discovery_elapsed <= discovery["budget_seconds"]
+    discovery.update(discovery_runtime_audit(errors))
     top_symbols = [item["symbol"] for item in discovery["top_candidates"]]
     if args.discovery_only:
         print(json.dumps(discovery, ensure_ascii=False, indent=2))

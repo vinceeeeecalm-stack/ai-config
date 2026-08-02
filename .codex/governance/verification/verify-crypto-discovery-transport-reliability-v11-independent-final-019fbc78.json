@@ -1,0 +1,75 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-discovery-transport-reliability-v11-independent-final-019fbc78",
+  "goal_id": "crypto-discovery-transport-reliability-v11",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "4635f6d8c8be24f748a4705806794e2843d47b8614066bf4bab717e9e1b9de19",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "fresh-discovery-runtime",
+      "status": "PASS",
+      "evidence": {
+        "wall_seconds": 8.6430185,
+        "elapsed_seconds": 8.527991,
+        "within_15_seconds": true,
+        "ticker_rows_considered": 701,
+        "dynamic_discovery_audit_present": true,
+        "public_endpoint_audit_present": true,
+        "transport_successes": 1,
+        "last_transport": "curl",
+        "fresh_transport_verified": true,
+        "top3_symbols": [
+          "ADAUSDT",
+          "1000SATSUSDT",
+          "ONDOUSDT"
+        ],
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "all-endpoints-failure-safety",
+      "status": "PASS",
+      "evidence": {
+        "decision_status": "NO_FRESH_DECISION",
+        "current_action": "NO_TRADE",
+        "trade_plan": null,
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "active-tests",
+      "status": "PASS",
+      "evidence": {
+        "working_directory": "/Users/vincentpan/Documents/investing",
+        "tests_run": 45,
+        "tests_passed": 45,
+        "tests_failed": 0,
+        "exit_code": 0
+      }
+    },
+    {
+      "id": "public-repo-safety",
+      "status": "PASS",
+      "evidence": {
+        "result": "PASS",
+        "secret_finding_count": 0,
+        "privacy_finding_count": 0
+      }
+    },
+    {
+      "id": "strategy-and-identity-gates",
+      "status": "PASS",
+      "evidence": {
+        "strategy_version": "impulse-capture-tactical-v6",
+        "thresholds_loosened": false,
+        "bstocks_gate_preserved": true
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T07:55:00Z"
+}
