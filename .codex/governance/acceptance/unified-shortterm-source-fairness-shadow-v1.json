@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-source-fairness-shadow-v1",
+  "title": "候选数据覆盖额度公平且来源失败局部降级",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "动态候选池大于单轮深度查询额度",
+    "一个新闻、社交或衍生品来源局部失败"
+  ],
+  "steps": [
+    "按轮转额度收集候选前置因子",
+    "模拟来源在扫描中途失败"
+  ],
+  "expected": [
+    "核心候选获得最低覆盖额度，候选不会因固定遍历顺序长期饥饿",
+    "来源失败只降级受影响候选和字段，不拖死整轮",
+    "未获得权威数据的字段标记 missing 或 stale，不补零冒充中性",
+    "数据公平不能绕过正式硬门"
+  ],
+  "evidence": [
+    "轮转额度确定性测试",
+    "局部来源故障注入"
+  ]
+}

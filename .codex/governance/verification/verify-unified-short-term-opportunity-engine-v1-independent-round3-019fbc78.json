@@ -1,0 +1,37 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-unified-short-term-opportunity-engine-v1-independent-round3-019fbc78",
+  "goal_id": "unified-short-term-opportunity-engine-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "aac78fee2a8be4efc1e96600cf6e64285fe35fbb5660a8fe8812e7aceafe0004",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "governance-source-binding",
+      "result": "PASS"
+    },
+    {
+      "id": "zero-trade-profit-four-binding",
+      "result": "PASS"
+    },
+    {
+      "id": "target-test-suite",
+      "result": "PASS"
+    },
+    {
+      "id": "runtime-status",
+      "result": "PASS"
+    },
+    {
+      "id": "global-skill-sync",
+      "result": "PASS"
+    },
+    {
+      "id": "read-only-verification",
+      "result": "PASS"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T11:46:02Z"
+}

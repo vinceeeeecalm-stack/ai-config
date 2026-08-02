@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-oi-alone-no-entry-v1",
+  "title": "OI 单独上涨不能触发短期入场",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "候选 OI 一小时、四小时和二十四小时变化为正",
+    "现货主动买盘、价格结构或催化至少一项缺失或弱势"
+  ],
+  "steps": [
+    "运行 shadow 因子确认和统一短期排名",
+    "将资金费率改为极端拥挤后再次运行"
+  ],
+  "expected": [
+    "directional_confirmation=false",
+    "shadow_action 不得为 ENTER_NOW",
+    "极端资金费率只能进一步降级",
+    "生产正式动作完全不受 shadow 输出影响"
+  ],
+  "evidence": [
+    "OI 单因子负向回归",
+    "生产无变化运行证据"
+  ]
+}

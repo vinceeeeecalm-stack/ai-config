@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-no-future-leakage-v1",
+  "title": "统一短期回放严格隔离决策 cutoff 与未来结果",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "候选因子带 captured_at，结果路径带逐点时间戳"
+  ],
+  "steps": [
+    "尝试把 cutoff 之前或等于 cutoff 的结果价格写入 outcome path",
+    "使用同一冻结输入重复运行回放"
+  ],
+  "expected": [
+    "cutoff 之前或等于 cutoff 的结果点被拒绝",
+    "相同输入、策略和配置摘要产生字节级确定的排名与基线摘要",
+    "未来目标/止损结果不改变原始 rank、action 或 factor snapshot"
+  ],
+  "evidence": [
+    "负向单元测试",
+    "确定性重复运行哈希"
+  ]
+}

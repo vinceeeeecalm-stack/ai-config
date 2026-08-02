@@ -1,0 +1,51 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "unified-short-term-opportunity-engine-v1",
+  "title": "统一分钟级至七天短期机会引擎的影子基线与分阶段晋升框架",
+  "business_outcome": "在不强制交易、不降低价值、催化、实时、回归、流动性和风险硬门的前提下，更早识别尚未完成上涨的 Crypto 机会，并把发现、决策、监控、退出、漏检与统一战术资金池净 ROI 变成可回放、可归因、可逐项晋升的闭环。",
+  "scope": [
+    "冻结分钟级、盘内、当日至最长七天的统一短期目标、统一资金池和统一正式动作语义",
+    "新增 UnifiedShortTermOpportunityV1、ShortTermFactorSnapshotV1、NearMissCandidateStateV1、ShortTermDecisionV1、ShortTermLifecycleV1、MissedOpportunityReviewV1 与 ShortTermProfitAttributionV1 的确定性合同和校验器",
+    "实现阶段零历史基线回放，测量三组目标/止损路径、发现覆盖率、发现时已消耗涨幅、提醒延迟、目标先于止损、MFE、MAE 与无效提醒",
+    "实现追加式漏检复盘和候选记忆的 shadow-only 证据链，所有记录绑定同一 snapshot_id、strategy_version、config_digest 与 source_digest",
+    "实现衍生品、排名加速度和自适应持有时钟的 shadow 计算接口，但不在本目标内改变生产排序、入场、止损或退出规则",
+    "以 ADA 作为普通回归样本验证通用规则，不添加 symbol 特例",
+    "冻结阶段一至阶段六的顺序晋升门；每个后续阶段必须使用新 superseding GoalContract，并满足滚动十四天单一核心赚钱规则限制"
+  ],
+  "non_goals": [
+    "不在本目标内把 shadow OI、资金费率、排名加速度或持有时钟晋升为生产赚钱规则",
+    "不创建面向用户的独立日内策略或独立一至七日策略",
+    "不自动真实下单、撤单、转账、充值、卖出、换仓、质押或使用私有交易 API",
+    "不强制每日交易，不为追求月度翻倍降低数据、流动性、回撤、止损或实时硬门",
+    "不把观察、漏检、Paper 或 shadow 结果计入真钱 ROI 或 BUSINESS_READY",
+    "不把短期亏损自动改名为长期持有",
+    "不修改长期五年十倍与十年十倍目标区的权威底账或正式在轨判断"
+  ],
+  "constraints": [
+    "短期预计和实际持有时间不得超过 10080 分钟，超过时必须退出或生成新的人工复核记录",
+    "正式用户动作只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE，且每轮只有一个 research_top1",
+    "OI 单独上升永远不能通过 shadow 或生产入场门；必须与现货买盘、价格结构、资金费率、催化和流动性共同验证",
+    "阶段零不得改变当前生产策略的候选排序、目标、止损、持有期或 Manual 最终仲裁",
+    "回放只能读取冻结 cutoff 之前的因子；cutoff 之后的价格只用于结果标签，不得回流到排名或决策",
+    "不同持有时间共用一个短期战术资金池和资金加权净 ROI，持有时间只能作为归因标签",
+    "同一工作树只允许当前 CODEX_THREAD_ID 写入，所有发布证据禁止包含秘密或完整账户隐私数据",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "acceptance_scenario_ids": [
+    "unified-shortterm-stage0-baseline-metrics-v1",
+    "unified-shortterm-no-future-leakage-v1",
+    "unified-shortterm-contract-binding-v1",
+    "unified-shortterm-oi-alone-no-entry-v1",
+    "unified-shortterm-nearmiss-memory-shadow-v1",
+    "unified-shortterm-adaptive-holding-shadow-v1",
+    "unified-shortterm-missed-review-append-v1",
+    "unified-shortterm-profit-isolation-v1",
+    "unified-shortterm-production-no-change-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "crypto-dynamic-spot-eligibility-failover-v15",
+  "frozen_at": "2026-08-02T11:13:10.531703Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "4d2eff3bc593de584aa3e82cfa00b8a7f6e366eb088f2e578c0e2c2e9b6fbaee"
+}

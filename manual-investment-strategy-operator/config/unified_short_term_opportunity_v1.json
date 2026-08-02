@@ -1,0 +1,49 @@
+{
+  "schema_version": "UnifiedShortTermEngineConfigV1",
+  "engine_id": "unified-short-term-opportunity-engine-v1",
+  "engine_version": "UnifiedShortTermOpportunityEngineV1",
+  "current_stage": "stage0_baseline",
+  "production_rule_changed": false,
+  "production_strategy_version": "impulse-capture-tactical-v7",
+  "single_tactical_pool": true,
+  "maximum_holding_minutes": 10080,
+  "formal_actions": [
+    "ENTER_NOW",
+    "WAIT_FOR_ENTRY",
+    "NO_TRADE"
+  ],
+  "baseline_thresholds": [
+    {"target_pct": 5.0, "stop_pct": 3.0},
+    {"target_pct": 8.0, "stop_pct": 4.0},
+    {"target_pct": 10.0, "stop_pct": 5.0}
+  ],
+  "fourteen_day_rule_gate": {
+    "last_core_rule_change_at": "2026-08-02T04:30:20Z",
+    "next_rule_promotion_not_before": "2026-08-16T04:30:20Z",
+    "maximum_core_rule_changes_per_window": 1
+  },
+  "stage_flags": {
+    "stage0_baseline_measurement": "ACTIVE",
+    "derivatives_at_full_candidate_discovery": "SHADOW_ONLY",
+    "near_miss_rank_4_to_20_memory": "SHADOW_ONLY",
+    "ranking_acceleration": "SHADOW_ONLY",
+    "adaptive_holding_clock": "SHADOW_ONLY",
+    "source_fairness_and_local_degradation": "DESIGNED",
+    "time_matched_regression": "DESIGNED",
+    "event_monitoring_and_missed_review": "SHADOW_ONLY"
+  },
+  "monitoring_calibration_ranges": {
+    "whole_market_scan_minutes": [10, 15],
+    "strongest_candidate_followup_minutes": [1, 5],
+    "production_schedule_active": false
+  },
+  "hard_invariants": {
+    "oi_alone_can_authorize": false,
+    "old_or_conflicting_price_can_enter": false,
+    "paper_can_enter_live_roi": false,
+    "short_loss_can_become_long_without_reunderwrite": false,
+    "live_orders_enabled": false,
+    "human_confirmation_required": true,
+    "tactical_pool_pause_drawdown_pct": 15.0
+  }
+}

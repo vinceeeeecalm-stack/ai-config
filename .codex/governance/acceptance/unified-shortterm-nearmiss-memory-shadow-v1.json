@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-nearmiss-memory-shadow-v1",
+  "title": "排名四至二十的持续候选不会在下一轮被遗忘",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "同一 symbol 在连续快照中排名、成交量、OI 或相对强弱增强"
+  ],
+  "steps": [
+    "追加第一轮 NearMissCandidateStateV1",
+    "用下一轮快照计算排名速度和因子加速度",
+    "重复写入等价状态"
+  ],
+  "expected": [
+    "候选历史保持追加式且可追溯",
+    "排名改善和同步动能产生 EARLY_WARNING 内部标签",
+    "等价写入返回 NO_UPDATE",
+    "EARLY_WARNING 不成为正式用户动作"
+  ],
+  "evidence": [
+    "连续快照回归",
+    "追加式账本测试"
+  ]
+}

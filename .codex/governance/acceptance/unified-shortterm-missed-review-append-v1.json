@@ -1,0 +1,23 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-missed-review-append-v1",
+  "title": "错过的短期机会进入不可覆盖的漏检复盘",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "候选当时未入选，但在冻结七天窗口内先达到黄金目标"
+  ],
+  "steps": [
+    "生成 MissedOpportunityReviewV1",
+    "按数据缺失、排名、门槛、扫描延迟或不可预测分类",
+    "重复写入并尝试用相同 ID 覆盖不同内容"
+  ],
+  "expected": [
+    "首次追加成功，等价写入 NO_UPDATE",
+    "相同 ID 不同内容被拒绝",
+    "漏检只进入学习分母，不进入 Paper 或真钱 ROI"
+  ],
+  "evidence": [
+    "追加式漏检账本测试",
+    "阶段零运行产物"
+  ]
+}

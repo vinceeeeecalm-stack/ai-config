@@ -1,0 +1,23 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-production-no-change-v1",
+  "title": "阶段零和 shadow 能力不改变现有正式投资动作",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "当前生产 Manual V3 和 Active V15 输入固定"
+  ],
+  "steps": [
+    "运行既有生产扫描与 Manual 仲裁夹具",
+    "并行运行统一短期 shadow 基线"
+  ],
+  "expected": [
+    "生产 research_top1 和 current_action 与基线版本一致",
+    "正式动作仍只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE",
+    "shadow 记录 formal_action_eligible=false",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "evidence": [
+    "生产回归测试",
+    "shadow 运行证据"
+  ]
+}
