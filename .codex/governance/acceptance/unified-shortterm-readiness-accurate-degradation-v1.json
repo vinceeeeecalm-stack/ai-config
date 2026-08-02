@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-readiness-accurate-degradation-v1",
+  "title": "影子证据、未激活规则和未测量利润准确分离",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "阶段一连续采样已发布",
+    "阶段二尚未获得独立冻结晋升目标",
+    "没有真钱成交时间序列"
+  ],
+  "steps": [
+    "审计当前真实治理和运行状态",
+    "读取阶段一观察数、到期结果数和预注册晋升最早时间",
+    "读取阶段二至阶段六是否存在已发布晋升目标以及真钱 ROI 证据"
+  ],
+  "expected": [
+    "阶段一显示 EVIDENCE_COLLECTING 或 GATE_DECIDED，而不是生产已激活",
+    "阶段二及以后显示 NOT_ACTIVATED 或 SHADOW_ONLY，不得因阶段零接口存在而冒充已生效",
+    "真钱 ROI 显示 UNMEASURED，系统交付状态与业务结果状态保持分离"
+  ],
+  "evidence": [
+    "UnifiedShortTermEngineReadinessV1 运行输出",
+    "阶段一观察账本只读摘要"
+  ]
+}

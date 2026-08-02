@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "derivatives-shadow-continuous-sampling-v1",
+  "goal_id": "unified-shortterm-phase-readiness-audit-v1",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "abb8a35e9b047d3c5f115b0549e287e9e8faf20886526ad295d4b2f2c48a86a4",
+  "source_digest": "99e1c733307f5c6847cf52aa563f1585fe564270cf7d0a3ba74491517a7755fc",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-runtime_verified-ceac5461",
-  "independent_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-independent-pass-019fbc78",
-  "updated_at": "2026-08-02T14:37:12.797953Z"
+  "last_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-runtime_verified-6bc3ad19",
+  "independent_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-independent-round2-019fbc78-99e1c733",
+  "updated_at": "2026-08-02T15:14:27.485609Z"
 }
