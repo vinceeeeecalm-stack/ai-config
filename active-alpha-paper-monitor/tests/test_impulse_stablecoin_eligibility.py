@@ -1,5 +1,6 @@
 import importlib.util
 import io
+import json
 import sys
 import unittest
 from contextlib import redirect_stdout
@@ -118,8 +119,14 @@ class StablecoinEligibilityTests(unittest.TestCase):
             ],
         )
 
-        self.assertNotIn("UUSDT", output)
-        self.assertIn("AAVEUSDT", output)
+        result = json.loads(output)
+        ranked_symbols = [item["symbol"] for item in result["top_candidates"]]
+        self.assertNotIn("UUSDT", ranked_symbols)
+        self.assertIn("AAVEUSDT", ranked_symbols)
+        self.assertIn(
+            {"symbol": "UUSDT", "reason": "stablecoin_or_fiat_like"},
+            result["dynamic_discovery_audit"]["candidate_eligibility_rejected"],
+        )
 
     def test_low_beta_commodity_tokens_remain_excluded(self):
         for symbol in ("PAXGUSDT", "XAUTUSDT"):
@@ -197,8 +204,14 @@ class StablecoinEligibilityTests(unittest.TestCase):
             ],
         )
 
-        self.assertNotIn("SXPUPUSDT", output)
-        self.assertIn("AAVEUSDT", output)
+        result = json.loads(output)
+        ranked_symbols = [item["symbol"] for item in result["top_candidates"]]
+        self.assertNotIn("SXPUPUSDT", ranked_symbols)
+        self.assertIn("AAVEUSDT", ranked_symbols)
+        self.assertIn(
+            {"symbol": "SXPUPUSDT", "reason": "leveraged_token"},
+            result["dynamic_discovery_audit"]["spot_eligibility_rejected"],
+        )
 
     def test_ordinary_crypto_is_not_rejected_by_a_price_heuristic(self):
         # Eligibility deliberately accepts only symbol identity. A risk asset
@@ -411,7 +424,14 @@ class StablecoinEligibilityTests(unittest.TestCase):
         calls = []
 
         def bounded_fetch(path, *_args, **kwargs):
-            calls.append((path, kwargs.get("timeout"), kwargs.get("max_bases")))
+            calls.append(
+                (
+                    path,
+                    kwargs.get("timeout"),
+                    kwargs.get("max_bases"),
+                    kwargs.get("transport"),
+                )
+            )
             if path == "/api/v3/ticker/24hr":
                 return [{"symbol": "BTCUSDT", "quoteVolume": "1000"}]
             if path == "/api/v3/exchangeInfo":
@@ -436,9 +456,15 @@ class StablecoinEligibilityTests(unittest.TestCase):
 
         self.assertEqual(selected, ["BTCUSDT"])
         self.assertTrue(calls)
-        for _path, timeout, max_bases in calls:
-            self.assertLessEqual(timeout, M.DISCOVERY_PUBLIC_TIMEOUT_SECONDS)
+        for path, timeout, max_bases, transport in calls:
+            expected_timeout = (
+                M.DISCOVERY_TICKER_TIMEOUT_SECONDS
+                if path == "/api/v3/ticker/24hr"
+                else M.DISCOVERY_PUBLIC_TIMEOUT_SECONDS
+            )
+            self.assertLessEqual(timeout, expected_timeout)
             self.assertLessEqual(max_bases, M.DISCOVERY_PUBLIC_MAX_BASES)
+            self.assertEqual(transport, "curl")
 
     def test_strategy_version_isolated_after_candidate_universe_change(self):
         self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v6")

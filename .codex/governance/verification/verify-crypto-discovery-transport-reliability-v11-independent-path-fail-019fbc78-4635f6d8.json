@@ -1,0 +1,60 @@
+{
+  "schema_version": "VerificationResultV1",
+  "verification_id": "verify-crypto-discovery-transport-reliability-v11-independent-019fbc78",
+  "goal_id": "crypto-discovery-transport-reliability-v11",
+  "goal_contract_digest": "4820bbccf861ed766de8de303b7a8cee4c9e6006265186490dcb97d890a4d768",
+  "source_digest": "4635f6d8c8be24f748a4705806794e2843d47b8614066bf4bab717e9e1b9de19",
+  "verifier_codex_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent_verifier": true,
+  "read_only": true,
+  "verdict": "FAIL",
+  "highest_proven_level": "RUNTIME_VERIFIED",
+  "summary": "Fresh discovery runtime and injected total-endpoint-failure behavior passed. Final verification fails because tests and public-safety commands were incorrectly sought in the installed Skill mirror instead of the canonical repository.",
+  "checks": {
+    "fresh_discovery_runtime": {
+      "status": "PASS",
+      "working_directory": "/Users/vincentpan/.codex/skills",
+      "outer_wall_seconds": 8.6430185,
+      "reported_elapsed_seconds": 8.527991,
+      "ticker_rows_considered": 701,
+      "transport_successes": 1,
+      "fresh_transport_verified": true,
+      "top3_symbols": ["ADAUSDT", "1000SATSUSDT", "ONDOUSDT"],
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    "all_public_endpoints_failure": {
+      "status": "PASS",
+      "decision_status": "NO_FRESH_DECISION",
+      "current_action": "NO_TRADE",
+      "trade_plan": null
+    },
+    "active_test_suite": {
+      "status": "MISSING_EVIDENCE",
+      "reason": "wrong_working_directory"
+    },
+    "public_safety_scan": {
+      "status": "MISSING_EVIDENCE",
+      "reason": "wrong_working_directory"
+    }
+  },
+  "findings": {
+    "P0": [],
+    "P1": [
+      {
+        "id": "P1-ACTIVE-45-TESTS-NOT-INDEPENDENTLY-VERIFIED",
+        "title": "Required 45-test Active suite lacks independent evidence"
+      },
+      {
+        "id": "P1-PUBLIC-SAFETY-NOT-INDEPENDENTLY-VERIFIED",
+        "title": "Required secret/privacy zero-result evidence is missing"
+      }
+    ],
+    "P2": [
+      {
+        "id": "P2-INTERMITTENT-DISCOVERY-SAMPLE",
+        "title": "One bounded discovery run produced no ticker rows"
+      }
+    ]
+  }
+}

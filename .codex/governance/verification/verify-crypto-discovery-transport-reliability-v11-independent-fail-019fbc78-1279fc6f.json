@@ -1,0 +1,85 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-discovery-transport-reliability-v11-independent-019fbc78-1279fc6f",
+  "goal_id": "crypto-discovery-transport-reliability-v11",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "implementation_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "source_digest": "1279fc6ff098063acc1cc1f7b2f7345ebfd023baad3d34e39c190464a8841fc7",
+  "goal_contract_digest": "4820bbccf861ed766de8de303b7a8cee4c9e6006265186490dcb97d890a4d768",
+  "level": "RUNTIME_VERIFIED",
+  "result": "FAIL",
+  "read_only": true,
+  "independent": true,
+  "P0": [],
+  "P1": [
+    {
+      "id": "discovery-only-transport-audit-missing",
+      "severity": "P1",
+      "acceptance_scenario_id": "crypto-discovery-curl-transport-fresh-v11",
+      "description": "Fresh discovery-only JSON omits ticker_rows_considered, public_endpoint_audit and dynamic_discovery_audit. The required ticker_rows_considered>0 and successful endpoint/transport cannot be verified from the runtime artifact.",
+      "observed": {
+        "ticker_rows_considered": null,
+        "public_endpoint_audit_present": false,
+        "dynamic_discovery_audit_present": false
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "discovery-only-transport-audit-missing",
+      "severity": "P1",
+      "result": "FAIL"
+    }
+  ],
+  "evidence": {
+    "source_binding": {
+      "recomputed_source_digest": "1279fc6ff098063acc1cc1f7b2f7345ebfd023baad3d34e39c190464a8841fc7",
+      "goal_hash_matches": true
+    },
+    "fresh_discovery": {
+      "returncode": 0,
+      "wall_clock_seconds": 8.358985,
+      "output_elapsed_seconds": 8.250269,
+      "budget_seconds": 15,
+      "within_budget": true,
+      "top3_count": 3,
+      "top_symbols": ["TRXUSDT", "PEPEUSDT", "NEARUSDT"],
+      "ticker_rows_considered": null,
+      "live_orders_enabled": false,
+      "private_api_used": false
+    },
+    "curl_transport": {
+      "connect_timeout_present": true,
+      "total_max_time_present": true,
+      "bounded_failover_test": "PASS",
+      "transport_audit_unit_test": "PASS"
+    },
+    "all_endpoint_failure": {
+      "targeted_tests_passed": "6/6",
+      "no_fresh_decision": true,
+      "current_action": "NO_TRADE",
+      "trade_plan": null,
+      "stale_price_reused": false
+    },
+    "gate_integrity": {
+      "strategy_version": "impulse-capture-tactical-v6",
+      "config_digest_formula_changed": false,
+      "ev_catalyst_value_liquidity_risk_freshness_thresholds_changed": false,
+      "bstocks_identity_gate_preserved": true
+    },
+    "same_digest_regression": {
+      "tested_result": "PASS",
+      "runtime_verified_result": "PASS",
+      "failed_checks": []
+    },
+    "repository_safety": {
+      "result": "PASS",
+      "secret_finding_count": 0,
+      "privacy_finding_count": 0,
+      "trackable_file_count": 590,
+      "history_blob_count": 730
+    }
+  },
+  "highest_proven_level": "TESTED",
+  "business_ready": false
+}

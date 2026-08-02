@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "crypto-discovery-curl-transport-fresh-v11",
+  "title": "Fresh public market discovery succeeds through bounded transport",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["At least one configured Binance public endpoint is reachable"],
+  "steps": ["Run tactical_1_7d discovery-only with dynamic-top 30", "Measure wall clock and inspect Top3"],
+  "expected": ["Wall clock and output elapsed are at most 15 seconds", "Fresh Top3 is non-empty", "Transport audit identifies successful public endpoint", "No private API or live order is used"],
+  "evidence": ["fresh discovery runtime JSON"]
+}

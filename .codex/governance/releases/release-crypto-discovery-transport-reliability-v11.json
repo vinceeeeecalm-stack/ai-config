@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-crypto-discovery-transport-reliability-v11",
+  "project_id": "investing-monorepo",
+  "goal_id": "crypto-discovery-transport-reliability-v11",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "345d110cb0d04200992f42339b62390cd0107196",
+    "branch": "codex/crypto-discovery-transport-v11",
+    "dirty": true
+  },
+  "source_digest": "4635f6d8c8be24f748a4705806794e2843d47b8614066bf4bab717e9e1b9de19",
+  "build_version": "4635f6d8c8be24f7",
+  "runtime_version": "impulse-capture-tactical-v6",
+  "database_version": "not-applicable",
+  "last_verification_id": "verify-crypto-discovery-transport-reliability-v11-runtime_verified-0f9e7bba",
+  "independent_verification_id": "verify-crypto-discovery-transport-reliability-v11-independent-final-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T07:57:08.108076Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

@@ -117,12 +117,92 @@ class EndpointFailoverTests(unittest.TestCase):
         self.assertTrue(calls[0].startswith(M.BINANCE_PUBLIC_BASES[1]))
         self.assertEqual(M.endpoint_audit_snapshot()[first]["skipped_count"], 1)
 
+    def test_bounded_curl_transport_returns_json_and_records_transport(self):
+        completed = M.subprocess.CompletedProcess(
+            args=["curl"],
+            returncode=0,
+            stdout='{"ok": true, "source": "bounded-curl"}',
+            stderr="",
+        )
+        with mock.patch.object(M.subprocess, "run", return_value=completed) as run:
+            payload = M.fetch_json(
+                "/api/v3/ping",
+                timeout=0.5,
+                max_bases=1,
+                transport="curl",
+            )
+
+        self.assertEqual(payload, {"ok": True, "source": "bounded-curl"})
+        args = run.call_args.args[0]
+        self.assertIn("--connect-timeout", args)
+        self.assertIn("--max-time", args)
+        audit = M.endpoint_audit_snapshot()[M.BINANCE_PUBLIC_BASES[0]]
+        self.assertEqual(audit["last_transport"], "curl")
+        self.assertEqual(audit["success_count"], 1)
+
+    def test_bounded_curl_transport_fails_over_once(self):
+        failed = M.subprocess.CompletedProcess(
+            args=["curl"], returncode=28, stdout="", stderr="timed out"
+        )
+        passed = M.subprocess.CompletedProcess(
+            args=["curl"], returncode=0, stdout='{"ok": true}', stderr=""
+        )
+        with mock.patch.object(
+            M.subprocess, "run", side_effect=[failed, passed]
+        ) as run:
+            payload = M.fetch_json(
+                "/api/v3/ping",
+                timeout=0.5,
+                max_bases=2,
+                transport="curl",
+            )
+
+        self.assertEqual(payload, {"ok": True})
+        self.assertEqual(run.call_count, 2)
+        self.assertIn(M.BINANCE_PUBLIC_BASES[0], run.call_args_list[0].args[0][-1])
+        self.assertIn(M.BINANCE_PUBLIC_BASES[1], run.call_args_list[1].args[0][-1])
+
+    def test_discovery_runtime_audit_exposes_fresh_curl_evidence(self):
+        endpoint_audit = {
+            base: {
+                "success_count": 1 if index == 0 else 0,
+                "failure_count": 0,
+                "skipped_count": 0,
+                "last_error": None,
+                "last_success_at": "2026-08-02T07:40:00Z" if index == 0 else None,
+                "last_transport": "curl" if index == 0 else None,
+                "consecutive_failures": 0,
+                "circuit_open": False,
+            }
+            for index, base in enumerate(M.BINANCE_PUBLIC_BASES)
+        }
+        original_rows = M.DISCOVERY_AUDIT["ticker_rows_considered"]
+        M.DISCOVERY_AUDIT["ticker_rows_considered"] = 701
+        try:
+            with mock.patch.object(
+                M, "endpoint_audit_snapshot", return_value=endpoint_audit
+            ):
+                audit = M.discovery_runtime_audit([])
+        finally:
+            M.DISCOVERY_AUDIT["ticker_rows_considered"] = original_rows
+
+        self.assertEqual(audit["ticker_rows_considered"], 701)
+        self.assertEqual(
+            audit["dynamic_discovery_audit"]["ticker_rows_considered"], 701
+        )
+        self.assertEqual(audit["public_endpoint_audit"], endpoint_audit)
+        self.assertTrue(audit["fresh_transport_verified"])
+        self.assertEqual(audit["transport_successes"][0]["last_transport"], "curl")
+
     def test_all_endpoint_failures_emit_no_fresh_decision(self):
         output = io.StringIO()
+        failed = M.subprocess.CompletedProcess(
+            args=["curl"], returncode=28, stdout="", stderr="all public endpoints timed out"
+        )
         with mock.patch.object(
-            M,
-            "urlopen",
-            side_effect=TimeoutError("all public endpoints timed out"),
+            M.subprocess,
+            "run",
+            return_value=failed,
         ), contextlib.redirect_stdout(output):
             return_code = M.main(
                 [
