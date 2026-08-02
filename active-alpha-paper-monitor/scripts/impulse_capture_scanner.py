@@ -44,7 +44,7 @@ from tactical_evidence_ledger import append_observation, build_scanner_observati
 
 
 ROOT = Path(__file__).resolve().parent.parent
-TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v4"
+TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v5"
 BINANCE_PUBLIC_BASES = (
     "https://data-api.binance.vision",
     "https://api1.binance.com",
@@ -300,6 +300,22 @@ def signal_ranking_key(row):
     return (
         IMPULSE_STAGE_PRIORITY.get(str(row.get("stage") or ""), -1),
         *historical_rank_key(row, setup_score_field="impulse_score_points"),
+        row.get("volume_multiple_5m_vs_median") or 0,
+    )
+
+
+def validated_profit_ranking_key(row):
+    """Rank validated Top3 by profit evidence before current impulse strength.
+
+    Discovery remains atmosphere and impulse driven.  Once comparable historical
+    evidence exists, the deep-research slot must follow the frozen profit
+    objective: first apply the historical quality gate and conservative EV
+    ordering, then use the current stage and volume only as late tie-breakers.
+    """
+
+    return (
+        *historical_rank_key(row, setup_score_field="impulse_score_points"),
+        IMPULSE_STAGE_PRIORITY.get(str(row.get("stage") or ""), -1),
         row.get("volume_multiple_5m_vs_median") or 0,
     )
 
@@ -1084,7 +1100,8 @@ def build_top1_decision_card(
         "execution_decision": "no_deploy_evidence",
         "executable_amount": 0.0,
         "selection_reason": (
-            "highest post-validation risk-adjusted setup quality among discovery Top3"
+            "profit-first validated ranking: historical quality gate, conservative EV, "
+            "expected return, then current setup tie-breakers"
         ),
         "setup_quality_score": signal.get("impulse_score_points"),
         "signal_stage": signal.get("stage"),
@@ -1524,7 +1541,7 @@ def main(argv=None):
         top_signals,
         base_score_field="impulse_score_points",
     )
-    top_signals.sort(key=signal_ranking_key, reverse=True)
+    top_signals.sort(key=validated_profit_ranking_key, reverse=True)
     validated_top1_signal = top_signals[0] if top_signals else None
     validated_top1 = None
     intraday_market_plan = None
@@ -1537,7 +1554,7 @@ def main(argv=None):
             "reward_risk_status": "pending_manual_target_stop_probability_event",
             "research_decision": "watch",
             "current_direct_decision": "do_not_enter_now",
-            "selection_reason": "highest post-validation risk-adjusted setup quality among discovery Top3",
+            "selection_reason": "profit-first validated ranking: historical quality gate, conservative EV, expected return, then current setup tie-breakers",
             "live_orders_enabled": False,
         }
         if args.request_mode == "intraday_scalp":

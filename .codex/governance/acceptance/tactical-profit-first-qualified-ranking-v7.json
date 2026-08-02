@@ -1,0 +1,21 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-profit-first-qualified-ranking-v7",
+  "title": "通过历史质量硬门的正 EV 候选优先于技术分更高的未通过候选",
+  "level": "TESTED",
+  "preconditions": [
+    "候选 A 具备至少 30 个无前视样本、正保守 EV、回报风险比至少 2 且 Profit Factor 大于 1",
+    "候选 B 技术阶段和形态分更高但保守 EV 非正或历史质量门失败"
+  ],
+  "steps": [
+    "对候选运行验证阶段利润优先排序两次"
+  ],
+  "expected": [
+    "候选 A 两次均稳定排名第一",
+    "相同输入产生完全相同顺序",
+    "排名不产生预测概率或真钱执行授权"
+  ],
+  "evidence": [
+    "正向与重复运行单元测试"
+  ]
+}
