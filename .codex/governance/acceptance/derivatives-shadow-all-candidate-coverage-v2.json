@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-all-candidate-coverage-v2",
+  "title": "衍生品因子覆盖 discovery 全候选而非只覆盖 Top3",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["同一轮 discovery-only 提供四至二十个合格候选"],
+  "steps": ["运行 shadow collector", "检查候选输入与结果的 symbol 集合和覆盖状态"],
+  "expected": ["每个输入候选都有成功或明确局部失败记录", "成功记录含 OI 1h/4h/24h、funding、basis、perp taker flow 和数据时间", "不因排名低于 Top3 而跳过"],
+  "evidence": ["确定性二十候选夹具", "运行摘要与专项测试"]
+}

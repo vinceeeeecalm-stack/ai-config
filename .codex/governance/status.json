@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "unified-short-term-opportunity-engine-v1",
+  "goal_id": "unified-shortterm-derivatives-shadow-v2",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "aac78fee2a8be4efc1e96600cf6e64285fe35fbb5660a8fe8812e7aceafe0004",
+  "source_digest": "1a9ce5a0cc0d1f07a4f9e7ac2f81e85e75b4d1a25753fbaab85b3733ccd679be",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-unified-short-term-opportunity-engine-v1-runtime_verified-0c3fe3ed",
-  "independent_verification_id": "verify-unified-short-term-opportunity-engine-v1-independent-round3-019fbc78",
-  "updated_at": "2026-08-02T11:47:40.272129Z"
+  "last_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-runtime_verified-5b43b230",
+  "independent_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-independent-019fbc78",
+  "updated_at": "2026-08-02T12:17:17.761948Z"
 }

@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-public-runtime-v2",
+  "title": "公开只读衍生品运行可追溯且有界",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["公共网络可用或明确返回候选级失败", "不提供账户凭据"],
+  "steps": ["运行宽池 discovery-only", "对最多二十个候选运行 shadow collector", "检查运行时、来源、绑定和安全字段"],
+  "expected": ["不调用私有 API 或订单接口", "成功与失败均可审计", "全轮不超过一百二十秒", "公共来源全部失败时准确输出 DATA_DEGRADED 而非假 PASS"],
+  "evidence": ["公开 no-write 运行包", "秘密扫描", "独立只读复验"]
+}

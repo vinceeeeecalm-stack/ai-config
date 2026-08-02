@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-production-isolation-v2",
+  "title": "影子衍生品不能改变生产 Top1 或正式动作",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["冻结同一 discovery 输入", "分别运行不带与带 shadow collector 的现有生产路径"],
+  "steps": ["比较生产 discovery 排名与正式输出", "检查安全字段和 ROI 资格"],
+  "expected": ["生产候选顺序和正式动作逐字一致", "production_rule_changed=false", "formal_action_eligible=false", "paper_roi_eligible=false", "real_money_roi_eligible=false"],
+  "evidence": ["生产无变化回归", "source diff 审计"]
+}

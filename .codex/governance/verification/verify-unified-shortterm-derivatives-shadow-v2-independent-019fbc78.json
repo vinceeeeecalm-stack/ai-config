@@ -1,0 +1,88 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-unified-shortterm-derivatives-shadow-v2-independent-019fbc78",
+  "goal_id": "unified-shortterm-derivatives-shadow-v2",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "1a9ce5a0cc0d1f07a4f9e7ac2f81e85e75b4d1a25753fbaab85b3733ccd679be",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "governance-source-binding",
+      "result": "PASS",
+      "evidence": "Governance status and RUNTIME_VERIFIED record match the frozen goal and supplied source digest."
+    },
+    {
+      "id": "round4-all-candidate-coverage",
+      "result": "PASS",
+      "evidence": "The round4 discovery Top20, shadow handoff, collector output and round4 ledger subset contain the same 20 symbols in identical order, including candidates below Top3."
+    },
+    {
+      "id": "oi-conflict-gates",
+      "result": "PASS",
+      "evidence": "Round4 contains 0 CONFIRMED_LONG, 15 OI_ONLY_CONFLICT, 1 CROWDED_CONFLICT and 4 NO_FUEL records. Negative tests independently confirmed that OI-only, weak spot confirmation and extreme funding cannot produce CONFIRMED_LONG or formal eligibility."
+    },
+    {
+      "id": "public-contract-alias-proof",
+      "result": "PASS",
+      "evidence": "Round4 maps PEPEUSDT to 1000PEPEUSDT and SHIBUSDT to 1000SHIBUSDT. Independent current public Binance Futures premiumIndex reads returned both exact multiplier contracts; an unknown multiplier alias resolved to null."
+    },
+    {
+      "id": "candidate-local-degradation",
+      "result": "PASS",
+      "evidence": "Fault-injection testing preserved the successful candidate, marked only the failed candidate DEGRADED and represented unavailable OI changes as null rather than zero."
+    },
+    {
+      "id": "same-round-four-binding",
+      "result": "PASS",
+      "evidence": "All 20 round4 records share exactly one snapshot_id, strategy_version, config_digest and runtime-source digest."
+    },
+    {
+      "id": "append-only-observations",
+      "result": "PASS",
+      "evidence": "The ledger contains 80 unique observation IDs across four 20-record snapshots. Tests confirmed equivalent appends return NO_UPDATE and conflicting content under the same ID is blocked."
+    },
+    {
+      "id": "seven-day-review-clock",
+      "result": "PASS",
+      "evidence": "Every round4 record has review_due_at exactly 604800 seconds after captured_at and evaluation_window_hours=168."
+    },
+    {
+      "id": "bounded-public-runtime",
+      "result": "PASS",
+      "evidence": "Round4 completed public collection for 20 candidates in 6.286746 seconds, within the 120-second whole-round limit; configured per-source timeout is 12 seconds."
+    },
+    {
+      "id": "production-isolation",
+      "result": "PASS",
+      "evidence": "The raw source diff adds an opt-in data-only handoff after production discovery ranking. Candidate order and production inputs remain unchanged; collector tests confirmed no mutation. Round4 derivatives_lead_candidate_count is 0."
+    },
+    {
+      "id": "execution-and-roi-isolation",
+      "result": "PASS",
+      "evidence": "All round4 records and the run summary retain production_rule_changed=false, formal_action_eligible=false, paper_roi_eligible=false, real_money_roi_eligible=false, live_orders_enabled=false, private_api_used=false and human_confirmation_required=true."
+    },
+    {
+      "id": "targeted-regression-tests",
+      "result": "PASS",
+      "evidence": "All 8 derivatives-shadow tests and the impulse scanner self-test passed."
+    },
+    {
+      "id": "global-skill-sync",
+      "result": "PASS",
+      "evidence": "Workspace and installed manifests matched exactly; validation, smoke checks and the installed 225-test suite passed."
+    },
+    {
+      "id": "public-repository-safety",
+      "result": "PASS",
+      "evidence": "PublicRepositorySafetyScanV1 returned PASS with 0 secret findings and 0 privacy findings."
+    },
+    {
+      "id": "read-only-verification",
+      "result": "PASS",
+      "evidence": "Git status was unchanged before and after verification. No project file, runtime package or ledger was modified."
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T12:11:35Z"
+}
