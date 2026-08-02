@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "identity-source-local-degradation-v10",
+  "title": "Identity-source failure degrades only the affected candidate",
+  "level": "TESTED",
+  "preconditions": ["One suspicious symbol identity lookup times out or fails"],
+  "steps": [
+    "Inject an identity lookup failure for one suspicious candidate",
+    "Continue discovery for ordinary and already-proven candidates"
+  ],
+  "expected": [
+    "Only the affected suspicious candidate is conservatively excluded",
+    "Other candidates continue through the round",
+    "The exclusion reason and source degradation are explicit"
+  ],
+  "evidence": ["failure-injection unit test"]
+}

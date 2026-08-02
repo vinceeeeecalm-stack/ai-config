@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "crypto-native-suffix-identity-preserved-v10",
+  "title": "Native Crypto suffix symbols remain discoverable",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Public exact identity evidence is available for a suspicious suffix symbol such as SHIB"],
+  "steps": [
+    "Resolve the suspicious base through the bounded public identity resolver",
+    "Run the formal Crypto discovery path"
+  ],
+  "expected": [
+    "An exact non-security Crypto identity is admitted",
+    "SHIBUSDT is not rejected solely because its base ends in B",
+    "All downstream alpha and risk gates remain required"
+  ],
+  "evidence": ["unit regression and fresh formal discovery audit"]
+}

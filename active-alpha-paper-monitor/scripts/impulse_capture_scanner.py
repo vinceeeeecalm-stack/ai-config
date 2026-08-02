@@ -16,6 +16,7 @@ import hashlib
 import json
 import math
 import statistics
+import subprocess
 import sys
 import threading
 import time
@@ -41,6 +42,11 @@ from risk_adjusted_path_quality import (
     calculate_risk_adjusted_path,
 )
 from tactical_evidence_ledger import append_observation, build_scanner_observation
+from crypto_candidate_identity import (
+    fetch_binance_public_product_identity,
+    product_identity_rejection_reason,
+    requires_public_identity_resolution,
+)
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -126,12 +132,17 @@ SECURITY_IDENTITY_MARKERS = (
     "tokenized etf",
     " xstock",
 )
-KNOWN_CRYPTO_SUFFIX_BASES = {"BNB", "TON"}
 DEFAULT_SYMBOLS = ["NIGHTUSDT", "SOLUSDT", "ADAUSDT", "ETHUSDT", "BTCUSDT"]
 ANCHORS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]
 DEFAULT_RECOMMENDATION_HISTORY = ROOT.parent / "manual-investment-strategy-operator" / "recommendations" / "recommendation_history.json"
 DEFAULT_TOP_CANDIDATES = 3
 DEFAULT_MAX_WORKERS = 12
+MAX_SUFFIX_IDENTITY_LOOKUPS = 8
+DISCOVERY_WALL_CLOCK_BUDGET_SECONDS = 15.0
+DISCOVERY_PUBLIC_TIMEOUT_SECONDS = 1.0
+DISCOVERY_PUBLIC_MAX_BASES = 2
+DISCOVERY_PRODUCT_TIMEOUT_SECONDS = 2.5
+DISCOVERY_IDENTITY_FALLBACK_TIMEOUT_SECONDS = 0.75
 IMPULSE_STAGE_PRIORITY = {
     "trigger": 5,
     "pre_breakout": 4,
@@ -656,14 +667,14 @@ def classify(metrics):
     return "no_current_impulse", "watch", score, reasons
 
 
-def anchor_state(timeout):
+def anchor_state(timeout, *, max_bases=3):
     def fetch_anchor(symbol):
         try:
             raw = fetch_json(
                 "/api/v3/klines",
                 {"symbol": symbol, "interval": "1h", "limit": 5},
                 timeout=min(timeout, 2.0),
-                max_bases=3,
+                max_bases=max_bases,
             )
             rows = summarize_klines(raw)
             return symbol, pct_change(rows[0]["open"], rows[-1]["close"])
@@ -772,7 +783,7 @@ def filter_exchange_spot_symbols(symbols, exchange_definitions):
     return accepted
 
 
-def fetch_exchange_definitions(symbols, timeout):
+def fetch_exchange_definitions(symbols, timeout, *, max_bases=3):
     """Fetch exchange identities in bounded batches for merged symbol inputs."""
 
     definitions = {}
@@ -783,7 +794,7 @@ def fetch_exchange_definitions(symbols, timeout):
                 "/api/v3/exchangeInfo",
                 {"symbols": json.dumps(batch, separators=(",", ":"))},
                 timeout=min(timeout, 5.0),
-                max_bases=3,
+                max_bases=max_bases,
             ).get("symbols")
             or []
         )
@@ -830,12 +841,30 @@ def fetch_public_crypto_identity(timeout):
 
 
 def fetch_public_identity_search(symbol, timeout):
-    request = Request(
-        f"https://api.coingecko.com/api/v3/search?{urlencode({'query': symbol})}",
-        headers={"User-Agent": "Mozilla/5.0 (Codex research-only scanner)"},
+    bounded_timeout = max(0.5, float(timeout))
+    result = subprocess.run(
+        [
+            "curl",
+            "--compressed",
+            "--connect-timeout",
+            str(min(0.5, bounded_timeout)),
+            "--max-time",
+            str(bounded_timeout),
+            "--retry",
+            "0",
+            "-sS",
+            f"https://api.coingecko.com/api/v3/search?{urlencode({'query': symbol})}",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=bounded_timeout + 0.5,
     )
-    with urlopen(request, timeout=timeout) as response:
-        payload = json.loads(response.read().decode("utf-8"))
+    if result.returncode != 0:
+        raise RuntimeError(
+            result.stderr.strip() or f"CoinGecko identity search returncode={result.returncode}"
+        )
+    payload = json.loads(result.stdout)
     exact = [
         item
         for item in payload.get("coins") or []
@@ -872,8 +901,8 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
     raw = fetch_json(
         "/api/v3/ticker/24hr",
         {"type": "MINI"},
-        timeout=min(timeout, 5.0),
-        max_bases=3,
+        timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+        max_bases=DISCOVERY_PUBLIC_MAX_BASES,
     )
     preselected_rows = []
     for row in raw:
@@ -896,8 +925,8 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         fetch_json(
             "/api/v3/exchangeInfo",
             {"symbols": json.dumps(preselected, separators=(",", ":"))},
-            timeout=min(timeout, 5.0),
-            max_bases=3,
+            timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+            max_bases=DISCOVERY_PUBLIC_MAX_BASES,
         ).get("symbols")
         or []
     )
@@ -909,23 +938,108 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         {
             str(item.get("baseAsset") or "").upper()
             for item in exchange_rows
-            if str(item.get("baseAsset") or "").upper().endswith(("B", "ON"))
-            and str(item.get("baseAsset") or "").upper() not in KNOWN_CRYPTO_SUFFIX_BASES
+            if requires_public_identity_resolution(
+                str(item.get("baseAsset") or "").upper()
+            )
         }
     )
-    # Binance's tokenized bStocks use an underlying ticker plus a B suffix
-    # (for example MUB/SOXLB/EWYB). Fast discovery rejects that convention
-    # unless the base is a known native crypto. Any disputed symbol can be
-    # re-admitted only after the slower public identity check in validation.
-    security_like_searches = {
-        base: [
-            {
+    # Resolve only suffix collisions, concurrently and within the discovery
+    # budget. A source failure excludes that candidate alone; ordinary symbols
+    # continue. Exact non-security Crypto matches are re-admitted, while exact
+    # security matches and ambiguous/no-match results remain excluded.
+    suspicious_identity: dict[str, dict] = {}
+    product_identity = {}
+    product_identity_error = None
+    try:
+        product_identity = fetch_binance_public_product_identity(
+            min(timeout, DISCOVERY_PRODUCT_TIMEOUT_SECONDS)
+        )
+        DISCOVERY_AUDIT["binance_product_identity_status"] = "verified_public_catalog"
+    except Exception as exc:  # noqa: BLE001 - fall back to exact public searches.
+        product_identity_error = str(exc)
+        DISCOVERY_AUDIT["binance_product_identity_status"] = (
+            f"degraded_unavailable:{exc}"
+        )
+
+    for base in suspicious_bases:
+        symbol = next(
+            (
+                str(item.get("symbol") or "")
+                for item in exchange_rows
+                if str(item.get("baseAsset") or "").upper() == base
+            ),
+            f"{base}USDT",
+        )
+        product_reason = product_identity_rejection_reason(
+            symbol,
+            product_identity,
+            source_available=product_identity_error is None,
+        )
+        if product_reason is None and symbol in product_identity:
+            suspicious_identity[base] = {
                 "symbol": base,
-                "reason": "tokenized_security_suffix_requires_post_top3_crypto_proof",
+                "security_matches": [],
+                "non_security_matches": [
+                    {
+                        "id": symbol,
+                        "name": product_identity[symbol].get("an"),
+                        "source": "Binance public product catalog",
+                    }
+                ],
+                "is_security_or_ambiguous": False,
             }
-        ]
-        for base in suspicious_bases
-    }
+        elif product_reason == "tokenized_security_product":
+            suspicious_identity[base] = {
+                "symbol": base,
+                "security_matches": [
+                    {
+                        "id": symbol,
+                        "name": product_identity[symbol].get("an"),
+                        "tags": product_identity[symbol].get("tags") or [],
+                        "source": "Binance public product catalog",
+                    }
+                ],
+                "non_security_matches": [],
+                "is_security_or_ambiguous": True,
+            }
+
+    unresolved_bases = [
+        base for base in suspicious_bases if base not in suspicious_identity
+    ]
+    suspicious_identity.update(
+        {
+            base: {
+                "symbol": base,
+                "security_matches": [],
+                "non_security_matches": [],
+                "is_security_or_ambiguous": True,
+                "lookup_error": "bounded_identity_lookup_budget_exhausted",
+            }
+            for base in unresolved_bases
+        }
+    )
+    if unresolved_bases:
+        def resolve_identity(base):
+            try:
+                return base, fetch_public_identity_search(
+                    base,
+                    min(timeout, DISCOVERY_IDENTITY_FALLBACK_TIMEOUT_SECONDS),
+                )
+            except Exception as exc:  # noqa: BLE001 - candidate-local degradation.
+                return base, {
+                    "symbol": base,
+                    "security_matches": [],
+                    "non_security_matches": [],
+                    "is_security_or_ambiguous": True,
+                    "lookup_error": str(exc),
+                }
+
+        bounded_bases = unresolved_bases[:MAX_SUFFIX_IDENTITY_LOOKUPS]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(4, len(bounded_bases))
+        ) as executor:
+            for base, result in executor.map(resolve_identity, bounded_bases):
+                suspicious_identity[base] = result
     confirmed_crypto_symbols = set()
     security_like_symbols = {}
     if identity_crosscheck:
@@ -938,7 +1052,9 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
             DISCOVERY_AUDIT["crypto_identity_status"] = f"degraded_unavailable:{exc}"
     else:
         DISCOVERY_AUDIT["crypto_identity_status"] = (
-            "tokenized_security_suffix_excluded; full_crosscheck_deferred_until_after_top3"
+            "bounded_suffix_collision_crosscheck_complete:"
+            f"{len(suspicious_bases) - len(unresolved_bases) + min(len(unresolved_bases), MAX_SUFFIX_IDENTITY_LOOKUPS)}/"
+            f"{len(suspicious_bases)}; full_crosscheck_deferred_until_after_top3"
         )
     items = [(symbol, quote_volume, 0) for symbol, quote_volume in preselected_rows]
     DISCOVERY_AUDIT["ticker_rows_considered"] = len(items)
@@ -951,12 +1067,20 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         exchange_rejection = exchange_spot_rejection_reason(definition)
         if exchange_rejection is None:
             base_asset = str(definition.get("baseAsset") or symbol[:-4]).upper()
-            if base_asset in security_like_searches:
+            suffix_identity = suspicious_identity.get(base_asset)
+            if suffix_identity and suffix_identity.get("is_security_or_ambiguous"):
                 DISCOVERY_AUDIT["crypto_identity_rejected"].append(
                     {
                         "symbol": symbol,
-                        "reason": "security_or_tokenized_equity_identity_not_crypto_candidate",
-                        "identity_matches": security_like_searches[base_asset][:5],
+                        "reason": (
+                            "public_identity_lookup_unavailable_for_suffix_collision"
+                            if suffix_identity.get("lookup_error")
+                            else "security_or_ambiguous_suffix_identity_not_crypto_candidate"
+                        ),
+                        "identity_matches": (
+                            suffix_identity.get("security_matches") or []
+                        )[:5],
+                        "lookup_error": suffix_identity.get("lookup_error"),
                     }
                 )
                 continue
@@ -1015,6 +1139,7 @@ def analyze_symbol(
     baseline_recommendation_id=None,
     captured_at=None,
     book_snapshot=None,
+    max_bases=3,
 ):
     captured_at = captured_at or utc_now()
     # Ninety rows are sufficient for a 60-minute discovery baseline plus the
@@ -1024,7 +1149,7 @@ def analyze_symbol(
         "/api/v3/klines",
         {"symbol": symbol, "interval": "1m", "limit": 90},
         timeout=min(timeout, 2.0),
-        max_bases=3,
+        max_bases=max_bases,
     )
     rows = completed_rows(summarize_klines(raw), int(captured_at.timestamp() * 1000))
     if len(rows) < 30:
@@ -1039,7 +1164,7 @@ def analyze_symbol(
             "/api/v3/depth",
             {"symbol": symbol, "limit": 100},
             timeout=min(timeout, 2.0),
-            max_bases=3,
+            max_bases=max_bases,
         )
         book = orderbook_metrics(depth)
     current = rows[-1]["close"]
@@ -1512,19 +1637,24 @@ def main(argv=None):
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["status"] == "ok" else 1
     run_started = time.monotonic()
+    discovery_deadline = run_started + DISCOVERY_WALL_CLOCK_BUDGET_SECONDS - 0.5
     symbols = [item.strip().upper() for item in args.symbols.split(",") if item.strip()]
     bootstrap_errors = []
     try:
         fetch_json(
             "/api/v3/ping",
-            timeout=min(args.timeout, 2.0),
-            max_bases=len(BINANCE_PUBLIC_BASES),
+            timeout=min(args.timeout, 0.5),
+            max_bases=1,
         )
     except Exception as exc:  # noqa: BLE001
         bootstrap_errors.append({"source": "endpoint_health_probe", "error": str(exc)})
     book_by_symbol = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        anchor_future = executor.submit(anchor_state, args.timeout)
+        anchor_future = executor.submit(
+            anchor_state,
+            min(args.timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+            max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+        )
         discovery_future = (
             executor.submit(discover_symbols, args.dynamic_top, args.timeout)
             if args.dynamic_top > 0
@@ -1545,7 +1675,8 @@ def main(argv=None):
         try:
             merged_exchange_definitions = fetch_exchange_definitions(
                 symbols,
-                args.timeout,
+                min(args.timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
+                max_bases=DISCOVERY_PUBLIC_MAX_BASES,
             )
         except Exception as exc:  # noqa: BLE001
             bootstrap_errors.append(
@@ -1561,8 +1692,8 @@ def main(argv=None):
             raw_books = fetch_json(
                 "/api/v3/ticker/bookTicker",
                 {"symbols": json.dumps(symbols, separators=(",", ":"))},
-                timeout=min(args.timeout, 2.0),
-                max_bases=3,
+                timeout=min(args.timeout, 0.75),
+                max_bases=DISCOVERY_PUBLIC_MAX_BASES,
             )
             if isinstance(raw_books, dict):
                 raw_books = [raw_books]
@@ -1584,10 +1715,11 @@ def main(argv=None):
             return analyze_symbol(
                 symbol,
                 anchor,
-                args.timeout,
+                min(args.timeout, 0.75),
                 baseline_ids.get(symbol),
                 captured,
                 book_by_symbol.get(symbol),
+                max_bases=DISCOVERY_PUBLIC_MAX_BASES,
             )
         except Exception as exc:  # noqa: BLE001 - scanner should continue and record failures.
             return {"symbol": symbol, "_scan_error": str(exc)}
@@ -1595,7 +1727,6 @@ def main(argv=None):
     workers = max(1, min(args.max_workers, len(symbols) or 1))
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=workers)
     futures = {executor.submit(scan_symbol, symbol): symbol for symbol in symbols}
-    discovery_deadline = run_started + 14.5
     try:
         remaining = max(0.05, discovery_deadline - time.monotonic())
         for future in concurrent.futures.as_completed(futures, timeout=remaining):

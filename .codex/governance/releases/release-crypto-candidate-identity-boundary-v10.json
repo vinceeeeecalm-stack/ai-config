@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-crypto-candidate-identity-boundary-v10",
+  "project_id": "investing-monorepo",
+  "goal_id": "crypto-candidate-identity-boundary-v10",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "f6ecf87448d4f8feaa5e0e0c114e1d8ab46ae8c9",
+    "branch": "codex/crypto-candidate-identity-v10",
+    "dirty": true
+  },
+  "source_digest": "924d27a057c0c9d11c0041506d0bcb8b42d8f4c9e54d15749a8df6be72fd1a3d",
+  "build_version": "source-924d27a0",
+  "runtime_version": "crypto-identity-boundary-v10",
+  "database_version": "no-database-change",
+  "last_verification_id": "verify-crypto-candidate-identity-boundary-v10-runtime_verified-b9483bc6",
+  "independent_verification_id": "verify-crypto-candidate-identity-boundary-v10-independent-rerun-019fbc78-924d27a0",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T07:23:05.701886Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

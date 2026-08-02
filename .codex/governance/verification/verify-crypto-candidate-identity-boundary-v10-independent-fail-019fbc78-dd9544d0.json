@@ -1,0 +1,70 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-crypto-candidate-identity-boundary-v10-independent-019fbc78-dd9544d0",
+  "goal_id": "crypto-candidate-identity-boundary-v10",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "implementation_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "source_digest": "dd9544d0a4e88386ea3ee5c9de220b6897bec161986781622ac6b444e3f126d0",
+  "level": "RUNTIME_VERIFIED",
+  "result": "FAIL",
+  "read_only": true,
+  "P0": [],
+  "P1": [
+    {
+      "id": "formal-discovery-wall-clock-budget-not-met",
+      "severity": "P1",
+      "description": "正式发现挑战未能可靠满足冻结的 15 秒墙钟预算，运行需要终止。",
+      "acceptance_scenario_id": "crypto-native-suffix-identity-preserved-v10"
+    }
+  ],
+  "findings": [
+    {
+      "id": "formal-discovery-wall-clock-budget-not-met",
+      "severity": "P1",
+      "result": "FAIL",
+      "required": "formal discovery <=15 seconds",
+      "observed": "未在预算边界内可靠完成并被终止"
+    }
+  ],
+  "evidence": {
+    "native_crypto_identity": {
+      "result": "PASS",
+      "admitted": ["SHIBUSDT", "DGBUSDT", "CKBUSDT", "TRBUSDT", "ARBUSDT"]
+    },
+    "tokenized_security_identity": {
+      "result": "PASS",
+      "rejected": {
+        "SOXLBUSDT": "tokenized_security_product",
+        "MUBUSDT": "tokenized_security_product",
+        "EWYBUSDT": "tokenized_security_product"
+      }
+    },
+    "identity_source_local_degradation": {
+      "result": "PASS",
+      "ordinary_candidates_continue": true,
+      "affected_suffix_candidate_conservatively_excluded": true
+    },
+    "pool_only": {
+      "result": "PASS",
+      "elapsed_seconds": 6.61,
+      "budget_seconds": 120,
+      "persistent_write_allowed": false
+    },
+    "hard_gates": {
+      "thresholds_changed": false,
+      "live_orders_enabled": false,
+      "private_api_used": false,
+      "paper_live_separated": true
+    },
+    "repository_safety": {
+      "secret_finding_count": 0,
+      "privacy_finding_count": 0
+    }
+  },
+  "commands": [
+    {"purpose": "Inspect frozen GoalContract and acceptance scenarios", "mode": "read_only", "result": "PASS"},
+    {"purpose": "Inspect current raw git diff and regression tests", "mode": "read_only", "result": "PASS"},
+    {"purpose": "Resolve exact Binance public identities for native Crypto and bStocks fixtures", "mode": "read_only", "result": "PASS"},
+    {"purpose": "Run bounded formal discovery challenge with --discovery-only --no-write", "mode": "read_only", "result": "FAIL", "reason": "15-second wall-clock budget not reliably met"}
+  ]
+}

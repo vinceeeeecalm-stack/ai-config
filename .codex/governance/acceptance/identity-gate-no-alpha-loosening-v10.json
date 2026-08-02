@@ -1,0 +1,17 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "identity-gate-no-alpha-loosening-v10",
+  "title": "Candidate identity repair does not loosen profit or risk gates",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["A native Crypto candidate passes identity but lacks positive EV, catalyst or live trigger"],
+  "steps": [
+    "Run the same frozen strategy and configuration through the formal scanner",
+    "Inspect current_action and the gate audit"
+  ],
+  "expected": [
+    "Identity admission alone never produces ENTER_NOW or WAIT_FOR_ENTRY",
+    "Negative conservative EV, missing catalyst or stale live evidence still produces NO_TRADE",
+    "Paper and live evidence remain separated"
+  ],
+  "evidence": ["source/config digest comparison and fresh NO_TRADE runtime artifact"]
+}

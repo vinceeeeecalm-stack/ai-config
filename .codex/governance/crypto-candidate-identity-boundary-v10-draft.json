@@ -1,0 +1,35 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "crypto-candidate-identity-boundary-v10",
+  "title": "Preserve native Crypto coverage while excluding tokenized securities",
+  "business_outcome": "减少原生 Crypto 候选被误排除造成的潜在 Alpha 漏失，并阻止代币化股票污染 Crypto 1–7 日排序，让唯一 research_top1 的资产身份可信且不放宽赚钱硬门。",
+  "scope": [
+    "为动态候选池与正式 impulse 扫描建立共享的候选身份边界",
+    "SHIB 等有公共精确原生 Crypto 证据的后缀符号可以进入正式发现",
+    "SOXLB、MUB、EWYB 等代币化证券或身份不明的可疑后缀符号不得进入 Crypto 机会排序",
+    "身份数据源失败只保守淘汰受影响候选，并保留确定性审计",
+    "保持价值、催化、正保守 EV、流动性、风险、Paper/真钱隔离与人工确认门不变"
+  ],
+  "non_goals": [
+    "不修改 alpha、估值、催化、EV、入场、目标、止损或风险阈值",
+    "不自动下单、充值、卖出、换仓或质押",
+    "不删除或覆盖运行、Paper、真钱、治理与 Git 历史",
+    "不重写美股扫描链路"
+  ],
+  "constraints": [
+    "同一工作树保持单写入者",
+    "动态池总预算不超过 120 秒，正式发现预算不超过 15 秒",
+    "身份解析失败必须局部、保守、可审计，不能拖死全轮",
+    "身份无效的显式或持仓符号只能进入风险监控审计，不能进入新机会排序",
+    "live_orders_enabled 与 private_api_used 始终为 false"
+  ],
+  "acceptance_scenario_ids": [
+    "crypto-native-suffix-identity-preserved-v10",
+    "tokenized-security-opportunity-excluded-v10",
+    "identity-source-local-degradation-v10",
+    "identity-gate-no-alpha-loosening-v10"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "tactical-bounded-pool-dryrun-safety-v9"
+}

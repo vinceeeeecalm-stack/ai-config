@@ -260,7 +260,10 @@ class StablecoinEligibilityTests(unittest.TestCase):
         }
         M.DISCOVERY_AUDIT["spot_eligibility_rejected"].clear()
 
-        with patch.object(M, "fetch_json", side_effect=[ticker_rows, exchange_rows]):
+        with (
+            patch.object(M, "fetch_json", side_effect=[ticker_rows, exchange_rows]),
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
             selected = M.discover_symbols(4, 8)
 
         self.assertEqual(selected, ["JUPUSDT", "SYRUPUSDT"])
@@ -270,6 +273,172 @@ class StablecoinEligibilityTests(unittest.TestCase):
         }
         self.assertEqual(rejected["SXPUPUSDT"], "leveraged_token")
         self.assertEqual(rejected["1INCHDOWNUSDT"], "leveraged_token")
+
+    def test_suffix_collision_uses_public_identity_and_preserves_native_crypto(self):
+        ticker_rows = [
+            {"symbol": "SHIBUSDT", "quoteVolume": "1000"},
+            {"symbol": "SOXLBUSDT", "quoteVolume": "900"},
+            {"symbol": "BTCUSDT", "quoteVolume": "800"},
+        ]
+        exchange_rows = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("SHIBUSDT", "SOXLBUSDT", "BTCUSDT")
+            ]
+        }
+
+        product_identity = {
+            "SHIBUSDT": {"s": "SHIBUSDT", "an": "SHIBA INU", "tags": ["Meme"]},
+            "SOXLBUSDT": {
+                "s": "SOXLBUSDT",
+                "an": "Semicon Bull 3X ETF (bStocks)",
+                "tags": ["bStocks"],
+            },
+            "BTCUSDT": {"s": "BTCUSDT", "an": "Bitcoin", "tags": []},
+        }
+
+        M.DISCOVERY_AUDIT["crypto_identity_rejected"].clear()
+        with (
+            patch.object(M, "fetch_json", side_effect=[ticker_rows, exchange_rows]),
+            patch.object(
+                M,
+                "fetch_binance_public_product_identity",
+                return_value=product_identity,
+            ),
+        ):
+            selected = M.discover_symbols(3, 8)
+
+        self.assertEqual(selected, ["SHIBUSDT", "BTCUSDT"])
+        self.assertIn(
+            "SOXLBUSDT",
+            {item["symbol"] for item in M.DISCOVERY_AUDIT["crypto_identity_rejected"]},
+        )
+
+    def test_suffix_identity_lookup_failure_is_candidate_local(self):
+        ticker_rows = [
+            {"symbol": "NATIVEBUSDT", "quoteVolume": "1000"},
+            {"symbol": "BTCUSDT", "quoteVolume": "900"},
+        ]
+        exchange_rows = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("NATIVEBUSDT", "BTCUSDT")
+            ]
+        }
+
+        with (
+            patch.object(M, "fetch_json", side_effect=[ticker_rows, exchange_rows]),
+            patch.object(
+                M,
+                "fetch_binance_public_product_identity",
+                side_effect=TimeoutError("product catalog fixture timeout"),
+            ),
+            patch.object(
+                M,
+                "fetch_public_identity_search",
+                side_effect=TimeoutError("identity fixture timeout"),
+            ),
+        ):
+            selected = M.discover_symbols(2, 8)
+
+        self.assertEqual(selected, ["BTCUSDT"])
+        rejection = next(
+            item
+            for item in M.DISCOVERY_AUDIT["crypto_identity_rejected"]
+            if item["symbol"] == "NATIVEBUSDT"
+        )
+        self.assertEqual(
+            rejection["reason"],
+            "public_identity_lookup_unavailable_for_suffix_collision",
+        )
+
+    def test_exact_public_native_crypto_identity_re_admits_suffix_collision(self):
+        ticker_rows = [
+            {"symbol": "NATIVEBUSDT", "quoteVolume": "1000"},
+            {"symbol": "BTCUSDT", "quoteVolume": "900"},
+        ]
+        exchange_rows = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("NATIVEBUSDT", "BTCUSDT")
+            ]
+        }
+        public_identity = {
+            "symbol": "NATIVEB",
+            "security_matches": [],
+            "non_security_matches": [
+                {"id": "nativeb-chain", "name": "NativeB", "symbol": "nativeb"}
+            ],
+            "is_security_or_ambiguous": False,
+        }
+
+        with (
+            patch.object(M, "fetch_json", side_effect=[ticker_rows, exchange_rows]),
+            patch.object(
+                M,
+                "fetch_binance_public_product_identity",
+                side_effect=TimeoutError("product catalog fixture timeout"),
+            ),
+            patch.object(
+                M,
+                "fetch_public_identity_search",
+                return_value=public_identity,
+            ),
+        ):
+            selected = M.discover_symbols(2, 8)
+
+        self.assertEqual(selected, ["NATIVEBUSDT", "BTCUSDT"])
+
+    def test_formal_discovery_source_attempts_are_bound_to_wall_clock_budget(self):
+        calls = []
+
+        def bounded_fetch(path, *_args, **kwargs):
+            calls.append((path, kwargs.get("timeout"), kwargs.get("max_bases")))
+            if path == "/api/v3/ticker/24hr":
+                return [{"symbol": "BTCUSDT", "quoteVolume": "1000"}]
+            if path == "/api/v3/exchangeInfo":
+                return {
+                    "symbols": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "baseAsset": "BTC",
+                            "status": "TRADING",
+                            "isSpotTradingAllowed": True,
+                            "permissionSets": [["SPOT"]],
+                        }
+                    ]
+                }
+            raise AssertionError(path)
+
+        with (
+            patch.object(M, "fetch_json", side_effect=bounded_fetch),
+            patch.object(M, "fetch_binance_public_product_identity", return_value={}),
+        ):
+            selected = M.discover_symbols(1, 4)
+
+        self.assertEqual(selected, ["BTCUSDT"])
+        self.assertTrue(calls)
+        for _path, timeout, max_bases in calls:
+            self.assertLessEqual(timeout, M.DISCOVERY_PUBLIC_TIMEOUT_SECONDS)
+            self.assertLessEqual(max_bases, M.DISCOVERY_PUBLIC_MAX_BASES)
 
     def test_strategy_version_isolated_after_candidate_universe_change(self):
         self.assertEqual(M.TACTICAL_STRATEGY_VERSION, "impulse-capture-tactical-v6")

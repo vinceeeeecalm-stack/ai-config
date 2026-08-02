@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-bounded-pool-dryrun-safety-v9",
+  "goal_id": "crypto-candidate-identity-boundary-v10",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "96e24b2e1a5a4835ab344cb24d062260201d0424bcb4e7e03a348d2f2d25ed62",
+  "source_digest": "924d27a057c0c9d11c0041506d0bcb8b42d8f4c9e54d15749a8df6be72fd1a3d",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-runtime_verified-ab9184b8",
-  "independent_verification_id": "verify-tactical-bounded-pool-dryrun-safety-v9-independent-019fbc78-96e24b2e",
-  "updated_at": "2026-08-02T06:28:47.883611Z"
+  "last_verification_id": "verify-crypto-candidate-identity-boundary-v10-runtime_verified-b9483bc6",
+  "independent_verification_id": "verify-crypto-candidate-identity-boundary-v10-independent-rerun-019fbc78-924d27a0",
+  "updated_at": "2026-08-02T07:22:57.057967Z"
 }
