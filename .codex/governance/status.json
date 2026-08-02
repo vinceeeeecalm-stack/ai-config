@@ -5,7 +5,7 @@
   "source_digest": "abb8a35e9b047d3c5f115b0549e287e9e8faf20886526ad295d4b2f2c48a86a4",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-runtime_verified-c05f2f97",
-  "independent_verification_id": null,
-  "updated_at": "2026-08-02T14:35:02.880048Z"
+  "last_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-runtime_verified-ceac5461",
+  "independent_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-independent-pass-019fbc78",
+  "updated_at": "2026-08-02T14:37:12.797953Z"
 }

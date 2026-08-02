@@ -1,5 +1,6 @@
 {
   "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-continuous-sampling-v1-independent-fail-019fbc78",
   "goal_id": "derivatives-shadow-continuous-sampling-v1",
   "level": "RUNTIME_VERIFIED",
   "source_digest": "14c5544703249b675aba039e782dfea902058a31689d6a6e3f0757e639e2a355",
