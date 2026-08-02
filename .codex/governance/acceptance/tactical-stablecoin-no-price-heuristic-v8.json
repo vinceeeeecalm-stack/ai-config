@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-stablecoin-no-price-heuristic-v8",
+  "title": "稳定币排除不得误删价格接近一美元的普通风险资产",
+  "level": "TESTED",
+  "preconditions": [
+    "普通 Crypto 现货资产价格可恰好或接近 1 美元",
+    "资产代码与身份不属于稳定币、法币样资产、低 beta 商品或杠杆代币"
+  ],
+  "steps": [
+    "对稳定币、普通资产和杠杆代币 fixture 运行同一资格函数",
+    "重复运行并比较结果"
+  ],
+  "expected": [
+    "稳定币与杠杆代币稳定被拒绝",
+    "BTC、AAVE、NIGHT 以及价格数值为 1 的普通 fixture 资产仍具备候选资格",
+    "资格结果不依赖当前价格涨跌或技术分数"
+  ],
+  "evidence": [
+    "候选资格单元测试与重复运行结果"
+  ]
+}

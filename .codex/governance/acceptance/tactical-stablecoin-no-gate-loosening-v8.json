@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-stablecoin-no-gate-loosening-v8",
+  "title": "排除稳定币后不得把次优风险资产自动升级为交易",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "稳定币被前置排除后仍有一个或多个非稳定币研究候选",
+    "非稳定币候选至少一个价值、催化、正保守 EV、实时、流动性或风险硬门未通过"
+  ],
+  "steps": [
+    "运行完整动态 Crypto 1–7 日扫描",
+    "检查唯一 research_top1、current_action、trade_plan、Paper/真钱边界和安全字段"
+  ],
+  "expected": [
+    "唯一 research_top1 是非稳定币",
+    "任一正式硬门失败时 current_action=NO_TRADE 且 trade_plan=null",
+    "排除首名不会让次名继承交易资格",
+    "live_orders_enabled=false、private_api_used=false，Paper 不进入真钱 ROI"
+  ],
+  "evidence": [
+    "真实运行 JSON",
+    "全量领域测试、同步 smoke 与不同线程只读复验"
+  ]
+}

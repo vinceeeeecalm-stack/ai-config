@@ -44,7 +44,7 @@ from tactical_evidence_ledger import append_observation, build_scanner_observati
 
 
 ROOT = Path(__file__).resolve().parent.parent
-TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v5"
+TACTICAL_STRATEGY_VERSION = "impulse-capture-tactical-v6"
 BINANCE_PUBLIC_BASES = (
     "https://data-api.binance.vision",
     "https://api1.binance.com",
@@ -80,6 +80,7 @@ BINANCE_ENDPOINT_SEMAPHORES = {
 }
 DISCOVERY_AUDIT = {
     "ticker_rows_considered": 0,
+    "candidate_eligibility_rejected": [],
     "spot_eligibility_checked": 0,
     "spot_eligibility_rejected": [],
     "crypto_identity_source": "CoinGecko public coin list",
@@ -87,6 +88,7 @@ DISCOVERY_AUDIT = {
     "crypto_identity_rejected": [],
 }
 STABLE_BASES = {
+    "U",
     "USDC",
     "FDUSD",
     "TUSD",
@@ -115,7 +117,6 @@ STABLE_BASES = {
     "GBP",
 }
 LOW_BETA_COMMODITY_BASES = {"PAXG", "XAUT"}
-LEVERAGED_TOKEN_MARKERS = ("UPUSDT", "DOWNUSDT", "BULLUSDT", "BEARUSDT")
 SECURITY_IDENTITY_MARKERS = (
     "backpack securities",
     "bstocks tokenized stock",
@@ -287,9 +288,16 @@ def rounded(value, digits=4):
     if isinstance(value, bool):
         return value
     try:
-        if math.isnan(float(value)) or math.isinf(float(value)):
+        numeric = float(value)
+        if math.isnan(numeric) or math.isinf(numeric):
             return None
-        return round(float(value), digits)
+        if numeric and abs(numeric) < 10 ** (-digits):
+            adaptive_digits = min(
+                16,
+                max(digits, -math.floor(math.log10(abs(numeric))) + 4),
+            )
+            return round(numeric, adaptive_digits)
+        return round(numeric, digits)
     except (TypeError, ValueError):
         return value
 
@@ -680,10 +688,113 @@ def anchor_state(timeout):
     return state, changes
 
 
+def dynamic_scan_rejection_reason(symbol):
+    if not symbol.endswith("USDT"):
+        return "non_usdt_quote"
+    base = symbol[:-4]
+    if base in STABLE_BASES:
+        return "stablecoin_or_fiat_like"
+    if base in LOW_BETA_COMMODITY_BASES:
+        return "low_beta_commodity"
+    return None
+
+
 def is_dynamic_scan_candidate(symbol):
-    if not symbol.endswith("USDT") or symbol.endswith(LEVERAGED_TOKEN_MARKERS):
-        return False
-    return symbol[:-4] not in (STABLE_BASES | LOW_BETA_COMMODITY_BASES)
+    return dynamic_scan_rejection_reason(symbol) is None
+
+
+def filter_opportunity_symbols(symbols):
+    """Apply the same opportunity-universe gate to explicit and discovered symbols."""
+
+    accepted = []
+    for raw_symbol in symbols:
+        symbol = str(raw_symbol or "").strip().upper()
+        if not symbol:
+            continue
+        rejection_reason = dynamic_scan_rejection_reason(symbol)
+        if rejection_reason is not None:
+            if not any(
+                item.get("symbol") == symbol
+                for item in DISCOVERY_AUDIT["candidate_eligibility_rejected"]
+            ):
+                DISCOVERY_AUDIT["candidate_eligibility_rejected"].append(
+                    {"symbol": symbol, "reason": rejection_reason}
+                )
+            continue
+        accepted.append(symbol)
+    return list(dict.fromkeys(accepted))
+
+
+def exchange_spot_rejection_reason(definition):
+    """Use exchange product identity, not ticker spelling, for spot eligibility."""
+
+    if not definition:
+        return "not_confirmed_active_spot_pair"
+    permissions = {
+        str(permission).upper()
+        for group in (definition.get("permissionSets") or [])
+        if isinstance(group, list)
+        for permission in group
+    }
+    permissions.update(
+        str(permission).upper()
+        for permission in (definition.get("permissions") or [])
+    )
+    if "LEVERAGED" in permissions:
+        return "leveraged_token"
+    if definition.get("status") != "TRADING":
+        return "not_active_spot_pair"
+    if definition.get("isSpotTradingAllowed") is False:
+        return "spot_not_allowed"
+    if permissions and "SPOT" not in permissions:
+        return "spot_permission_missing"
+    return None
+
+
+def filter_exchange_spot_symbols(symbols, exchange_definitions):
+    """Require authoritative active-SPOT identity for every opportunity input."""
+
+    accepted = []
+    for symbol in symbols:
+        rejection_reason = exchange_spot_rejection_reason(
+            exchange_definitions.get(symbol)
+        )
+        if rejection_reason is not None:
+            if not any(
+                item.get("symbol") == symbol
+                for item in DISCOVERY_AUDIT["spot_eligibility_rejected"]
+            ):
+                DISCOVERY_AUDIT["spot_eligibility_rejected"].append(
+                    {"symbol": symbol, "reason": rejection_reason}
+                )
+            continue
+        accepted.append(symbol)
+    return accepted
+
+
+def fetch_exchange_definitions(symbols, timeout):
+    """Fetch exchange identities in bounded batches for merged symbol inputs."""
+
+    definitions = {}
+    for offset in range(0, len(symbols), 100):
+        batch = symbols[offset : offset + 100]
+        rows = (
+            fetch_json(
+                "/api/v3/exchangeInfo",
+                {"symbols": json.dumps(batch, separators=(",", ":"))},
+                timeout=min(timeout, 5.0),
+                max_bases=3,
+            ).get("symbols")
+            or []
+        )
+        definitions.update(
+            {
+                str(item.get("symbol") or ""): item
+                for item in rows
+                if item.get("symbol")
+            }
+        )
+    return definitions
 
 
 def build_public_crypto_identity(payload):
@@ -752,8 +863,10 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
 
     The CoinGecko full coin list is useful secondary identity evidence, but its
     payload can stream for far longer than the socket timeout. Discovery uses
-    Binance's active-spot contract plus deterministic stable/leveraged-token
-    exclusions. The optional public identity cross-check belongs after Top3.
+    Binance's active-spot contract plus deterministic stablecoin and commodity
+    exclusions. Leveraged-product identity comes from authoritative exchange
+    permissions, never ticker suffixes. The optional public identity cross-check
+    belongs after Top3.
     """
 
     raw = fetch_json(
@@ -765,7 +878,12 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
     preselected_rows = []
     for row in raw:
         symbol = str(row.get("symbol") or "")
-        if not is_dynamic_scan_candidate(symbol):
+        rejection_reason = dynamic_scan_rejection_reason(symbol)
+        if rejection_reason is not None:
+            if symbol.endswith("USDT"):
+                DISCOVERY_AUDIT["candidate_eligibility_rejected"].append(
+                    {"symbol": symbol, "reason": rejection_reason}
+                )
             continue
         quote_volume = safe_float(row.get("quoteVolume"), 0) or 0
         preselected_rows.append((symbol, quote_volume))
@@ -783,10 +901,9 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         ).get("symbols")
         or []
     )
-    eligible_spot = {
+    exchange_definitions = {
         str(item.get("symbol") or ""): item
         for item in exchange_rows
-        if item.get("status") == "TRADING" and item.get("isSpotTradingAllowed") is not False
     }
     suspicious_bases = sorted(
         {
@@ -830,9 +947,9 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         if len(selected) >= top_n:
             break
         DISCOVERY_AUDIT["spot_eligibility_checked"] += 1
-        definition = eligible_spot.get(symbol)
-        eligible = definition is not None
-        if eligible:
+        definition = exchange_definitions.get(symbol)
+        exchange_rejection = exchange_spot_rejection_reason(definition)
+        if exchange_rejection is None:
             base_asset = str(definition.get("baseAsset") or symbol[:-4]).upper()
             if base_asset in security_like_searches:
                 DISCOVERY_AUDIT["crypto_identity_rejected"].append(
@@ -866,7 +983,7 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
             for item in DISCOVERY_AUDIT["spot_eligibility_rejected"]
         ):
             DISCOVERY_AUDIT["spot_eligibility_rejected"].append(
-                {"symbol": symbol, "reason": "not_confirmed_active_spot_pair"}
+                {"symbol": symbol, "reason": exchange_rejection}
             )
     return selected
 
@@ -1313,19 +1430,54 @@ def run_self_test():
         ),
         "stablecoin_pairs_are_excluded_from_dynamic_discovery": all(
             not is_dynamic_scan_candidate(symbol)
-            for symbol in ("RLUSDUSDT", "USDEUSDT", "PYUSDUSDT", "EURUSDT")
+            for symbol in (
+                "UUSDT",
+                "RLUSDUSDT",
+                "USDEUSDT",
+                "PYUSDUSDT",
+                "EURUSDT",
+            )
         ),
         "low_beta_gold_tokens_are_excluded_from_fast_alpha": all(
             not is_dynamic_scan_candidate(symbol)
             for symbol in ("PAXGUSDT", "XAUTUSDT")
         ),
-        "leveraged_tokens_are_excluded_from_dynamic_discovery": all(
-            not is_dynamic_scan_candidate(symbol)
-            for symbol in ("BTCUPUSDT", "ETHDOWNUSDT", "SOLBULLUSDT", "ADABEARUSDT")
+        "leveraged_products_are_rejected_by_exchange_identity": all(
+            exchange_spot_rejection_reason(
+                {
+                    "symbol": symbol,
+                    "status": "BREAK",
+                    "isSpotTradingAllowed": False,
+                    "permissionSets": [["LEVERAGED"]],
+                }
+            )
+            == "leveraged_token"
+            for symbol in (
+                "BTCUPUSDT",
+                "SXPUPUSDT",
+                "SXPDOWNUSDT",
+                "1INCHUPUSDT",
+                "1INCHDOWNUSDT",
+            )
         ),
         "ordinary_spot_pairs_remain_eligible": all(
             is_dynamic_scan_candidate(symbol)
-            for symbol in ("BTCUSDT", "AAVEUSDT", "NIGHTUSDT")
+            and exchange_spot_rejection_reason(
+                {
+                    "symbol": symbol,
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+            )
+            is None
+            for symbol in (
+                "BTCUSDT",
+                "AAVEUSDT",
+                "NIGHTUSDT",
+                "JUPUSDT",
+                "SYRUPUSDT",
+            )
         ),
         "tokenized_security_identity_is_separated_from_crypto": (
             "SOXL" in identity_fixture["security_like"]
@@ -1388,23 +1540,39 @@ def main(argv=None):
         except Exception as exc:  # noqa: BLE001
             bootstrap_errors.append({"source": "anchor", "error": str(exc)})
             anchor_state_value, anchor_changes = "missing", {}
-    symbols = list(dict.fromkeys(symbols))
-    try:
-        raw_books = fetch_json(
-            "/api/v3/ticker/bookTicker",
-            {"symbols": json.dumps(symbols, separators=(",", ":"))},
-            timeout=min(args.timeout, 2.0),
-            max_bases=3,
+    symbols = filter_opportunity_symbols(symbols)
+    if symbols:
+        try:
+            merged_exchange_definitions = fetch_exchange_definitions(
+                symbols,
+                args.timeout,
+            )
+        except Exception as exc:  # noqa: BLE001
+            bootstrap_errors.append(
+                {"source": "merged_exchange_identity", "error": str(exc)}
+            )
+            merged_exchange_definitions = {}
+        symbols = filter_exchange_spot_symbols(
+            symbols,
+            merged_exchange_definitions,
         )
-        if isinstance(raw_books, dict):
-            raw_books = [raw_books]
-        book_by_symbol = {
-            str(item.get("symbol") or ""): item
-            for item in raw_books
-            if isinstance(item, dict) and item.get("symbol")
-        }
-    except Exception as exc:  # noqa: BLE001
-        bootstrap_errors.append({"source": "selected_top_of_book", "error": str(exc)})
+    if symbols:
+        try:
+            raw_books = fetch_json(
+                "/api/v3/ticker/bookTicker",
+                {"symbols": json.dumps(symbols, separators=(",", ":"))},
+                timeout=min(args.timeout, 2.0),
+                max_bases=3,
+            )
+            if isinstance(raw_books, dict):
+                raw_books = [raw_books]
+            book_by_symbol = {
+                str(item.get("symbol") or ""): item
+                for item in raw_books
+                if isinstance(item, dict) and item.get("symbol")
+            }
+        except Exception as exc:  # noqa: BLE001
+            bootstrap_errors.append({"source": "selected_top_of_book", "error": str(exc)})
     captured = utc_now()
     baseline_ids = load_baseline_ids(args.recommendation_history, captured)
     anchor = {"state": anchor_state_value, "changes": {key: rounded(value) for key, value in anchor_changes.items()}}

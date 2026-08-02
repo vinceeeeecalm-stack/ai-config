@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-stablecoin-u-excluded-v8",
+  "title": "U 与其他美元稳定币不能进入 1–7 日上涨机会排序",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "Binance 动态 USDT 现货池包含 UUSDT、RLUSDUSDT 或其他已知稳定币交易对",
+    "稳定币可能因低波动、成交活跃或历史亏损较小获得较高原始排序"
+  ],
+  "steps": [
+    "运行动态候选资格过滤与 scanner self-test",
+    "运行至少一轮 dynamic-top 全市场 Crypto 1–7 日扫描",
+    "检查 discovery、validated Top1、历史排名和观察样本"
+  ],
+  "expected": [
+    "UUSDT、RLUSDUSDT 和常见稳定币在深度行情请求前即被排除",
+    "稳定币不得成为 discovery Top3、research_top1、Paper 入场或真钱动作",
+    "原始历史观察记录保持不变且不会被迁入交易分母"
+  ],
+  "evidence": [
+    "确定性单元测试与 scanner self-test",
+    "真实全市场运行 JSON 与动态发现审计"
+  ]
+}

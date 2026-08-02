@@ -1,0 +1,213 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-stablecoin-opportunity-exclusion-v8-independent-019fbc78-92d59e1e",
+  "goal_id": "tactical-stablecoin-opportunity-exclusion-v8",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "acceptance_scenarios": [
+          "tactical-stablecoin-u-excluded-v8",
+          "tactical-stablecoin-no-price-heuristic-v8",
+          "tactical-stablecoin-no-gate-loosening-v8"
+        ],
+        "stored_goal_contract_digest": "32e8ab7f21fe5e34ded2a5ad05ea62b7b6c40ded13abc109688fb566e1b06339",
+        "recomputed_goal_contract_digest": "32e8ab7f21fe5e34ded2a5ad05ea62b7b6c40ded13abc109688fb566e1b06339",
+        "authoritative_source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
+        "recomputed_source_digest": "92d59e1edd11be6e32c7e1c7c6994eb05af4d4ea46cb312c4f10598b1a7365b9",
+        "verification_stale": false,
+        "effective_open_deviations": 0,
+        "verifier_is_distinct_from_implementation_owner": true
+      }
+    },
+    {
+      "id": "tactical-stablecoin-u-excluded-v8",
+      "result": "PASS",
+      "evidence": {
+        "stablecoin_fixtures_rejected": [
+          "UUSDT",
+          "RLUSDUSDT",
+          "USDEUSDT",
+          "PYUSDUSDT",
+          "USDCUSDT",
+          "EURUSDT"
+        ],
+        "rejection_reason": "stablecoin_or_fiat_like",
+        "dynamic_entry_filtered_before_exchange_identity": true,
+        "explicit_static_entry_filtered_before_exchange_identity": true,
+        "explicit_main_fixture_input": [
+          "UUSDT",
+          "AAVEUSDT"
+        ],
+        "explicit_main_fixture_ranked_output": [
+          "AAVEUSDT"
+        ],
+        "stablecoin_reached_book_request": false,
+        "stablecoin_reached_analysis_or_ranking": false,
+        "runtime_u_audit": {
+          "UUSDT": "stablecoin_or_fiat_like",
+          "RLUSDUSDT": "stablecoin_or_fiat_like"
+        },
+        "runtime_stablecoins_in_discovery": [],
+        "runtime_stablecoins_in_ranked_history": [],
+        "runtime_stablecoins_in_observations": [],
+        "historical_u_observation_preserved": true,
+        "historical_u_observation_accepted": false
+      }
+    },
+    {
+      "id": "tactical-stablecoin-no-price-heuristic-v8",
+      "result": "PASS",
+      "evidence": {
+        "eligibility_price_input_used": false,
+        "ordinary_symbol_fixtures_accepted": [
+          "BTCUSDT",
+          "AAVEUSDT",
+          "NIGHTUSDT",
+          "ASSETUSDT",
+          "JUPUSDT",
+          "SYRUPUSDT"
+        ],
+        "one_dollar_ordinary_fixture_accepted": true,
+        "jup_syrup_suffix_false_positive_absent": true,
+        "exchange_identity_source": "Binance exchangeInfo permissionSets/permissions",
+        "leveraged_fixtures_rejected": [
+          "BTCUPUSDT",
+          "SXPUPUSDT",
+          "SXPDOWNUSDT",
+          "1INCHUPUSDT",
+          "1INCHDOWNUSDT"
+        ],
+        "leveraged_rejection_reason": "leveraged_token",
+        "explicit_leveraged_main_fixture_input": [
+          "SXPUPUSDT",
+          "SXPDOWNUSDT",
+          "1INCHUPUSDT",
+          "1INCHDOWNUSDT",
+          "JUPUSDT",
+          "SYRUPUSDT",
+          "AAVEUSDT"
+        ],
+        "explicit_leveraged_book_symbols": [
+          "JUPUSDT",
+          "SYRUPUSDT",
+          "AAVEUSDT"
+        ],
+        "leveraged_products_reached_book_or_analysis": false,
+        "missing_exchange_definition_rejected": true,
+        "classification_repeat_deterministic": true
+      }
+    },
+    {
+      "id": "positive-microprice-serialization",
+      "result": "PASS",
+      "evidence": {
+        "adaptive_precision_enabled": true,
+        "runtime_microprices": {
+          "PEPEUSDT": 2.9e-06,
+          "1000SATSUSDT": 1.151e-05
+        },
+        "all_runtime_microprices_positive": true,
+        "pepe_observation_price": 2.9e-06,
+        "observation_json_roundtrip_positive": true,
+        "observation_contract_validation_passed": true,
+        "formal_action_eligible": false,
+        "paper_live_separated": true,
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "runtime-artifact-binding-and-projections",
+      "result": "PASS",
+      "evidence": {
+        "artifact": "active-alpha-paper-monitor/experiments/20260802-054000-impulse-capture.json",
+        "artifact_sha256": "848488e21985c09442f46058feac9f8bb256af4e3ef872561f037f014e39cc6e",
+        "snapshot_id": "snapshot-144e40c7b15be2b14666",
+        "strategy_version": "impulse-capture-tactical-v6",
+        "config_digest": "2d0856a4c747aefe203a99cf6cdde4249c9f9396a4de4126f4f221f92f94c499",
+        "artifact_source_digest": "b287b34a41300c9b7c46659d116e35d531a697da443457882258e77e86d2dde3",
+        "recomputed_scanner_plus_ledger_digest": "b287b34a41300c9b7c46659d116e35d531a697da443457882258e77e86d2dde3",
+        "validated_top1": "ORDIUSDT",
+        "deep_research_candidate_symbol": "ORDIUSDT",
+        "ranked_history_primary_symbol": "ORDIUSDT",
+        "decision_card_best_candidate": "ORDIUSDT",
+        "all_top1_projections_consistent": true,
+        "runtime_errors": []
+      }
+    },
+    {
+      "id": "tactical-stablecoin-no-gate-loosening-v8",
+      "result": "PASS",
+      "evidence": {
+        "top1_symbol": "ORDIUSDT",
+        "top1_is_non_stablecoin": true,
+        "top1_conservative_expected_value_pct": -1.927309,
+        "top1_historical_quality_gate_passed": false,
+        "current_action": "NO_TRADE",
+        "trade_plan": null,
+        "max_allowed_action": "watch",
+        "decision_status": "FRESH_RESEARCH_RESULT",
+        "runtime_observation_count": 3,
+        "runtime_accepted_observations": 0,
+        "runtime_formal_action_eligible": 0,
+        "runtime_paper_entry_eligible": 0,
+        "live_orders_enabled": false,
+        "private_api_used": false,
+        "secondary_candidate_inherited_trade_eligibility": false
+      }
+    },
+    {
+      "id": "strategy-version-and-paper-live-isolation",
+      "result": "PASS",
+      "evidence": {
+        "scanner_strategy_version": "impulse-capture-tactical-v6",
+        "artifact_strategy_version": "impulse-capture-tactical-v6",
+        "runtime_rows_bound_to_snapshot_config_source_and_version": 3,
+        "ledger_observation_count": 43,
+        "accepted_observation_count": 0,
+        "rejected_observation_count": 43,
+        "paper_trade_sample_count": 0,
+        "live_trade_sample_count": 0,
+        "real_money_roi_sample_count": 0,
+        "paper_live_separated": true,
+        "live_orders_enabled": false
+      }
+    },
+    {
+      "id": "global-installed-skill-integrity",
+      "result": "PASS",
+      "evidence": {
+        "workspace_manifest_file_count": 268,
+        "installed_manifest_file_count": 268,
+        "workspace_manifest_sha256": "515a97e19d520e3b29c364231675caabc21edaff668dfe8dc11daf432bba525a",
+        "installed_manifest_sha256": "515a97e19d520e3b29c364231675caabc21edaff668dfe8dc11daf432bba525a",
+        "missing_installed": [],
+        "extra_installed": [],
+        "hash_mismatches": [],
+        "workspace_validation_errors": [],
+        "installed_validation_errors": []
+      }
+    },
+    {
+      "id": "governance-level-and-read-only-verifier",
+      "result": "PASS",
+      "evidence": {
+        "governance_effective_level": "RUNTIME_VERIFIED",
+        "highest_independently_proven_level": "RUNTIME_VERIFIED",
+        "blocked": false,
+        "open_deviations": 0,
+        "project_files_modified_by_verifier": false,
+        "scanner_or_ledger_write_path_invoked": false,
+        "tests_used_in_memory_or_read_only_artifacts": true
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T05:43:31Z"
+}
