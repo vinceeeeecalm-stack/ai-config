@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-schedule-future-window-v1",
+  "title": "自动结算只在首批样本到期后的有限窗口运行",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["最早 review_due_at 为 2026-08-09T12:04:46Z", "RRULE guard 可用"],
+  "steps": ["校验 proposed RRULE", "创建 heartbeat", "读取已保存自动化"],
+  "expected": ["第一次运行不早于 2026-08-09 20:15 Asia/Shanghai", "最后一次不晚于 22:55", "2026-08-09 后无 future occurrence"],
+  "evidence": ["RRULE guard 输出与 automation view"]
+}

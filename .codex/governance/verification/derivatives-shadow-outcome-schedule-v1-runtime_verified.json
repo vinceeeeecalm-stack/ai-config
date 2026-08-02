@@ -1,0 +1,119 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-outcome-schedule-v1-runtime_verified-ca7393ae",
+  "goal_id": "derivatives-shadow-outcome-schedule-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "0852489367c267c187c248c9c2e428e19be412992144a4faad212b9046b99eae",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 335,
+      "stdout_sha256": "6021b7503231a5442398c86e1d09bc86b8a15e98eee947e0a748dd1c4d575202",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/fast_candidate_funnel.py --self-test --iterations 30 --candidate-count 30",
+      "exit_code": 0,
+      "duration_ms": 56,
+      "stdout_sha256": "f04817266edd20ea2fb54b608442d5ed78466b45b611b3852c52a101fe86c33b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --self-test --iterations 30 --candidate-count 25",
+      "exit_code": 0,
+      "duration_ms": 94,
+      "stdout_sha256": "f965d3d1ecf56ba062e0ce76918249c1a2332fa19c994af40bc62e2a061caff9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --count 25 --top 3 --max-symbols 30 --request-timeout 12 --request-mode intraday_scalp --json-only --assert-runtime-contract",
+      "exit_code": 0,
+      "duration_ms": 8626,
+      "stdout_sha256": "db4d02f4f4a7b9b5235ce621ebdc6f234a091fc672e62496602b7aae78cb135f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/impulse_capture_scanner.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 102,
+      "stdout_sha256": "be09fea9ff291a74df074531831040b1e33ee327908d79e52909a4dd4be12e29",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/derivatives_shadow_outcome_reviewer.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 87,
+      "stdout_sha256": "9c28ec53b99945239130381a1eeab4940d0831eb92cec2f0666b90b436dfb42b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/longterm_next_dollar_ranker.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 46,
+      "stdout_sha256": "f401c2e222fe934b68995a3e73e81f8d7fc836dfc10f520fd1603ac526bceec0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 45,
+      "stdout_sha256": "128a45224326a3e5e3a5802d0e34e672392e2f5d18a6a882b5cd83d03932d773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest -v manual-investment-strategy-operator/tests/test_profit_oriented_dual_sleeve.py",
+      "exit_code": 0,
+      "duration_ms": 55,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "52e44a54425e5a3415deec51486d5c1ba7c45fa3b0de50882514fa9cce63b29d"
+    },
+    {
+      "command": "python3 -m unittest -v manual-investment-strategy-operator/tests/test_longterm_next_dollar_ranker.py manual-investment-strategy-operator/tests/test_us_open_dynamic_scanner.py",
+      "exit_code": 0,
+      "duration_ms": 112,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "27caf0a2dadecd476796fef88dbe0c0b6a4e151dfcd21679d5ade1ad97da14ff"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/v3_manual_dispatch.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 58,
+      "stdout_sha256": "cb5f4f138f490a9790275abf991d603456caf55b6ff3372d9207784f9c123b04",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/recommendation_execution_calendar_gate.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 40,
+      "stdout_sha256": "e177ac87da15e01cafd03d66df9085d79fbc0bae3046271a7fb3e186fa68d52e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --shadow-suite manual-investment-strategy-operator/runtime/universal_investment_core_v3",
+      "exit_code": 0,
+      "duration_ms": 45,
+      "stdout_sha256": "0b8ed624e57a2049022348ec330713a485bc8fca4d3560a2d485160d1c40a7e6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/sync_installed_skill.py --check --with-smoke",
+      "exit_code": 0,
+      "duration_ms": 584,
+      "stdout_sha256": "79a1132e0f3008d4225c06c465d3bfef9eb1b6b5f4d87272cc63309d9a294cd7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 scripts/scan-public-repo.py",
+      "exit_code": 0,
+      "duration_ms": 44345,
+      "stdout_sha256": "4824418f5204ec2ca3a77d00ff7df7f446677efb49fa516be10c6110f644fe5a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T13:05:51.439877Z"
+}

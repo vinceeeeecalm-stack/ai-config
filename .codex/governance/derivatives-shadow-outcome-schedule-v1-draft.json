@@ -1,0 +1,35 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "derivatives-shadow-outcome-schedule-v1",
+  "title": "首批衍生品影子样本的有限期自动结算窗口",
+  "business_outcome": "在首批四十条可结算影子观察到期后自动运行无前视结果结算和审计摘要，减少用户盯盘依赖，同时保持策略、正式动作和收益分母不变。",
+  "scope": [
+    "创建附着当前 Active Goal 任务的 heartbeat 自动化，只在 2026-08-09 20:15 至 22:55 Asia/Shanghai 的有限窗口运行",
+    "每次先读取 GitHub main 和现有追加式账本，再运行 derivatives_shadow_outcome_reviewer.py",
+    "完整窗口结果追加至独立影子 outcome ledger；等价重复运行保持 NO_UPDATE",
+    "数据失败保留 DATA_BLOCKED 和重试，成功后汇总三组路径和 cohort 差异",
+    "向当前任务同步结算数量、数据阻断和阶段一证据状态"
+  ],
+  "non_goals": [
+    "不运行新行情选股、深研或正式 Manual 推荐",
+    "不修改任何生产排序、因子阈值、research_top1、入场、止损或退出规则",
+    "不生成 Paper/真钱成交或 ROI，不创建真实订单、转账或账户动作",
+    "不在本目标批准阶段一生产晋升或阶段二规则"
+  ],
+  "constraints": [
+    "创建前必须通过 RRULE 稳定性校验且至少有一个未来 occurrence",
+    "同名或同 prompt 自动化不存在时才允许创建，禁止重复",
+    "自动化使用当前任务 heartbeat，不创建独立项目任务",
+    "只允许有限 UNTIL 窗口，不使用 COUNT，不在到期前读取行情",
+    "结算器必须来自 GitHub main 且保持 production/Paper/live/business 隔离字段",
+    "自动化提示不得包含密钥、账户、私密持仓或原始令牌"
+  ],
+  "acceptance_scenario_ids": [
+    "derivatives-shadow-outcome-schedule-future-window-v1",
+    "derivatives-shadow-outcome-schedule-safety-v1",
+    "derivatives-shadow-outcome-schedule-idempotent-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "derivatives-shadow-outcome-review-v1"
+}

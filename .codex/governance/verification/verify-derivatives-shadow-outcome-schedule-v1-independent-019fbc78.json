@@ -1,0 +1,83 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-outcome-schedule-v1-independent-019fbc78",
+  "goal_id": "derivatives-shadow-outcome-schedule-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "0852489367c267c187c248c9c2e428e19be412992144a4faad212b9046b99eae",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "governance-source-binding",
+      "result": "PASS",
+      "evidence": "Governance status and RUNTIME_VERIFIED record match the frozen goal and authoritative source digest."
+    },
+    {
+      "id": "automation-uniqueness",
+      "result": "PASS",
+      "evidence": "The automation directory contains exactly one automation TOML; exact-name count=1 and exact-prompt count=1."
+    },
+    {
+      "id": "heartbeat-current-task",
+      "result": "PASS",
+      "evidence": "kind=heartbeat. target_thread_id equals the goal's frozen_by/current task ID."
+    },
+    {
+      "id": "retained-start-and-rrule-guard",
+      "result": "PASS",
+      "evidence": "created_at=updated_at=1785675261424. automation_rrule_guard.py --updating-existing returned valid=true with nine future occurrences and no errors."
+    },
+    {
+      "id": "finite-nine-run-window",
+      "result": "PASS",
+      "evidence": "Occurrences are exclusively 2026-08-09 Asia/Shanghai at 20:15, 20:35, 20:55, 21:15, 21:35, 21:55, 22:15, 22:35 and 22:55. No COUNT is used and no occurrence crosses the local date."
+    },
+    {
+      "id": "first-run-after-review-due",
+      "result": "PASS",
+      "evidence": "Earliest frozen review_due_at is 2026-08-09T12:04:46.734863Z. The first occurrence at 20:15 Asia/Shanghai is later."
+    },
+    {
+      "id": "github-main-reviewer",
+      "result": "PASS",
+      "evidence": "The reviewer exists on origin/main. Its origin/main and working-tree SHA-256 values both equal 63ab16cc26c4c1dbdc5ca33bedfa5e9482c25a1d3e221b9b94e4de9f5c2dbe24."
+    },
+    {
+      "id": "prompt-scope-and-safety",
+      "result": "PASS",
+      "evidence": "The prompt limits work to the GitHub-main reviewer and existing shadow observation ledger; forbids new scans, deep research, code or strategy changes, production ranking or formal-action changes, Paper or real-money ROI, BUSINESS_READY promotion, orders, transfers and private APIs; and requires candidate-local retry without fake zero returns."
+    },
+    {
+      "id": "idempotent-repeat",
+      "result": "PASS",
+      "evidence": "Reviewer tests confirmed equivalent repeated results return NO_UPDATE and conflicting content under the same review ID is blocked."
+    },
+    {
+      "id": "local-failure-retry",
+      "result": "PASS",
+      "evidence": "Reviewer tests confirmed one candidate's data failure remains DATA_BLOCKED and retryable without blocking successful candidates or persisting a fabricated outcome."
+    },
+    {
+      "id": "reviewer-regression-suite",
+      "result": "PASS",
+      "evidence": "All 11 derivatives-shadow outcome reviewer tests passed."
+    },
+    {
+      "id": "evidence-hash-binding",
+      "result": "PASS",
+      "evidence": "Actual RRULE, prompt and automation file hashes match governance evidence."
+    },
+    {
+      "id": "public-repository-safety",
+      "result": "PASS",
+      "evidence": "PublicRepositorySafetyScanV1 returned PASS with zero secret and zero privacy findings."
+    },
+    {
+      "id": "read-only-verification",
+      "result": "PASS",
+      "evidence": "The automation was neither triggered nor updated. No project, runtime or automation file was modified; the automation TOML hash remained unchanged."
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T13:03:12Z"
+}

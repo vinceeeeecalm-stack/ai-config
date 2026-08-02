@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-schedule-safety-v1",
+  "title": "自动任务只能结算影子证据",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["heartbeat prompt 已冻结"],
+  "steps": ["检查自动化 kind、destination 和 prompt", "检查禁止动作"],
+  "expected": ["附着当前任务", "不扫描新标的或输出正式动作", "不修改策略", "不进入 Paper/真钱 ROI", "不自动下单"],
+  "evidence": ["automation view 与 prompt 摘要哈希"]
+}
