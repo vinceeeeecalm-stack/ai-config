@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-derivatives-shadow-continuous-sampling-v1",
+  "project_id": "investing-monorepo",
+  "goal_id": "derivatives-shadow-continuous-sampling-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "847b269bb1fecaf4af3079378de8fa013cb0d49b",
+    "branch": "codex/derivatives-shadow-continuous-sampling-v1",
+    "dirty": false
+  },
+  "source_digest": "abb8a35e9b047d3c5f115b0549e287e9e8faf20886526ad295d4b2f2c48a86a4",
+  "build_version": "847b269bb1fecaf4af3079378de8fa013cb0d49b",
+  "runtime_version": "ec93ef1ea9afe7eaa0e020963313f9a445673690f434e73d6de5c2dc3300653e",
+  "database_version": null,
+  "last_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-runtime_verified-ceac5461",
+  "independent_verification_id": "verify-derivatives-shadow-continuous-sampling-v1-independent-pass-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 8,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T14:37:53.476954Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "derivatives-shadow-continuous-sampling-v1",
+  "title": "阶段一衍生品影子证据的持续采样与到期闭环",
+  "business_outcome": "在不改变任何生产赚钱规则的前提下，持续形成同一阶段一假设下、可在七天后结算的现货与衍生品同轮样本，避免首批实验组为零导致晋升门永远无法获得可比较证据。",
+  "scope": [
+    "新增确定性阶段一采样编排入口，调用现有 discovery shadow handoff 与公开衍生品 collector，并追加到独立运行账本",
+    "每轮最多采集二十个动态流动性候选，保持同一 snapshot、strategy、config 与 source 绑定",
+    "提供 fixture 与真实公共行情两种入口；fixture 只用于测试，真实模式禁止私有 API 与订单能力",
+    "把重复运行、局部数据失败、整轮时限、安全隔离和追加式持久化纳入回归测试",
+    "把现有 heartbeat 扩展为有明确截止时间的阶段一采样、到期结算与预注册评估闭环"
+  ],
+  "non_goals": [
+    "不改变生产 discovery score、排序、research_top1、ENTER_NOW、WAIT_FOR_ENTRY 或 NO_TRADE",
+    "不启动阶段二持续候选或排名加速度规则晋升",
+    "不修改入场、目标、止损、退出、仓位、价值、催化、实时或风险门",
+    "不把影子 observation 或 outcome 计入 Paper、真钱 ROI 或 BUSINESS_READY",
+    "不自动下单、转账、换仓、质押或访问私有账户 API"
+  ],
+  "constraints": [
+    "所有新增输出必须 formal_action_eligible=false、production_rule_changed=false、paper_roi_eligible=false、real_money_roi_eligible=false",
+    "OI 单独上涨只能形成内部冲突标签，不能授权用户动作",
+    "同一快照重复运行必须 NO_UPDATE，不得覆盖或复制追加式观察",
+    "单候选或单公共来源失败只降级该候选，不能伪造零变化或拖死整轮",
+    "自动采样必须有 UTC UNTIL 截止时间，不得无限运行；十四天门前不得晋升生产规则",
+    "阶段一晋升仍必须由 derivatives-shadow-promotion-gate-v1 的冻结标准决定，并另建 superseding GoalContract"
+  ],
+  "acceptance_scenario_ids": [
+    "derivatives-continuous-sampling-public-cycle-v1",
+    "derivatives-continuous-sampling-append-only-v1",
+    "derivatives-continuous-sampling-safety-isolation-v1",
+    "derivatives-continuous-sampling-bounded-automation-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "derivatives-shadow-promotion-gate-v1"
+}

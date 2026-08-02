@@ -36,6 +36,7 @@ def observation(symbol: str = "AAAUSDT", rank: int = 4) -> dict:
         "strategy_version": "unified-shortterm-derivatives-shadow-v2",
         "config_digest": "a" * 64,
         "source_digest": "b" * 64,
+        "public_sources": list(M.PUBLIC_SOURCE_NAMES),
         "observed_at": M.iso(observed),
         "captured_at": M.iso(observed),
         "review_due_at": M.iso(observed + timedelta(days=7)),
@@ -93,6 +94,7 @@ class DerivativesShadowOutcomeReviewerTests(unittest.TestCase):
         self.assertEqual(review["mae_pct"], -4.5)
         self.assertEqual(review["end_return_pct"], 1.0)
         self.assertEqual(review["rank_band"], "RANK_4_20")
+        self.assertEqual(review["source_lineage_digest"], M.source_lineage_digest(self.observation))
 
     def test_same_bar_is_conservative_stop_first(self) -> None:
         review = M.build_review(

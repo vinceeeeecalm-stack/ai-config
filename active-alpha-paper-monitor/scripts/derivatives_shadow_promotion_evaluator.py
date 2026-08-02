@@ -147,7 +147,7 @@ def _validate_review(record: dict[str, Any], config: dict[str, Any]) -> dict[str
         raise PromotionGateError("invalid_review_schema")
     if record.get("window_status") != "COMPLETE":
         raise PromotionGateError("incomplete_review_not_allowed")
-    for field in ("review_id", "observation_id", "symbol", "snapshot_id", "strategy_version", "config_digest", "source_digest"):
+    for field in ("review_id", "observation_id", "symbol", "snapshot_id", "strategy_version", "config_digest", "source_digest", "source_lineage_digest"):
         if not isinstance(record.get(field), str) or not record[field]:
             raise PromotionGateError(f"missing_review_field:{field}")
     if record.get("reviewer_version") != config["reviewer_version"]:
@@ -241,7 +241,11 @@ def evaluate(records: list[dict[str, Any]], config: dict[str, Any]) -> dict[str,
         seen.add(record["review_id"])
         seen_observations.add(record["observation_id"])
         complete.append(record)
-    lineage_fields = ("strategy_version", "config_digest", "source_digest", "reviewer_version", "review_config_digest")
+    # source_digest binds the immutable values of one point-in-time snapshot
+    # and is expected to vary across snapshots.  source_lineage_digest binds
+    # the collector/venue/endpoint implementation and must remain stable for a
+    # comparable cross-snapshot experiment.
+    lineage_fields = ("strategy_version", "config_digest", "source_lineage_digest", "reviewer_version", "review_config_digest")
     lineage_values = {
         field: sorted({record[field] for record in complete})
         for field in lineage_fields

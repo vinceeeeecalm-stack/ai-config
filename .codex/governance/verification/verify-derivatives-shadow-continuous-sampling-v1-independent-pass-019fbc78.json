@@ -1,0 +1,38 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-continuous-sampling-v1-independent-pass-019fbc78",
+  "goal_id": "derivatives-shadow-continuous-sampling-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "abb8a35e9b047d3c5f115b0549e287e9e8faf20886526ad295d4b2f2c48a86a4",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "targeted derivatives shadow test suite",
+      "result": "PASS",
+      "evidence": "39/39 tests passed"
+    },
+    {
+      "command": "independent five-regression fixture",
+      "result": "PASS",
+      "evidence": "双截止自动化、动态 source 聚合、同 snapshot NO_UPDATE、候选级 malformed 降级、timeout>120 阻断均通过"
+    },
+    {
+      "command": "automation_rrule_guard.py --updating-existing",
+      "result": "PASS",
+      "evidence": "采样截止 2026-08-16T04:15:00Z；结算截止 2026-08-23T16:15:00Z；存在未来 occurrence"
+    },
+    {
+      "command": "sync_installed_skill.py --check --with-smoke",
+      "result": "PASS",
+      "evidence": "287 files；manifest ec93ef1ea9afe7eaa0e020963313f9a445673690f434e73d6de5c2dc3300653e；225 tests passed"
+    },
+    {
+      "command": "scan-public-repo.py and verify-monorepo-policy.py",
+      "result": "PASS",
+      "evidence": "secret and privacy findings 0"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T14:33:00Z"
+}
