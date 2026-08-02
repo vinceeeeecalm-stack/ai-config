@@ -1,0 +1,22 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-unified-shortterm-phase-readiness-audit-v1-independent-fail-019fbc78-cc812724",
+  "goal_id": "unified-shortterm-phase-readiness-audit-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "cc8127244dff43b166c89e711c29c74b9dc247eb5cb571a0e88f88bb8ce32e0f",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "FAIL",
+  "severity_counts": {"P0": 0, "P1": 3, "P2": 0},
+  "checks": [
+    {"command": "Python 3.9 target tests and self-test", "result": "PASS", "evidence": "6/6 tests and self-test passed"},
+    {"command": "fixed-as-of deterministic audit", "result": "PASS", "evidence": "Repeated output hashes matched"},
+    {"command": "authority and automation negative fixtures", "result": "FAIL", "evidence": "CODED/same-thread verifier and malformed unsafe automation were accepted"},
+    {"command": "public repo safety and monorepo policy", "result": "PASS", "evidence": "No secret-shaped tracked files"}
+  ],
+  "findings": [
+    {"severity": "P1", "title": "低等级或非独立 PASS 可冒充 RUNTIME_VERIFIED", "evidence": "release_state 未校验 verifier schema、level 或线程独立性。"},
+    {"severity": "P1", "title": "自动化权威校验可被字符串 token 欺骗", "evidence": "畸形 RRULE 和危险 prompt token 仍返回 active=true。"},
+    {"severity": "P1", "title": "unique_blocker 与 all_blockers 不一致", "evidence": "phase1_forward_outcomes_and_gate_pending 未进入 all_blockers。"}
+  ],
+  "created_at": "2026-08-02T15:02:00Z"
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "unified-shortterm-phase-readiness-audit-v1",
+  "title": "统一短期机会引擎全目标阶段就绪审计",
+  "business_outcome": "把分钟级至七天统一短期引擎的每一层绑定到权威发布、运行样本和十四天晋升门，准确区分系统已验证、影子采样中、尚未激活和真实利润未测量，避免局部工程通过被误报为整体赚钱闭环完成。",
+  "scope": [
+    "新增确定性 UnifiedShortTermEngineReadinessV1 审计，覆盖动态候选、衍生品前移、持续候选与排名加速度、自适应持有时钟、时间匹配回归、唯一 Top1 与正式动作、生命周期、漏检复盘和统一真钱 ROI",
+    "审计只读取冻结目标、发布证据、独立复验、运行观察账本、晋升配置和自动化状态，不以文件存在本身提升就绪等级",
+    "输出当前阶段、完整分层状态、全部阻断、唯一下一步、十四天晋升最早时间和下一可申请阶段",
+    "在 Manual Skill 中提供单一只读入口，并以确定性夹具验证缺证据、版本错位、自动化缺失和利润未测量时的诚实降级",
+    "保持当前阶段一连续采样、七天结算和预注册晋升门不变"
+  ],
+  "non_goals": [
+    "不激活阶段二持续候选或排名加速度生产规则",
+    "不改变候选排序、估值、入场、止损、目标、退出、持有时钟或 ROI 分母",
+    "不运行新的行情深研或生成当前真钱推荐",
+    "不自动下单、转账、充值、卖出、换仓、质押或调用私有交易 API",
+    "不把 Shadow、Paper、历史回放或工程测试当作真钱盈利证据或 BUSINESS_READY"
+  ],
+  "constraints": [
+    "每十四天最多批准一个核心赚钱规则变化；阶段一结果未经过冻结晋升门前，下一阶段必须保持 NOT_ACTIVATED",
+    "审计等级必须由同目标的 ReleaseEvidenceV1、PASS VerificationResultV1 和必要运行证据共同支持，缺少任一项时降级而不是推断通过",
+    "运行账本、账户数据和市场缓存不进入 Git，审计输出不得包含秘密或完整账户隐私数据",
+    "正式用户动作仍只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE；本审计本身不生成任何交易动作",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "acceptance_scenario_ids": [
+    "unified-shortterm-readiness-authority-binding-v1",
+    "unified-shortterm-readiness-accurate-degradation-v1",
+    "unified-shortterm-readiness-phase-gate-isolation-v1",
+    "unified-shortterm-readiness-safe-output-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "derivatives-shadow-continuous-sampling-v1",
+  "frozen_at": "2026-08-02T14:45:32.651050Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "4633924ce53adc437128173bb27eb21f973d88ef589be920c3c8d94874e524ad"
+}

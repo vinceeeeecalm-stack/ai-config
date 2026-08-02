@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-readiness-safe-output-v1",
+  "title": "就绪审计只读且不产生交易副作用",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "live_orders_enabled=false",
+    "运行数据可能包含缺失、损坏或尚未到期的记录"
+  ],
+  "steps": [
+    "运行正常、自测和故障夹具",
+    "核对输出字段白名单和安全标志",
+    "核对运行前后生产配置、动作账本、Paper 与真钱账本"
+  ],
+  "expected": [
+    "审计不写市场、账户、Paper 或真钱账本",
+    "输出不含密钥、令牌或完整账户隐私数据",
+    "生产排序和正式动作规则未变化",
+    "异常输入形成准确 blocker，不导致伪通过"
+  ],
+  "evidence": [
+    "只读副作用测试",
+    "公开仓库秘密与隐私扫描"
+  ]
+}

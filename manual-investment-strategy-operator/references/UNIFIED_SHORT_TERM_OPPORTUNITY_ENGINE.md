@@ -36,6 +36,17 @@ OI 只代表新增仓位和潜在燃料，不能单独证明方向。至少还�
 
 阶段 0 的真实账本尚无到期结果时必须输出 `DATA_INSUFFICIENT`。确定性夹具仅验证实现与防前视，不是 Paper 或真钱证据，也不能提升 `BUSINESS_READY`。
 
+## 全目标阶段就绪审计
+
+运行 `scripts/unified_shortterm_phase_readiness.py` 获取 `UnifiedShortTermEngineReadinessV1`。它把当前最终目标拆为可审计的层，并同时显示：
+
+- 当前生产阶段和影子阶段；
+- 每层的发布、独立复验与必要运行证据；
+- `RUNTIME_VERIFIED / EVIDENCE_COLLECTING / SHADOW_ONLY / NOT_ACTIVATED / UNMEASURED` 等准确状态；
+- 十四天单规则门、完整阻断和唯一下一步。
+
+该审计不生成行情判断或交易动作。阶段一通过预注册门也只得到“可以另建治理目标申请晋升”，绝不会自动改变生产规则；没有真钱时间序列时利润始终为 `UNMEASURED`。
+
 ## 风险边界
 
 不自动下单；最长持有 7 天；短期亏损不得自动转长期；OI 单独上涨不得入场；旧行情或双源冲突不得入场；4–7 日机会没有持续催化和监控不得交易；战术池回撤 15% 暂停；没有合格机会时 `NO_TRADE` 是正确结果。

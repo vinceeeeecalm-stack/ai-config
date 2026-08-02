@@ -11,6 +11,7 @@
     "python3 closed-loop-delivery-governor/scripts/test_governance.py",
     "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
     "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/unified_shortterm_phase_readiness.py --self-test",
     "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts"
   ],
   "runtime_checks": [
@@ -22,6 +23,7 @@
     "python3 active-alpha-paper-monitor/scripts/derivatives_shadow_cycle.py --self-test",
     "python3 active-alpha-paper-monitor/scripts/derivatives_shadow_outcome_reviewer.py --self-test",
     "python3 active-alpha-paper-monitor/scripts/derivatives_shadow_promotion_evaluator.py --self-test",
+    "python3 manual-investment-strategy-operator/scripts/unified_shortterm_phase_readiness.py --self-test",
     "python3 manual-investment-strategy-operator/scripts/longterm_next_dollar_ranker.py --self-test",
     "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
     "python3 -m unittest -v manual-investment-strategy-operator/tests/test_profit_oriented_dual_sleeve.py",

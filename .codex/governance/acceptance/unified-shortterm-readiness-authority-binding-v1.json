@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-readiness-authority-binding-v1",
+  "title": "每个阶段状态绑定权威发布、复验和运行证据",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "仓库包含阶段零、阶段一和连续采样的冻结治理资产",
+    "运行账本与治理证据保持分离"
+  ],
+  "steps": [
+    "运行统一短期全目标阶段就绪审计",
+    "逐项核对动态候选、衍生品、候选记忆、持有时钟、回归、决策、生命周期、漏检和真钱 ROI",
+    "删除或篡改夹具中的发布、PASS 复验或运行证据后重新审计"
+  ],
+  "expected": [
+    "已验证层同时引用 ReleaseEvidenceV1、PASS VerificationResultV1 和所需运行证据",
+    "只有源文件但没有权威证据的层不得显示 RUNTIME_VERIFIED",
+    "证据缺失或版本错位时稳定降级并列出对应 blocker"
+  ],
+  "evidence": [
+    "manual-investment-strategy-operator/tests/test_unified_shortterm_phase_readiness.py",
+    "manual-investment-strategy-operator/scripts/unified_shortterm_phase_readiness.py --self-test"
+  ]
+}

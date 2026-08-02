@@ -1,0 +1,24 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "unified-shortterm-readiness-phase-gate-isolation-v1",
+  "title": "十四天单规则门阻止提前激活下一阶段",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "阶段一最早晋升时间和样本门已经预注册",
+    "阶段一仍处于采样或结算窗口"
+  ],
+  "steps": [
+    "在晋升最早时间之前运行审计",
+    "在样本不足、结果拒绝和结果合格三种夹具上运行审计",
+    "核对 next_eligible_phase 与 unique_next_step"
+  ],
+  "expected": [
+    "晋升时间未到或样本不足时，阶段二始终保持 NOT_ACTIVATED",
+    "阶段一合格只允许另建治理目标申请晋升，不自动改变生产规则",
+    "唯一下一步与当前最高优先级 blocker 一致"
+  ],
+  "evidence": [
+    "阶段门确定性测试",
+    "预注册晋升配置摘要"
+  ]
+}
