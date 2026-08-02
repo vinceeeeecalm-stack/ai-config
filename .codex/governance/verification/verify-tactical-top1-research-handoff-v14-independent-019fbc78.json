@@ -1,0 +1,68 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-top1-research-handoff-v14-independent-019fbc78",
+  "goal_id": "tactical-top1-research-handoff-v14",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "80f115691f6b1c8d3416d7441f457c1261f58ac37f88ca108c121f74a03ce362",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "severity": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0
+  },
+  "checks": [
+    {
+      "name": "frozen_contract_and_patch_identity",
+      "result": "PASS",
+      "evidence": "Staged patch SHA-256=a918f34fec909890d0f1bf139924a64ff60e718608ca3ee1fa16c80ea582b907; independently recomputed governance digest matched; git diff --cached --check passed."
+    },
+    {
+      "name": "full_regression_suite",
+      "result": "PASS",
+      "evidence": "214 tests passed with zero failures."
+    },
+    {
+      "name": "complete_handoff_and_zero_cash",
+      "result": "PASS",
+      "evidence": "Complete evidence produced ARBITRATED_ACTION/ENTER_NOW; zero cash changed only account_execution to NO_DEPLOY_CASH and executable_amount to 0 while preserving the research decision and card."
+    },
+    {
+      "name": "no_fake_evidence",
+      "result": "PASS",
+      "evidence": "Missing roles, forbidden valuation method, absent official catalyst source, and failed risk challenge all returned NO_TRADE with a null card and no populated research_by_symbol."
+    },
+    {
+      "name": "top1_rebind",
+      "result": "PASS",
+      "evidence": "A changed Top1 returned TOP1_CHANGED without copying old research; a new request bound to the final snapshot; only an unchanged Top1 could rebind."
+    },
+    {
+      "name": "freshness_and_recovery",
+      "result": "PASS",
+      "evidence": "Stale and dual-source-conflict paths blocked without a card; replacing certification with fresh evidence recovered ENTER_NOW; the dossier remained immutable and identical inputs remained deterministic."
+    },
+    {
+      "name": "research_before_final_certification",
+      "result": "PASS",
+      "evidence": "A dossier prepared after certified_at was explicitly blocked as dossier_prepared_in_future."
+    },
+    {
+      "name": "paper_live_separation",
+      "result": "PASS",
+      "evidence": "paper_action_exposed=false, paper_live_separated=true, live_orders_enabled=false, private_api_used=false, and human_confirmation_required=true."
+    },
+    {
+      "name": "real_runtime_reproduction",
+      "result": "PASS",
+      "evidence": "ZEC and TRX bundles reproduced byte-for-byte from current source; both returned their unique research_top1 with NO_TRADE, a null card, negative-EV and missing verified-catalyst reasons."
+    }
+  ],
+  "artifact_sha256": {
+    "zec_handoff": "889cc42b7b081a3ebc3b5decf8a47b33b82583fd8b048e39b1f87488ea8f162e",
+    "trx_handoff": "d0aba693bdcba370213e22cf9f90e1f5251a71ff88924f14dbebb4ad1972f6ab",
+    "zec_scanner": "d2e56c2570956becb72b0b7b1e05505a08604f02f1deb32e10300da44471fe00",
+    "trx_scanner": "c6001d469e7c8b21528260fe7d8330dec527f20eed20baf1e5520c4375fa165f"
+  },
+  "findings": []
+}

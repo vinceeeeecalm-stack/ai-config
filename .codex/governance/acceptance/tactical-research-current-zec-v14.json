@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-research-current-zec-v14",
+  "title": "当前 ZEC 研究 Top1 在缺少未来催化和正期望时诚实拒绝",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["读取 2026-08-02 最新 ZEC Top1 scanner", "官方事件搜索没有确认未来 1–7 日催化", "历史保守 EV 为负"],
+  "steps": ["生成 ZEC 深研请求", "输入明确 BLOCKED 的官方催化角色", "运行交接和最终仲裁"],
+  "expected": ["research_top1=ZECUSDT", "current_action=NO_TRADE", "decision_card=null", "拒绝原因包含负 EV 和 verified catalyst 缺失"],
+  "evidence": ["ZEC request bundle", "ZEC 无催化 dossier", "最终运行包"]
+}

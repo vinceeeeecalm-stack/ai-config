@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-observation-outcome-review-v13",
+  "goal_id": "tactical-top1-research-handoff-v14",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "36fbcc04f109616a9ecfdf00e7e4264ad822164430ee317c8be772813f4b9ab9",
+  "source_digest": "80f115691f6b1c8d3416d7441f457c1261f58ac37f88ca108c121f74a03ce362",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-observation-outcome-review-v13-runtime_verified-72206391",
-  "independent_verification_id": "verify-tactical-observation-outcome-review-v13-independent-round2-019fbc78",
-  "updated_at": "2026-08-02T09:12:30.527521Z"
+  "last_verification_id": "verify-tactical-top1-research-handoff-v14-runtime_verified-241dc0f6",
+  "independent_verification_id": null,
+  "updated_at": "2026-08-02T09:48:51.368855Z"
 }

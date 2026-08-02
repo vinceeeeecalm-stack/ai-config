@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-research-freshness-recovery-v14",
+  "title": "过期或冲突行情阻断并可通过新认证恢复",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["dossier 内容仍有效", "行情超过 60 秒或双源差异超过 1%"],
+  "steps": ["运行失败认证", "确认 NO_TRADE", "替换为最终 fresh 双源认证", "重跑同一确定性合同"],
+  "expected": ["过期/冲突不生成卡", "恢复只更新新 snapshot 绑定", "原 dossier 内容不被静默改写", "相同恢复输入结果确定性一致"],
+  "evidence": ["过期 fixture", "双源冲突 fixture", "故障恢复测试"]
+}
