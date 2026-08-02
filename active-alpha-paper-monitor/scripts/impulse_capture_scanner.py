@@ -17,6 +17,7 @@ import json
 import math
 import statistics
 import sys
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -52,7 +53,29 @@ BINANCE_PUBLIC_BASES = (
     "https://api.binance.com",
 )
 BINANCE_ENDPOINT_AUDIT = {
-    base: {"success_count": 0, "failure_count": 0, "last_error": None}
+    base: {
+        "success_count": 0,
+        "failure_count": 0,
+        "skipped_count": 0,
+        "last_error": None,
+        "last_success_at": None,
+    }
+    for base in BINANCE_PUBLIC_BASES
+}
+BINANCE_ENDPOINT_STATE = {
+    base: {
+        "consecutive_failures": 0,
+        "circuit_open_until": 0.0,
+        "last_success_monotonic": 0.0,
+    }
+    for base in BINANCE_PUBLIC_BASES
+}
+BINANCE_ENDPOINT_LOCK = threading.Lock()
+BINANCE_ENDPOINT_MAX_CONCURRENCY = 4
+BINANCE_ENDPOINT_FAILURE_THRESHOLD = 3
+BINANCE_CIRCUIT_BREAKER_SECONDS = 8.0
+BINANCE_ENDPOINT_SEMAPHORES = {
+    base: threading.BoundedSemaphore(BINANCE_ENDPOINT_MAX_CONCURRENCY)
     for base in BINANCE_PUBLIC_BASES
 }
 DISCOVERY_AUDIT = {
@@ -130,11 +153,41 @@ def fetch_json(
     max_bases: int | None = None,
 ):
     last_error = None
-    bases = BINANCE_PUBLIC_BASES[:max_bases] if max_bases else BINANCE_PUBLIC_BASES
+    now = time.monotonic()
+    with BINANCE_ENDPOINT_LOCK:
+        bases = sorted(
+            BINANCE_PUBLIC_BASES,
+            key=lambda base: (
+                0
+                if (
+                    BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] <= now
+                    and BINANCE_ENDPOINT_STATE[base]["last_success_monotonic"] > 0
+                    and BINANCE_ENDPOINT_STATE[base]["consecutive_failures"] == 0
+                )
+                else 1,
+                -BINANCE_ENDPOINT_STATE[base]["last_success_monotonic"],
+                BINANCE_PUBLIC_BASES.index(base),
+            ),
+        )
+    attempted = 0
     for base in bases:
+        with BINANCE_ENDPOINT_LOCK:
+            if BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] > time.monotonic():
+                BINANCE_ENDPOINT_AUDIT[base]["skipped_count"] += 1
+                continue
+        if max_bases is not None and attempted >= max_bases:
+            break
+        attempted += 1
         url = f"{base}{path}"
         if params:
             url = f"{url}?{urlencode(params)}"
+        semaphore = BINANCE_ENDPOINT_SEMAPHORES[base]
+        acquired = semaphore.acquire(timeout=max(0.05, timeout))
+        if not acquired:
+            with BINANCE_ENDPOINT_LOCK:
+                BINANCE_ENDPOINT_AUDIT[base]["skipped_count"] += 1
+            last_error = TimeoutError(f"endpoint concurrency queue timed out: {base}")
+            continue
         try:
             request = Request(
                 url,
@@ -148,13 +201,71 @@ def fetch_json(
                 if str(response.headers.get("Content-Encoding") or "").lower() == "gzip":
                     raw_body = gzip.decompress(raw_body)
                 payload = json.loads(raw_body.decode("utf-8"))
-            BINANCE_ENDPOINT_AUDIT[base]["success_count"] += 1
+            with BINANCE_ENDPOINT_LOCK:
+                BINANCE_ENDPOINT_AUDIT[base]["success_count"] += 1
+                BINANCE_ENDPOINT_AUDIT[base]["last_success_at"] = (
+                    utc_now().isoformat().replace("+00:00", "Z")
+                )
+                BINANCE_ENDPOINT_STATE[base]["consecutive_failures"] = 0
+                BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] = 0.0
+                BINANCE_ENDPOINT_STATE[base]["last_success_monotonic"] = time.monotonic()
             return payload
         except Exception as exc:  # noqa: BLE001 - try the next official public endpoint.
             last_error = exc
-            BINANCE_ENDPOINT_AUDIT[base]["failure_count"] += 1
-            BINANCE_ENDPOINT_AUDIT[base]["last_error"] = str(exc)
+            with BINANCE_ENDPOINT_LOCK:
+                BINANCE_ENDPOINT_AUDIT[base]["failure_count"] += 1
+                BINANCE_ENDPOINT_AUDIT[base]["last_error"] = str(exc)
+                BINANCE_ENDPOINT_STATE[base]["consecutive_failures"] += 1
+                if (
+                    BINANCE_ENDPOINT_STATE[base]["consecutive_failures"]
+                    >= BINANCE_ENDPOINT_FAILURE_THRESHOLD
+                ):
+                    BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] = (
+                        time.monotonic() + BINANCE_CIRCUIT_BREAKER_SECONDS
+                    )
+        finally:
+            semaphore.release()
     raise last_error or RuntimeError("All Binance public endpoints failed")
+
+
+def endpoint_audit_snapshot():
+    now = time.monotonic()
+    with BINANCE_ENDPOINT_LOCK:
+        return {
+            base: {
+                **audit,
+                "consecutive_failures": BINANCE_ENDPOINT_STATE[base][
+                    "consecutive_failures"
+                ],
+                "circuit_open": (
+                    BINANCE_ENDPOINT_STATE[base]["circuit_open_until"] > now
+                ),
+            }
+            for base, audit in BINANCE_ENDPOINT_AUDIT.items()
+        }
+
+
+def reset_endpoint_health_for_test():
+    """Reset process-local endpoint health; used only by deterministic tests."""
+
+    with BINANCE_ENDPOINT_LOCK:
+        for base in BINANCE_PUBLIC_BASES:
+            BINANCE_ENDPOINT_AUDIT[base].update(
+                {
+                    "success_count": 0,
+                    "failure_count": 0,
+                    "skipped_count": 0,
+                    "last_error": None,
+                    "last_success_at": None,
+                }
+            )
+            BINANCE_ENDPOINT_STATE[base].update(
+                {
+                    "consecutive_failures": 0,
+                    "circuit_open_until": 0.0,
+                    "last_success_monotonic": 0.0,
+                }
+            )
 
 
 def safe_float(value, default=None):
@@ -528,7 +639,7 @@ def anchor_state(timeout):
                 "/api/v3/klines",
                 {"symbol": symbol, "interval": "1h", "limit": 5},
                 timeout=min(timeout, 2.0),
-                max_bases=2,
+                max_bases=3,
             )
             rows = summarize_klines(raw)
             return symbol, pct_change(rows[0]["open"], rows[-1]["close"])
@@ -632,8 +743,8 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
     raw = fetch_json(
         "/api/v3/ticker/24hr",
         {"type": "MINI"},
-        timeout=min(timeout, 2.0),
-        max_bases=2,
+        timeout=min(timeout, 5.0),
+        max_bases=3,
     )
     preselected_rows = []
     for row in raw:
@@ -651,8 +762,8 @@ def discover_symbols(top_n, timeout, *, identity_crosscheck=False):
         fetch_json(
             "/api/v3/exchangeInfo",
             {"symbols": json.dumps(preselected, separators=(",", ":"))},
-            timeout=min(timeout, 2.0),
-            max_bases=2,
+            timeout=min(timeout, 5.0),
+            max_bases=3,
         ).get("symbols")
         or []
     )
@@ -780,7 +891,7 @@ def analyze_symbol(
         "/api/v3/klines",
         {"symbol": symbol, "interval": "1m", "limit": 90},
         timeout=min(timeout, 2.0),
-        max_bases=2,
+        max_bases=3,
     )
     rows = completed_rows(summarize_klines(raw), int(captured_at.timestamp() * 1000))
     if len(rows) < 30:
@@ -795,7 +906,7 @@ def analyze_symbol(
             "/api/v3/depth",
             {"symbol": symbol, "limit": 100},
             timeout=min(timeout, 2.0),
-            max_bases=2,
+            max_bases=3,
         )
         book = orderbook_metrics(depth)
     current = rows[-1]["close"]
@@ -1234,6 +1345,14 @@ def main(argv=None):
     run_started = time.monotonic()
     symbols = [item.strip().upper() for item in args.symbols.split(",") if item.strip()]
     bootstrap_errors = []
+    try:
+        fetch_json(
+            "/api/v3/ping",
+            timeout=min(args.timeout, 2.0),
+            max_bases=len(BINANCE_PUBLIC_BASES),
+        )
+    except Exception as exc:  # noqa: BLE001
+        bootstrap_errors.append({"source": "endpoint_health_probe", "error": str(exc)})
     book_by_symbol = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         anchor_future = executor.submit(anchor_state, args.timeout)
@@ -1258,7 +1377,7 @@ def main(argv=None):
             "/api/v3/ticker/bookTicker",
             {"symbols": json.dumps(symbols, separators=(",", ":"))},
             timeout=min(args.timeout, 2.0),
-            max_bases=2,
+            max_bases=3,
         )
         if isinstance(raw_books, dict):
             raw_books = [raw_books]
@@ -1456,6 +1575,8 @@ def main(argv=None):
             for item in top_signals[:3]
         ],
     }, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()[:20]
+    fresh_market_data_available = bool(signals)
+    no_fresh_decision = not fresh_market_data_available
     result = {
         "run_type": "impulse_capture_scan",
         "request_mode": args.request_mode,
@@ -1466,6 +1587,15 @@ def main(argv=None):
         "captured_at": captured.isoformat().replace("+00:00", "Z"),
         "live_orders_enabled": False,
         "private_api_used": False,
+        "decision_status": (
+            "FRESH_RESEARCH_RESULT"
+            if fresh_market_data_available
+            else "NO_FRESH_DECISION"
+        ),
+        "current_action": "NO_TRADE",
+        "fresh_market_data_available": fresh_market_data_available,
+        "no_fresh_decision": no_fresh_decision,
+        "trade_plan": None,
         "anchor": anchor,
         "signals": signals,
         "discovery_top3": discovery["top_candidates"],
@@ -1509,7 +1639,7 @@ def main(argv=None):
         "research_panel_missing": True,
         "errors": errors,
         "data_sources": ["Binance public spot klines", "Binance public spot order book"],
-        "public_endpoint_audit": BINANCE_ENDPOINT_AUDIT,
+        "public_endpoint_audit": endpoint_audit_snapshot(),
         "dynamic_discovery_audit": DISCOVERY_AUDIT,
         "risk_adjusted_path_policy": {
             "calculation_version": RISK_PATH_CALCULATION_VERSION,

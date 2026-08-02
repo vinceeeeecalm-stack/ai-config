@@ -1,0 +1,43 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-market-source-failover-v5-independent-c5fa0923",
+  "goal_id": "tactical-market-source-failover-v5",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "c5fa0923598d118628c6d34c89edd724cb501a32d381bb77167aa1cd9a224b7b",
+  "goal_contract_digest": "eb525ebd35e0b52f58080c06399995a5aaef3f7197dffdee47bcdfbd8a8649c6",
+  "implementation_verification_id": "verify-tactical-market-source-failover-v5-runtime_verified-8ce70ac4",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "independent": true,
+  "read_only": true,
+  "result": "FAIL",
+  "checks": [
+    {"id": "frozen-contracts", "result": "PASS"},
+    {"id": "governance-source-binding", "result": "PASS"},
+    {"id": "runtime-artifact-source-binding", "result": "PASS"},
+    {"id": "tactical-binance-endpoint-circuit-breaker-v5", "result": "PASS"},
+    {"id": "tactical-partial-source-round-survival-v5", "result": "PASS"},
+    {"id": "tactical-source-failover-safety-v5", "result": "FAIL"},
+    {"id": "all-public-endpoints-failed-contract", "result": "FAIL"},
+    {"id": "ledger-isolation", "result": "PASS"},
+    {"id": "regression-suite", "result": "PASS"},
+    {"id": "global-installed-skill-integrity", "result": "PASS"},
+    {"id": "read-only-evidence-stability", "result": "PASS"}
+  ],
+  "findings": [
+    {
+      "id": "P1-all-endpoints-failure-missing-no-fresh-decision",
+      "severity": "P1",
+      "acceptance_scenario_id": "tactical-source-failover-safety-v5",
+      "expected": "所有公共端点均失败时显式输出 NO_FRESH_DECISION，且不得复用旧 TradePlan。",
+      "actual": "全端点故障注入返回 deep_research_status=no_validated_top1、max_allowed_action=watch，但缺少 NO_FRESH_DECISION；未复用旧计划，也未生成观察或交易。",
+      "root_layer": "market_data_failover_contract"
+    }
+  ],
+  "p0_findings": [],
+  "p1_findings": ["P1-all-endpoints-failure-missing-no-fresh-decision"],
+  "highest_proven_level": "TESTED",
+  "business_ready": false,
+  "business_ready_reason": "全源失败安全约束未满足。",
+  "verified_at": "2026-08-02T03:40:01Z"
+}

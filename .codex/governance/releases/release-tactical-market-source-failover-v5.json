@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-tactical-market-source-failover-v5",
+  "project_id": "investing-monorepo",
+  "goal_id": "tactical-market-source-failover-v5",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "7fc19ce94639a396ae6f2a6184f1fb97de90c368",
+    "branch": "codex/tactical-evidence-ledger-v4",
+    "dirty": true
+  },
+  "source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
+  "build_version": "b2906511",
+  "runtime_version": "snapshot-5354b55257ed46d13c56",
+  "database_version": "not_applicable_append_only_jsonl",
+  "last_verification_id": "verify-tactical-market-source-failover-v5-runtime_verified-c7695671",
+  "independent_verification_id": "verify-tactical-market-source-failover-v5-independent-rerun-b2906511",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T03:53:56.874229Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

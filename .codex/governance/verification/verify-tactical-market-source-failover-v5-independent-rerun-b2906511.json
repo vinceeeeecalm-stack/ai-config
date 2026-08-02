@@ -1,0 +1,128 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-market-source-failover-v5-independent-rerun-b2906511",
+  "goal_id": "tactical-market-source-failover-v5",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "frozen-contract-and-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "goal_contract_digest": "eb525ebd35e0b52f58080c06399995a5aaef3f7197dffdee47bcdfbd8a8649c6",
+        "authoritative_source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
+        "current_source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
+        "verification_stale": false,
+        "open_deviations": 0
+      }
+    },
+    {
+      "id": "previous-independent-failure-preserved",
+      "result": "PASS",
+      "evidence": {
+        "verification_id": "verify-tactical-market-source-failover-v5-independent-c5fa0923",
+        "result": "FAIL",
+        "historical_p1": "P1-all-endpoints-failure-missing-no-fresh-decision",
+        "overwritten": false,
+        "append_only_deviation_closure_present": true
+      }
+    },
+    {
+      "id": "all-five-endpoints-failure-contract",
+      "result": "PASS",
+      "evidence": {
+        "all_five_circuit_open": true,
+        "decision_status": "NO_FRESH_DECISION",
+        "current_action": "NO_TRADE",
+        "fresh_market_data_available": false,
+        "no_fresh_decision": true,
+        "trade_plan": null,
+        "observation_count": 0,
+        "old_trade_plan_reused": false,
+        "live_orders_enabled": false,
+        "private_api_used": false
+      }
+    },
+    {
+      "id": "tactical-binance-endpoint-circuit-breaker-v5",
+      "result": "PASS",
+      "evidence": {
+        "failure_threshold": 3,
+        "circuit_breaker_seconds": 8.0,
+        "per_endpoint_max_concurrency": 4,
+        "open_circuit_skips_do_not_consume_attempt_limit": true,
+        "healthy_public_mirror_is_prioritized": true,
+        "deterministic_failover_tests": "4/4 PASS"
+      }
+    },
+    {
+      "id": "tactical-partial-source-round-survival-v5",
+      "result": "PASS",
+      "evidence": {
+        "artifact": "active-alpha-paper-monitor/experiments/20260802-034627-impulse-capture.json",
+        "artifact_sha256": "f20f26e8be06d09eed29aa231dcf957b31a9e87d683d1d61a798e07b93defa18",
+        "ticker_rows_considered": 650,
+        "unique_research_top1": "ZECUSDT",
+        "decision_status": "FRESH_RESEARCH_RESULT",
+        "current_action": "NO_TRADE",
+        "observations_appended": 3,
+        "end_to_end_seconds": 18.42766
+      }
+    },
+    {
+      "id": "runtime-artifact-source-binding",
+      "result": "PASS",
+      "evidence": {
+        "scanner_plus_ledger_digest": "1f8baec1f8e899dc424bdb810826f12221227ca0ef5ca44cdf3ba60cbceebda6",
+        "artifact_source_digest": "1f8baec1f8e899dc424bdb810826f12221227ca0ef5ca44cdf3ba60cbceebda6",
+        "runtime_snapshot_id": "snapshot-5354b55257ed46d13c56",
+        "runtime_rows_bound_to_snapshot": 3
+      }
+    },
+    {
+      "id": "tactical-source-failover-safety-v5",
+      "result": "PASS",
+      "evidence": {
+        "runtime_observation_count": 13,
+        "accepted_observation_count": 0,
+        "rejected_observation_count": 13,
+        "paper_trade_sample_count": 0,
+        "live_trade_sample_count": 0,
+        "real_money_roi_sample_count": 0,
+        "paper_live_separated": true
+      }
+    },
+    {
+      "id": "regression-suite",
+      "result": "PASS",
+      "evidence": {
+        "monorepo_policy": "PASS",
+        "active_alpha_tests": "12/12 PASS",
+        "manual_operator_tests": "191/191 PASS",
+        "governance_tests": "14/14 PASS",
+        "scanner_self_test": "PASS"
+      }
+    },
+    {
+      "id": "global-installed-skill-integrity",
+      "result": "PASS",
+      "evidence": {
+        "workspace_manifest_sha256": "74e6776ec3cfe0db47637ca0305e5cb5e7c8114bc96dbe4538728b1a7a2c5891",
+        "installed_manifest_sha256": "74e6776ec3cfe0db47637ca0305e5cb5e7c8114bc96dbe4538728b1a7a2c5891",
+        "hash_mismatches": [],
+        "smoke_passed": true
+      }
+    },
+    {
+      "id": "read-only-evidence-stability",
+      "result": "PASS",
+      "evidence": {
+        "files_modified_by_verifier": false
+      }
+    }
+  ],
+  "findings": [],
+  "created_at": null
+}

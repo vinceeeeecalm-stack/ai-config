@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "tactical-evidence-ledger-v4",
+  "goal_id": "tactical-market-source-failover-v5",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "5088cb9dab266b816ecdd12182e486fdfd7f0de4825bf8498bd3f0dc45451f95",
+  "source_digest": "b290651171200d04016a0fcc9fa01201e390419acb8f38b3e11a4aa221cf6fa4",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-tactical-evidence-ledger-v4-runtime_verified-37d62a9b",
-  "independent_verification_id": "verify-tactical-evidence-ledger-v4-independent-rerun-5088cb9d",
-  "updated_at": "2026-08-02T03:08:50.416959Z"
+  "last_verification_id": "verify-tactical-market-source-failover-v5-runtime_verified-c7695671",
+  "independent_verification_id": "verify-tactical-market-source-failover-v5-independent-rerun-b2906511",
+  "updated_at": "2026-08-02T03:53:44.333470Z"
 }
