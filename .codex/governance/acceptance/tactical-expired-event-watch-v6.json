@@ -1,0 +1,25 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "tactical-expired-event-watch-v6",
+  "title": "过期新链事件只保留审计且不能成为当前催化",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "verified mainnet event 的 watch_until 早于当前 cutoff_at"
+  ],
+  "steps": [
+    "运行 new_chain_opportunity_radar live 或确定性快照评估",
+    "检查事件状态、候选、来源调用和动作上限"
+  ],
+  "expected": [
+    "event_status=expired",
+    "event_stage=watch_expired",
+    "candidates 为空且不发起 DEX 资产扫描",
+    "max_active_action=watch 且 current_catalyst_eligible=false",
+    "不输出当前 why_now 或预测概率",
+    "live_orders_enabled=false"
+  ],
+  "evidence": [
+    "确定性过期边界测试",
+    "Robinhood Chain 过期注册表真实运行结果"
+  ]
+}

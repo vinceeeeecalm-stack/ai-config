@@ -30,6 +30,50 @@ def parse_iso(value: str | None) -> datetime | None:
     return parsed
 
 
+def event_window_status(
+    event: dict[str, Any], cutoff_at: datetime
+) -> dict[str, Any]:
+    """Return the live eligibility of an event without mutating history."""
+
+    raw_watch_until = event.get("watch_until")
+    if not raw_watch_until:
+        return {
+            "event_status": "invalid_window",
+            "current_catalyst_eligible": False,
+            "watch_until": None,
+            "window_reason": "watch_until_missing",
+        }
+    try:
+        watch_until = parse_iso(str(raw_watch_until))
+    except (TypeError, ValueError) as exc:
+        return {
+            "event_status": "invalid_window",
+            "current_catalyst_eligible": False,
+            "watch_until": str(raw_watch_until),
+            "window_reason": f"watch_until_invalid:{type(exc).__name__}",
+        }
+    if watch_until is None:
+        return {
+            "event_status": "invalid_window",
+            "current_catalyst_eligible": False,
+            "watch_until": str(raw_watch_until),
+            "window_reason": "watch_until_missing",
+        }
+    if cutoff_at > watch_until:
+        return {
+            "event_status": "expired",
+            "current_catalyst_eligible": False,
+            "watch_until": watch_until.isoformat(),
+            "window_reason": "cutoff_after_watch_until",
+        }
+    return {
+        "event_status": "active",
+        "current_catalyst_eligible": True,
+        "watch_until": watch_until.isoformat(),
+        "window_reason": "within_watch_window",
+    }
+
+
 def as_float(value: Any) -> float | None:
     if value is None or isinstance(value, bool):
         return None
@@ -279,9 +323,44 @@ def _normalize_gecko_pool(row: dict[str, Any], captured_at: str) -> dict[str, An
 
 
 def scan_live_event(
-    event: dict[str, Any], policy: dict[str, Any], timeout: float
+    event: dict[str, Any],
+    policy: dict[str, Any],
+    timeout: float,
+    *,
+    captured_at: datetime | None = None,
 ) -> dict[str, Any]:
-    captured_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    captured = captured_at or datetime.now(timezone.utc).replace(microsecond=0)
+    if captured.tzinfo is None:
+        raise ValueError("captured_at_timezone_required")
+    captured_text = captured.isoformat()
+    window = event_window_status(event, captured)
+    if not window["current_catalyst_eligible"]:
+        return {
+            "schema_version": "new-chain-opportunity-radar-v1",
+            "snapshot_id": (
+                f"new-chain-{event.get('event_id')}-{captured_text}"
+            ),
+            "cutoff_at": captured_text,
+            "event_id": event.get("event_id"),
+            "event_stage": (
+                "watch_expired"
+                if window["event_status"] == "expired"
+                else "watch_window_invalid"
+            ),
+            **window,
+            "candidates": [],
+            "max_active_action": "watch",
+            "live_orders_enabled": False,
+            "private_api_used": False,
+            "human_confirmation_required": True,
+            "historical_baseline_mutation_allowed": False,
+            "source_status": [],
+            "data_quality_status": (
+                "expired_not_scanned"
+                if window["event_status"] == "expired"
+                else "invalid_event_window_not_scanned"
+            ),
+        }
     assets: dict[str, dict[str, Any]] = {}
     source_status: list[dict[str, Any]] = []
     network = event.get("geckoterminal_network")
@@ -295,7 +374,7 @@ def scan_live_event(
                 payload = get_json(url, timeout)
                 rows = payload.get("data") or []
                 for row in rows:
-                    item = _normalize_gecko_pool(row, captured_at)
+                    item = _normalize_gecko_pool(row, captured_text)
                     key = str(item.get("pair_address") or item.get("contract_address"))
                     assets[key] = item
                 source_status.append(
@@ -341,7 +420,7 @@ def scan_live_event(
                                 + [row.get("url") or url]
                             )
                         ),
-                        "captured_at": captured_at,
+                        "captured_at": captured_text,
                         "price_usd": as_float(row.get("priceUsd")),
                         "liquidity_usd": as_float(
                             (row.get("liquidity") or {}).get("usd")
@@ -374,12 +453,13 @@ def scan_live_event(
                 }
             )
     snapshot = {
-        "snapshot_id": f"new-chain-{event.get('event_id')}-{captured_at}",
-        "cutoff_at": captured_at,
+        "snapshot_id": f"new-chain-{event.get('event_id')}-{captured_text}",
+        "cutoff_at": captured_text,
         "event": event,
         "assets": list(assets.values()),
     }
     result = evaluate_snapshot(snapshot, policy)
+    result.update(window)
     result["source_status"] = source_status
     result["data_quality_status"] = (
         "verified"

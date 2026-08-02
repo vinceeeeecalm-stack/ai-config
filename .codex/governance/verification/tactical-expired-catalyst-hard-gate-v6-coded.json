@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-tactical-expired-catalyst-hard-gate-v6-coded-de6e1ac1",
+  "goal_id": "tactical-expired-catalyst-hard-gate-v6",
+  "level": "CODED",
+  "source_digest": "803e5e7a55eef6d058596fef01b74a82b8d4e620cd1adf6d45e54c2dc6ec2bcc",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T04:06:10.073829Z"
+}
