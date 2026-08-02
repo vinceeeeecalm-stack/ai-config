@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "unified-shortterm-derivatives-shadow-v2",
+  "goal_id": "derivatives-shadow-outcome-review-v1",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "1a9ce5a0cc0d1f07a4f9e7ac2f81e85e75b4d1a25753fbaab85b3733ccd679be",
+  "source_digest": "733f0b7ca999d019764db2c51308e3fb2d89c62856dd40074135dca434cb45aa",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-runtime_verified-5b43b230",
-  "independent_verification_id": "verify-unified-shortterm-derivatives-shadow-v2-independent-019fbc78",
-  "updated_at": "2026-08-02T12:17:17.761948Z"
+  "last_verification_id": "verify-derivatives-shadow-outcome-review-v1-runtime_verified-95ca8508",
+  "independent_verification_id": "verify-derivatives-shadow-outcome-review-v1-independent-019fbc78",
+  "updated_at": "2026-08-02T12:41:50.091517Z"
 }

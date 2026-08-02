@@ -48,6 +48,10 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
    输出最多二十个同轮现货因子，再交给
    `scripts/derivatives_shadow_collector.py` 补充 OI、funding、basis 和合约主动成交。
    该数据不进入当前 discovery score、Top1 或正式 handoff 动作；OI 单独上升只能输出冲突标签。
+   达到冻结的七天 `review_due_at` 后，先运行
+   `scripts/derivatives_shadow_outcome_reviewer.py`，用观察后的闭合 15m 现货 K 线同时结算
+   `+5%/-3%`、`+8%/-4%`、`+10%/-5%` 三组诊断路径。结果只进入
+   `DerivativesShadowOutcomeReviewV1` 与 cohort 摘要；未到期不得读取行情，数据失败不得写入伪结果。
 5. 运行 paper 风险、容量和 recovery gate；失败时保留 blocked candidate 和明确原因。
 6. 每个冻结候选写 ObservationSampleV1；只有可复现的 Paper fill 写 TradeSampleV1。
 7. 输出统一 handoff：候选事实、setup、概率类型、验证状态、风险、缺口和 observation plan；walk-forward 与 Paper 统一封装为 `RegressionEvidenceV1`。
@@ -123,6 +127,7 @@ Runtime 产物应保存在工作区或显式 `INVESTING_RUNTIME_ROOT`，迁移�
 - 当前信号：`scripts/current_signal_probe.py`
 - 异动扫描：`scripts/impulse_capture_scanner.py`
 - 全候选衍生品影子采集：`scripts/derivatives_shadow_collector.py`；只消费显式 shadow handoff，候选级局部降级，绝不改变生产排名或动作。
+- 衍生品影子到期结算：`scripts/derivatives_shadow_outcome_reviewer.py`；只结算已到期观察，输出追加式三路径诊断和因子 cohort，不进入 Paper/真钱 ROI。
 - 新链事件到资产：`scripts/new_chain_opportunity_radar.py`
 - 美国 crypto 立法事件：`scripts/us_crypto_legislative_event_radar.py`
 - 美股开盘扫描：`scripts/us_open_dynamic_scanner.py`

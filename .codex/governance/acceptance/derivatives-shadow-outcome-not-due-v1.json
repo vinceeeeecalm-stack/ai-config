@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-not-due-v1",
+  "title": "未到期观察不读取未来行情",
+  "level": "TESTED",
+  "preconditions": ["review_due_at 晚于 as_of"],
+  "steps": ["运行 due reviewer"],
+  "expected": ["行情 provider 调用次数为零", "没有结果写入", "观察仍保留待结算"],
+  "evidence": ["未到期负向测试"]
+}

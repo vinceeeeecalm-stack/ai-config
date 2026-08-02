@@ -32,6 +32,8 @@ OI 只代表新增仓位和潜在燃料，不能单独证明方向。至少还�
 
 阶段 1 的 `unified-shortterm-derivatives-shadow-v2` 只在 Active discovery 全候选层采集 OI、funding、basis 和合约主动成交影子证据。它不改变生产排序，也不允许 Manual 把影子方向标签当作正式动作；只有后续十四天窗口和前向结果共同通过后才能另建目标申请晋升。
 
+阶段 1 的影子观察到期后，由 Active 的七天 reviewer 生成三组无前视路径和 cohort 诊断。这些结果只用于判断阶段 1 规则是否值得在未来独立晋升；Manual 不得把它们计入 Paper/真钱 ROI，也不得据此直接生成当前正式动作。
+
 阶段 0 的真实账本尚无到期结果时必须输出 `DATA_INSUFFICIENT`。确定性夹具仅验证实现与防前视，不是 Paper 或真钱证据，也不能提升 `BUSINESS_READY`。
 
 ## 风险边界

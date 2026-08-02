@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-isolation-v1",
+  "title": "影子结果不进入交易动作或收益分母",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["已生成影子结果和 cohort 摘要"],
+  "steps": ["检查结果与汇总安全字段", "运行 golden replay"],
+  "expected": ["正式动作、Paper ROI、真钱 ROI 和 BUSINESS_READY 全部不具备资格", "不使用私有 API 或自动订单", "只输出诊断比较"],
+  "evidence": ["运行时合同自检与 golden replay"]
+}
