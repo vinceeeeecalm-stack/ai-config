@@ -1,0 +1,93 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-outcome-review-v1-independent-019fbc78",
+  "goal_id": "derivatives-shadow-outcome-review-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "733f0b7ca999d019764db2c51308e3fb2d89c62856dd40074135dca434cb45aa",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": [
+    {
+      "id": "governance-source-binding",
+      "result": "PASS",
+      "evidence": "Governance status and RUNTIME_VERIFIED record match the frozen goal and current source digest."
+    },
+    {
+      "id": "no-future-data",
+      "result": "PASS",
+      "evidence": "A post-expiry bar with extreme high/low values was excluded. MFE, MAE, ending return, path outcomes and 672-bar count remained unchanged."
+    },
+    {
+      "id": "three-frozen-paths",
+      "result": "PASS",
+      "evidence": "The immutable thresholds are +5%/-3%, +8%/-4% and +10%/-5%. Deterministic replay produced TARGET, STOP and NONE respectively."
+    },
+    {
+      "id": "same-bar-stop-first",
+      "result": "PASS",
+      "evidence": "A bar touching both target and stop produced AMBIGUOUS_STOP_FIRST."
+    },
+    {
+      "id": "closed-window-integrity",
+      "result": "PASS",
+      "evidence": "Duplicate timestamps were rejected as DATA_BLOCKED with bars_not_unique_chronological; incomplete windows did not emit zero returns or path conclusions."
+    },
+    {
+      "id": "not-due-no-market-read",
+      "result": "PASS",
+      "evidence": "Real-ledger replay with a provider that fails if invoked recorded provider_calls=0, not_due_count=40, due_unreviewed_count=0 and appended_count=0."
+    },
+    {
+      "id": "legacy-no-backfill",
+      "result": "PASS",
+      "evidence": "All 40 legacy records were classified LEGACY_UNREVIEWABLE with review_due_at_backfilled=false and market_data_requested=false. They did not block the 40 reviewable records."
+    },
+    {
+      "id": "candidate-local-data-block",
+      "result": "PASS",
+      "evidence": "Fault injection allowed the healthy candidate to append while the failed candidate remained DATA_BLOCKED, NOT_APPENDED_RETRYABLE and absent from persisted outcomes."
+    },
+    {
+      "id": "append-binding",
+      "result": "PASS",
+      "evidence": "Complete outcomes preserved snapshot_id, strategy_version, config_digest, source_digest and captured factor state. Equivalent append returned NO_UPDATE; changed content under the same review ID was blocked."
+    },
+    {
+      "id": "cohort-separation",
+      "result": "PASS",
+      "evidence": "Cohorts remained separated by capture-time directional state, production signal stage and TOP3/RANK_4_20 rank band."
+    },
+    {
+      "id": "action-roi-business-isolation",
+      "result": "PASS",
+      "evidence": "Reviews and summaries retain production_rule_changed=false, formal_action_eligible=false, paper_roi_eligible=false, real_money_roi_eligible=false, business_ready_eligible=false, live_orders_enabled=false, private_api_used=false and human_confirmation_required=true."
+    },
+    {
+      "id": "reviewer-tests",
+      "result": "PASS",
+      "evidence": "All 11 targeted reviewer tests passed."
+    },
+    {
+      "id": "long-window-self-test",
+      "result": "PASS",
+      "evidence": "The reviewer self-test processed a complete seven-day, 672-bar 15-minute window and passed path, binding, append-only and isolation checks."
+    },
+    {
+      "id": "skill-mirror",
+      "result": "PASS",
+      "evidence": "Workspace and installed Skill manifests matched exactly; validation, smoke checks and the installed 225-test suite passed."
+    },
+    {
+      "id": "public-repository-safety",
+      "result": "PASS",
+      "evidence": "PublicRepositorySafetyScanV1 returned PASS with zero secret and zero privacy findings."
+    },
+    {
+      "id": "read-only-verification",
+      "result": "PASS",
+      "evidence": "No project or runtime file was written. The designated runtime files retained SHA-256 values d510f4af8ad05630202890bd394fd403bc01b97a97939f4888065497826ed107 and 30516601d8da25aff8956a25baff2f68d0e5c5735fbed73b0ffb9a615e46d816."
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-02T12:39:16Z"
+}

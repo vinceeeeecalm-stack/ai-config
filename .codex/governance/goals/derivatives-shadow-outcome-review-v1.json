@@ -1,0 +1,43 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "derivatives-shadow-outcome-review-v1",
+  "title": "衍生品影子观察的七天无前视结果结算",
+  "business_outcome": "把阶段一影子观察自动结算为可归因的七天路径证据，比较 OI、资金费率、基差和主动成交的不同状态是否更早识别上涨，同时不改变生产选股、正式动作或任何收益分母。",
+  "scope": [
+    "读取追加式 DerivativesShadowObservationV1 账本，只结算已达到冻结 review_due_at 的观察",
+    "使用观察后、到期前的闭合十五分钟现货 K 线计算 MFE、MAE、期末收益和三组目标/止损先后",
+    "冻结并同时评估 +5%/-3%、+8%/-4%、+10%/-5% 三组诊断路径，同柱冲突按止损优先",
+    "生成追加式 DerivativesShadowOutcomeReviewV1，保留原 snapshot、strategy、config、source 和 factor 状态绑定",
+    "按 directional_state、production_signal_stage 和 rank band 生成可审计 cohort 摘要",
+    "数据源失败只令对应候选 DATA_BLOCKED 并保留重试，不写入伪结果"
+  ],
+  "non_goals": [
+    "不把影子结果加入生产候选分数、research_top1 或 ENTER_NOW/WAIT_FOR_ENTRY/NO_TRADE",
+    "不修改阶段一 collector 的因子阈值，不批准阶段一生产晋升",
+    "不生成 Paper 成交、真钱成交或资金加权 ROI",
+    "不实现阶段二排名加速度、阶段三持有时钟或阶段六主动交易提醒",
+    "不使用未来数据、未闭合 K 线、私有 API 或账户信息"
+  ],
+  "constraints": [
+    "观察未到 review_due_at 时不得请求行情或写入结果",
+    "K 线必须位于 observed_at 到 review_due_at 的闭合窗口内，并按时间唯一递增",
+    "三组诊断阈值由独立版本配置冻结，历史结果不得用新配置回填",
+    "同一根 K 线同时触及目标与止损时必须按 AMBIGUOUS_STOP_FIRST 处理",
+    "同一 review_id 同内容重复写入返回 NO_UPDATE，不同内容必须阻断",
+    "formal_action_eligible=false、paper_roi_eligible=false、real_money_roi_eligible=false、business_ready_eligible=false",
+    "live_orders_enabled=false、private_api_used=false、human_confirmation_required=true"
+  ],
+  "acceptance_scenario_ids": [
+    "derivatives-shadow-outcome-three-paths-v1",
+    "derivatives-shadow-outcome-not-due-v1",
+    "derivatives-shadow-outcome-local-data-block-v1",
+    "derivatives-shadow-outcome-append-binding-v1",
+    "derivatives-shadow-outcome-isolation-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "unified-shortterm-derivatives-shadow-v2",
+  "frozen_at": "2026-08-02T12:23:51.206583Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "1724e91e640f8818b9eb631e61986c60c5d1df4b175b48910493a8f0087758ef"
+}

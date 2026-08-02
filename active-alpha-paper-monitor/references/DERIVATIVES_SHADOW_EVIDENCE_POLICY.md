@@ -34,3 +34,21 @@
 ## Promotion gate
 
 阶段一生产晋升必须使用新的 superseding GoalContract，且不得早于配置中的十四天规则窗口。晋升前至少比较：发现提前量、黄金机会识别率、假阳性、资金费率拥挤误判、OI-only 冲突率、来源覆盖和延迟。影子结果不允许回填或改写既有生产建议。
+
+## Seven-day outcome settlement
+
+`derivatives_shadow_outcome_reviewer.py` 只读取已经达到冻结 `review_due_at` 的
+`DerivativesShadowObservationV1`。每个观察使用 `observed_at` 之后、`review_due_at`
+之前的闭合 15m 现货 K 线，同时结算以下三组诊断路径：
+
+- 先上涨 5%，还是先下跌 3%；
+- 先上涨 8%，还是先下跌 4%；
+- 先上涨 10%，还是先下跌 5%。
+
+同一根 K 线同时触发两侧时按 `AMBIGUOUS_STOP_FIRST` 处理。窗口起点、终点或中间
+K 线缺失时保留 `DATA_BLOCKED` 重试，不得用不完整窗口产生零收益或路径结论。
+
+结果按原始 `directional_state`、`production_signal_stage` 和 `TOP3/RANK_4_20`
+分组汇总，用于比较影子因子的提前识别与假阳性。结果始终
+`formal_action_eligible=false`、`paper_roi_eligible=false`、
+`real_money_roi_eligible=false`、`business_ready_eligible=false`；它不是交易、Paper 成交或 ROI。

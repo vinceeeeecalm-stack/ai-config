@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-three-paths-v1",
+  "title": "同一冻结窗口结算三组黄金机会路径",
+  "level": "TESTED",
+  "preconditions": ["已到期影子观察", "完整闭合十五分钟 K 线夹具"],
+  "steps": ["结算 +5/-3、+8/-4、+10/-5 三组路径", "制造同柱目标止损冲突"],
+  "expected": ["分别记录先到目标、先到止损或未触发", "同柱冲突按 AMBIGUOUS_STOP_FIRST", "MFE、MAE 和期末收益一致"],
+  "evidence": ["无前视确定性路径测试"]
+}

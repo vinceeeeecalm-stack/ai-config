@@ -19,6 +19,7 @@
     "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --self-test --iterations 30 --candidate-count 25",
     "python3 active-alpha-paper-monitor/scripts/us_open_dynamic_scanner.py --count 25 --top 3 --max-symbols 30 --request-timeout 12 --request-mode intraday_scalp --json-only --assert-runtime-contract",
     "python3 active-alpha-paper-monitor/scripts/impulse_capture_scanner.py --self-test",
+    "python3 active-alpha-paper-monitor/scripts/derivatives_shadow_outcome_reviewer.py --self-test",
     "python3 manual-investment-strategy-operator/scripts/longterm_next_dollar_ranker.py --self-test",
     "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
     "python3 -m unittest -v manual-investment-strategy-operator/tests/test_profit_oriented_dual_sleeve.py",

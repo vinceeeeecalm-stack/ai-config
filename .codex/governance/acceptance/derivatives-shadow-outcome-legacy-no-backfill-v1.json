@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-legacy-no-backfill-v1",
+  "title": "缺少冻结复核时钟的旧影子记录不回填",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["追加式账本包含没有 review_due_at 的早期 DerivativesShadowObservationV1"],
+  "steps": ["读取完整历史账本", "运行到期结算"],
+  "expected": ["旧记录标记 LEGACY_UNREVIEWABLE", "不从 observed_at 推导或补写 review_due_at", "旧记录不拖死具备冻结窗口的新记录", "不调用旧记录行情 provider"],
+  "evidence": ["真实 80 条账本兼容运行与负向测试"]
+}

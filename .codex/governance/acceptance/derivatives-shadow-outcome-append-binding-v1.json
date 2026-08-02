@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-append-binding-v1",
+  "title": "结果记录保持原观察绑定且不可覆盖",
+  "level": "TESTED",
+  "preconditions": ["有效影子观察和结果记录"],
+  "steps": ["首次写入", "等价重复写入", "篡改相同 ID 后写入"],
+  "expected": ["保留原四摘要与因子状态", "重复返回 NO_UPDATE", "冲突写入阻断"],
+  "evidence": ["合同与追加式 JSONL 测试"]
+}
