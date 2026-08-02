@@ -1,0 +1,31 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-promotion-gate-v1-independent-pass-019fbc78",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "2488bd64892b93a83c57b400d1a7f0abbcf7b3e32555a36bad771b2e59e3343f",
+  "verifier_thread_id": "019fbc78-722a-7611-aa6e-da68d97569ec",
+  "result": "PASS",
+  "checks": {
+    "frozen_fields": "22/22 mutations blocked",
+    "absolute_future_times": "6/6 fields blocked",
+    "relative_time_boundaries": "5/5 faults blocked",
+    "lineage_isolation": "5/5 lineage axes blocked or safely isolated",
+    "real_two_source_pool": {
+      "decision": "MORE_EVIDENCE_REQUIRED",
+      "evidence_pool_valid": false,
+      "required_blocker_present": true,
+      "pooled_experiment_samples": 0,
+      "pooled_control_samples": 0,
+      "overall_uplift": null
+    },
+    "failed_benefit_gate": "REJECT_PHASE1",
+    "targeted_tests": "11/11 PASS",
+    "empty_outcome": "MORE_EVIDENCE_REQUIRED and deterministic",
+    "global_mirror": "PASS; 286 files; 225 tests PASS",
+    "automation": "RRULE guard PASS; nine future occurrences; execution and ROI isolation preserved",
+    "public_safety": "PASS; zero secret and privacy findings"
+  },
+  "findings": [],
+  "created_at": "2026-08-02T13:46:00Z"
+}

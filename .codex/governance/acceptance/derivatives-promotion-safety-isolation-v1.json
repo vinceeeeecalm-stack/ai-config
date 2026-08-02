@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-promotion-safety-isolation-v1",
+  "title": "晋升评估不得污染生产动作或收益分母",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["输入包含非法生产动作、Paper/真钱 ROI 资格、未来数据或错误绑定之一"],
+  "steps": ["运行评估器", "检查安全判定与持久化行为"],
+  "expected": ["结果为 REJECT_PHASE1 或输入被阻断", "production_rule_changed=false", "formal_action_eligible=false", "paper_roi_eligible=false", "real_money_roi_eligible=false", "live_orders_enabled=false"],
+  "evidence": ["fault fixtures", "targeted tests", "runtime safety output"]
+}

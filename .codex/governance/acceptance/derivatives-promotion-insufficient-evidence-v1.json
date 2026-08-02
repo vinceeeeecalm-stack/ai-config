@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-promotion-insufficient-evidence-v1",
+  "title": "样本不足时不得事后放宽晋升门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["完整结果、独立快照、实验组或早期发现实验组任一少于冻结下限"],
+  "steps": ["运行评估器", "检查判定和 all_blockers", "重复运行"],
+  "expected": ["结果为 MORE_EVIDENCE_REQUIRED", "缺口逐项列出", "重复运行输出相同", "不得输出 PROMOTION_REVIEW_ELIGIBLE"],
+  "evidence": ["insufficient fixture", "targeted test", "pre-due runtime result"]
+}

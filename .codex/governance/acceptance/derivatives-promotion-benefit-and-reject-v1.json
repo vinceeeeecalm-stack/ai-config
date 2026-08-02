@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-promotion-benefit-and-reject-v1",
+  "title": "充分样本下按冻结增量标准给出有资格或淘汰",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["实验组和对照组均满足冻结样本量，结果窗口完整且绑定有效"],
+  "steps": ["运行正向增量夹具", "运行无增量夹具", "检查主要路径和 RANK_4_20 分组"],
+  "expected": ["正向夹具仅得到 PROMOTION_REVIEW_ELIGIBLE", "无增量夹具得到 REJECT_PHASE1", "辅助路径不改变判定", "输出保存全部诊断指标"],
+  "evidence": ["eligible fixture", "reject fixture", "targeted tests"]
+}

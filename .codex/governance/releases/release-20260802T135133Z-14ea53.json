@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-20260802T135133Z-14ea53",
+  "project_id": "investing-monorepo",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "d14e57fd5fb75b9a7f5d8fb51ebd895059ff2b79",
+    "branch": "codex/derivatives-shadow-promotion-gate-v1",
+    "dirty": true
+  },
+  "source_digest": "2488bd64892b93a83c57b400d1a7f0abbcf7b3e32555a36bad771b2e59e3343f",
+  "build_version": null,
+  "runtime_version": null,
+  "database_version": null,
+  "last_verification_id": "verify-derivatives-shadow-promotion-gate-v1-runtime_verified-5a91c82f",
+  "independent_verification_id": "verify-derivatives-shadow-promotion-gate-v1-independent-pass-019fbc78",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 8,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-02T13:51:33.188081Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-promotion-gate-v1-coded-809acf9f",
+  "goal_id": "derivatives-shadow-promotion-gate-v1",
+  "level": "CODED",
+  "source_digest": "2488bd64892b93a83c57b400d1a7f0abbcf7b3e32555a36bad771b2e59e3343f",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T13:50:16.741808Z"
+}
