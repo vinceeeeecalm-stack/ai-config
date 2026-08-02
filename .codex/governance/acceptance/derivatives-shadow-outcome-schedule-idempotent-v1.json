@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "derivatives-shadow-outcome-schedule-idempotent-v1",
+  "title": "有限窗口重复运行保持追加幂等",
+  "level": "TESTED",
+  "preconditions": ["同一 observation 和 review_config_digest"],
+  "steps": ["重复运行 reviewer", "模拟局部数据失败"],
+  "expected": ["相同结果返回 NO_UPDATE", "冲突内容阻断", "失败候选不写入并可在后续 occurrence 重试"],
+  "evidence": ["reviewer 追加式与局部失败测试"]
+}

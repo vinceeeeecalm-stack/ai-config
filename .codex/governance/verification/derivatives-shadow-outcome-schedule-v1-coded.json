@@ -1,0 +1,13 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-outcome-schedule-v1-coded-eea9b544",
+  "goal_id": "derivatives-shadow-outcome-schedule-v1",
+  "level": "CODED",
+  "source_digest": "0852489367c267c187c248c9c2e428e19be412992144a4faad212b9046b99eae",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [],
+  "findings": [],
+  "created_at": "2026-08-02T12:57:38.119413Z"
+}
