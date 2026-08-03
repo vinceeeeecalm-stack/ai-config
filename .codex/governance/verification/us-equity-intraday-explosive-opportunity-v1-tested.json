@@ -1,0 +1,84 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-us-equity-intraday-explosive-opportunity-v1-tested-dc1f40d1",
+  "goal_id": "us-equity-intraday-explosive-opportunity-v1",
+  "level": "TESTED",
+  "source_digest": "9a312aa301716608105aa4c8369d0303d562097ef7de326c2255ccf47c7a29ef",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 337,
+      "stdout_sha256": "432f42a8d1a9c2ae5b3b9a22c8bb57de3177780a461e61bfd0f20066cfc1df85",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_ms": 426,
+      "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
+      "stderr_sha256": "999a35f07955e06f1319c1b37a90ec581d1c5254c297d20fff48811bc2b04441"
+    },
+    {
+      "command": "python3 -m unittest discover -s active-alpha-paper-monitor/tests -p 'test_*.py' -v",
+      "exit_code": 0,
+      "duration_ms": 2756,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "81e5c2f9a91e5c69583fa03ef15bfb07db649ccb0740a9b7eebb8a5429bee43e"
+    },
+    {
+      "command": "python3 closed-loop-delivery-governor/scripts/test_governance.py",
+      "exit_code": 0,
+      "duration_ms": 7272,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "dc0fefb84ef2ae883dc5480e33d66eec937d81fca8ca600f0714c4ec66e5d36f"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 42,
+      "stdout_sha256": "128a45224326a3e5e3a5802d0e34e672392e2f5d18a6a882b5cd83d03932d773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 43,
+      "stdout_sha256": "0b8ed624e57a2049022348ec330713a485bc8fca4d3560a2d485160d1c40a7e6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/unified_shortterm_phase_readiness.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 53,
+      "stdout_sha256": "c2c8d09bd989f6d1302eb08dc77e7c9e176b13fb2990f1eba5c4cc73a16ef3fb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 active-alpha-paper-monitor/scripts/us_equity_intraday_shadow.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 51,
+      "stdout_sha256": "d966e62180b04d5b3af17870026b135b49ab63e011ef8506b5a0c1a685eab3d2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest -v active-alpha-paper-monitor/tests/test_us_equity_intraday_shadow.py",
+      "exit_code": 0,
+      "duration_ms": 77,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5bcb89d7ec3d2d30066d53268d34b5f8565effca332cd02aeb1fd57745939bd5"
+    },
+    {
+      "command": "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts",
+      "exit_code": 0,
+      "duration_ms": 56,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-03T15:16:47.372011Z"
+}

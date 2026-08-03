@@ -1,0 +1,48 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "us-equity-intraday-explosive-opportunity-v1",
+  "title": "插件驱动的美股盘前与盘中完整机会引擎阶段零",
+  "business_outcome": "利用 Alpaca 实时市场数据、动态候选、官方催化与资本风险证据，在美股盘前和盘中形成可追溯的全市场高爆发机会漏斗、唯一研究 Top1 和明确三态影子判断，为后续每十四天单规则晋升积累无未来泄漏证据，同时不把影子结果冒充真钱收益。",
+  "scope": [
+    "新增 AlpacaMarketSnapshotV1 白名单适配器，准确区分 CONSOLIDATED_REALTIME、IEX_CROSS_VERIFIED、IEX_ONLY 和 STALE_OR_CONFLICTED",
+    "新增盘前与盘中因子、爆发机会、决策、生命周期、漏检和利润归因八类确定性合同",
+    "实现盘前 04:00–09:29 与盘中 09:30–15:55 的同构完整影子漏斗：动态候选、板块、量价、催化、估值、资本风险、Top20、Top3、唯一 research_top1 和三态影子判断",
+    "实现价格下限、OTC、停牌、身份、流动性、数据时效、双源冲突、价差、VWAP、开盘区间、板块相对强度、催化、费用后 EV 和风险硬门",
+    "实现持续候选、排名加速度、动作变化去重、生命周期和追加式漏检复盘接口",
+    "提供 IREN 型盘前/盘中确定性夹具、六个前向影子场景和 Alpaca IEX 只读连通性证据",
+    "更新 Manual 唯一入口与 Active 发现边界，从 GitHub 权威源码同步全局 Skill 镜像"
+  ],
+  "non_goals": [
+    "不改变当前 Crypto 阶段一衍生品自动采样、阈值、结算、晋升时钟或账本",
+    "不在本目标内改变生产美股 research_top1、ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE、入场、止损、退出或仓位",
+    "不自动真实下单、撤单、转账、卖出、换仓、质押，不使用期权、做空、保证金或私有交易 API",
+    "不把 Alpaca IEX 伪装为 SIP consolidated quote，不把影子、Paper 或插件模拟数据计入真钱 ROI 或 BUSINESS_READY",
+    "不强制每日交易，不以 10% 目标放宽数据、流动性、资本风险或费用后正 EV 门",
+    "不把 CRCL 等长期提醒混入盘内 Top1 或战术资金池"
+  ],
+  "constraints": [
+    "阶段零所有新判断必须 formal_action_eligible=false 且 production_rule_changed=false；后续生产晋升必须另建 superseding GoalContract",
+    "每十四天最多晋升一个核心赚钱规则；阶段零可同时计算但不得提前影响正式动作",
+    "同一推荐的 snapshot_id、strategy_version、config_digest、source_digest、market_session、price_as_of 和 decision_valid_until 必须一致",
+    "正式动作语义只允许 ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE；NO_TRADE 不得生成伪交易卡",
+    "IEX_ONLY 盘前最高为 WAIT_FOR_ENTRY；过期、冲突或双源差异超过 1% 必须 NO_TRADE",
+    "价格低于 5 美元、OTC、停牌、退市风险或身份不可验证标的必须在排名前排除",
+    "当前实际建议风险不超过 0.5%，2% 仅作为压力测试，live_orders_enabled=false、private_api_used=false、human_confirmation_required=true",
+    "运行账本、行情缓存、账户信息、连接元数据、秘密和 token 不进入 Git 或治理证据"
+  ],
+  "acceptance_scenario_ids": [
+    "us-equity-alpaca-authority-v1",
+    "us-equity-premarket-full-funnel-v1",
+    "us-equity-intraday-full-funnel-v1",
+    "us-equity-action-and-risk-gates-v1",
+    "us-equity-memory-lifecycle-isolation-v1",
+    "us-equity-forward-recovery-v1",
+    "us-equity-production-no-change-v1"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "frozen_at": "2026-08-03T14:18:32.320518Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "c6e91eb0d73fce31b375f46791563816848f13bae83e1f11c79cef75f3794f54"
+}

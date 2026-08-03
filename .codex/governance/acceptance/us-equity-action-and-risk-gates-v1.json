@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-action-and-risk-gates-v1",
+  "title": "三态动作、实时和资本风险硬门",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["包含合格、等待和禁止交易候选"],
+  "steps": ["验证报价时效、双源差异、价格、身份、流动性、催化、EV 和盈亏比", "生成推荐卡与 0.5%/1%/2% 压力测试"],
+  "expected": ["动作只允许 ENTER_NOW/WAIT_FOR_ENTRY/NO_TRADE", "WAIT 给完整价格触发和有效期", "NO_TRADE 不生成交易卡", "现金为零不改变市场判断但执行金额为零", "实际风险上限不因 2% 压测放宽"],
+  "evidence": ["动作矩阵测试", "风险压力测试"]
+}

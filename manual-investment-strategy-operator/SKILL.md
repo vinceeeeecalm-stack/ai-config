@@ -1,6 +1,6 @@
 ---
 name: manual-investment-strategy-operator
-description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 Crypto 1–7 日唯一 Top1 与明确入场/等待计划、长期 5 年/10 年 10 倍目标路径、资金加权净 ROI 与盈亏复盘，也用于统一持仓/现金、长期 DCA、事件交易、存量持仓复盘和晨晚主控台；生成带证据与独立执行门控的人工确认草案，不自动下单、转账、质押或换仓。
+description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 Crypto、美股盘前与盘中唯一 Top1 和明确三态计划、长期 5 年/10 年 10 倍目标路径、资金加权净 ROI 与盈亏复盘，也用于统一持仓/现金、长期 DCA、事件交易、存量持仓复盘和晨晚主控台；生成带证据与独立执行门控的人工确认草案，不自动下单、转账、质押或换仓。
 ---
 
 # Manual Investment Strategy Operator V3
@@ -33,6 +33,14 @@ description: 手动投资赚钱闭环的唯一日常入口。用于运行短期 
 - 每轮仍只能有一个 `research_top1`，正式动作只允许 `ENTER_NOW / WAIT_FOR_ENTRY / NO_TRADE`；OI 单独上涨永远不能授权入场。
 - 真实观察尚未到期时必须显示 `DATA_INSUFFICIENT`，不得用确定性夹具或未来数据补足。
 - 衍生品前移、持续候选晋升、自适应时钟、数据公平、时间匹配回归和提醒退出只能在后续 superseding GoalContract 中每 14 天晋升一个核心规则。
+
+### 美股盘前＋盘中完整机会引擎（阶段 0 影子）
+
+当用户要求美股盘前、盘中、日内波段、高爆发或 IREN 型量价催化机会时，必须读取 `references/US_EQUITY_PREMARKET_INTRADAY_ENGINE.md`。用户仍只调用本 Skill；内部使用 `Public Equity Investing` 插件的 Alpaca 只读连接器获取 clock、资产身份、snapshot、quote、trade 和闭合 1m/5m bars，再交给 Active 的白名单适配器与完整影子漏斗。
+
+- 盘前与盘中都必须完成动态候选、板块、量价、催化、估值、资本风险、Top20、Top3 和唯一 Top1，不得只跟踪固定名单或把盘前降为候选发现；价格低于 5 美元、OTC、停牌、身份不明或流动性不足在排名前排除，无合格交易时保留唯一研究 Top1 和明确 `NO_TRADE`。
+- 当前 Alpaca 权限为 IEX；只有 IEX 加第二个 60 秒内且差异不超过 1% 的公共价格才是 `IEX_CROSS_VERIFIED`，SIP 拒绝必须如实记录；阶段零只验证三态语义，所有新判断 `formal_action_eligible=false` 且 `production_rule_changed=false`，不得覆盖现有生产动作。
+- 10% 是优先目标，不是硬门；当前风险上限仍为 0.5%，1%/2% 只做仓位压力测试；CRCL 等长期价值提醒单独输出，不参与盘内 Top1，也不得作为战术资金来源。
 
 ### V3 权威分析内核与正式动作
 
@@ -104,7 +112,7 @@ python3 scripts/tactical_research_handoff.py \
 | request_mode | 适用请求 | 必读引用 |
 |---|---|---|
 | `longterm_dca` | 5–10 年 DCA、质押复利、长期组合下一美元 | `references/V3_DECISION_CONTRACT.md`、`references/V3_DATA_AUTHORITY_AND_LEARNING.md`、`references/GOAL_ORIENTED_DCA_POLICY.md`、`references/LONG_TERM_PRICE_SCENARIO_POLICY.md` |
-| `intraday_scalp` | 几分钟至数小时、当天平仓的高流动性机会 | `references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
+| `intraday_scalp` | 美股盘前/盘中几分钟至数小时、当天平仓的高流动性机会 | `references/US_EQUITY_PREMARKET_INTRADAY_ENGINE.md`、`references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
 | `tactical_1_7d` | 1–7 日快速交易、高 ROI、异动/回调 | `references/V3_DECISION_CONTRACT.md`、`references/CANDIDATE_DEEP_DIVE_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md`、`references/TACTICAL_RESEARCH_HANDOFF_CONTRACT.md` |
 | `event_trade_1_3w` | 财报、监管、FOMC 前后 1–3 周事件交易 | `references/V3_DECISION_CONTRACT.md`、`references/US_EQUITY_TACTICAL_ALPHA_POLICY.md`、`references/HISTORICAL_CYCLE_AND_EVENT_CONDITIONING_POLICY.md`、`references/PRE_ENTRY_DOWNSIDE_AND_CAPITAL_RISK_GATE.md` |
 | `existing_position_review` | 继续持有、减仓、退出、事故复盘 | `references/V3_DECISION_CONTRACT.md`、`references/V3_DATA_AUTHORITY_AND_LEARNING.md`、`references/POSITION_FIRST_RECOMMENDATION_FLOW.md`、`references/TACTICAL_DRAWDOWN_SENTINEL_POLICY.md` |

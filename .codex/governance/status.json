@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "goal_id": "us-equity-intraday-explosive-opportunity-v1",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5",
+  "source_digest": "9a312aa301716608105aa4c8369d0303d562097ef7de326c2255ccf47c7a29ef",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-runtime_verified-49c88dee",
-  "independent_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-independent-rerun-019fc7af",
-  "updated_at": "2026-08-03T13:13:11.835306Z"
+  "last_verification_id": "verify-us-equity-intraday-explosive-opportunity-v1-runtime_verified-2160cabf",
+  "independent_verification_id": "verify-us-equity-intraday-explosive-opportunity-v1-independent-round3-019fc81f",
+  "updated_at": "2026-08-03T15:22:04.889167Z"
 }

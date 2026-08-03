@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-forward-recovery-v1",
+  "title": "六个前向影子任务与局部故障恢复",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["盘前 ENTER、盘前 WAIT、盘中 ENTER、盘中 NO_TRADE、IEX 异常价差和来源故障夹具"],
+  "steps": ["依次运行六个影子任务", "令单候选或单来源失败", "检查剩余候选和 all_blockers"],
+  "expected": ["六个任务达到冻结动作", "局部失败只淘汰受影响候选", "全轮无权威数据时诚实 NO_TRADE", "P0/P1 独立复验发现为零"],
+  "evidence": ["前向套件 JSON", "异线程只读 VerificationResultV1"]
+}

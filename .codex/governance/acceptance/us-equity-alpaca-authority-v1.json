@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-alpaca-authority-v1",
+  "title": "Alpaca IEX 证据白名单与权限诚实分级",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["Public Equity Investing 插件可只读调用 Alpaca", "SIP 当前未订阅"],
+  "steps": ["读取 clock、IREN/CRCL snapshot、quote 和 1m bars", "将响应转换为 AlpacaMarketSnapshotV1", "模拟 SIP 拒绝、过期和双源冲突"],
+  "expected": ["IEX 成功数据只标记 IEX_ONLY 或 IEX_CROSS_VERIFIED", "SIP 拒绝不得伪装 consolidated", "秘密、账户和连接元数据被白名单拒绝", "过期或冲突为 STALE_OR_CONFLICTED"],
+  "evidence": ["插件只读调用摘要", "确定性单元测试", "无秘密扫描"]
+}

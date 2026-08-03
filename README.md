@@ -30,7 +30,11 @@ $manual-investment-strategy-operator 运行短期赚钱区。读取本月最小�
 $manual-investment-strategy-operator 运行长期复利区。读取我确认的长期持仓和现金，按5年10倍主路径、10年10倍兜底，输出本期最值得新增一美元的方向、买入区间和等待条件。
 
 $manual-investment-strategy-operator 复盘本月赚钱目标。读取所有最小成交回执，计算资金加权净ROI，归因选标、入场、退出和风险错误，只提出下一轮一个最值得修改的规则。
+
+$manual-investment-strategy-operator 完整扫描当前美股盘前或盘中机会：通过 Public Equity Investing/Alpaca 读取实时分钟线、报价和成交，输出唯一 research_top1、明确动作、入场价格、目标、止损和最迟退出；若证据不足则明确 WAIT_FOR_ENTRY 或 NO_TRADE。
 ```
+
+美股新链路当前是阶段 0 影子验证：盘前与盘中都会完成动态候选、板块、量价、催化、估值、资本风险、Top20、Top3 和唯一 Top1，但不会覆盖生产动作，也不会计入 Paper 或真钱 ROI。当前 Alpaca 权限为 IEX；IEX 不会被伪装为 SIP consolidated quote。
 
 冻结目标：短期战术区为 Crypto 1–7 日月度资金加权净 ROI `+100%` 的进攻目标，并设战术池 `-15%` 紧急暂停线；长期为 5 年 10 倍主路径、10 年 10 倍兜底。以上是可审计方向，不是收益保证，不授权自动交易。
 

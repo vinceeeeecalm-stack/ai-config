@@ -1,0 +1,34 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-us-equity-intraday-explosive-opportunity-v1-independent-round3-019fc81f",
+  "goal_id": "us-equity-intraday-explosive-opportunity-v1",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "9a312aa301716608105aa4c8369d0303d562097ef7de326c2255ccf47c7a29ef",
+  "verifier_thread_id": "019fc81f-de86-7182-a4fd-dac2c50e543d",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "targeted_unit_tests",
+      "result": "PASS",
+      "test_count": 32
+    },
+    {
+      "name": "six_forward_and_recovery_scenarios",
+      "result": "PASS"
+    },
+    {
+      "name": "repository_policy",
+      "result": "PASS"
+    },
+    {
+      "name": "adversarial_matrix",
+      "result": "PASS"
+    },
+    {
+      "name": "production_isolation",
+      "result": "PASS"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-03T15:16:32Z"
+}

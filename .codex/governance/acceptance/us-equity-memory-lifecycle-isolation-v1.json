@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-memory-lifecycle-isolation-v1",
+  "title": "持续候选、生命周期、漏检与利润隔离",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["连续两轮排名与动作夹具", "隔离临时账本"],
+  "steps": ["保存第 4–20 候选并计算排名加速度", "追加动作变化、目标/止损/过期和漏检记录", "重复写入和冲突写入", "尝试把影子结果计入真钱 ROI"],
+  "expected": ["增强候选不会遗忘", "同内容返回 NO_UPDATE、冲突阻断", "错失记录只追加", "影子与 Paper 永不进入真钱 ROI", "短期亏损不得转长期"],
+  "evidence": ["追加式账本测试", "隔离断言"]
+}

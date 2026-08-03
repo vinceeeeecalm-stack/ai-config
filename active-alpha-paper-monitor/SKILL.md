@@ -1,11 +1,22 @@
 ---
 name: active-alpha-paper-monitor
-description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 skill。用于在统一 EvidenceSnapshotV2 上扫描 crypto 与美股候选、运行 walk-forward/paper 复盘并生成 V3 handoff；不负责最终组合仲裁，不自动真实下单。
+description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 skill。用于在统一 EvidenceSnapshotV2 上扫描 crypto、美股盘前与盘中候选，运行 walk-forward/paper/影子复盘并生成 V3 handoff；不负责最终组合仲裁，不自动真实下单。
 ---
 
 # Active Alpha Paper Monitor V3
 
 这是机会发现与 paper 验证层。它把可复核证据交给 Manual V3，不替用户作真实交易。
+
+## 美股盘前与盘中阶段零影子链
+
+当 Manual 请求美股盘前/盘中完整扫描时，读取
+`references/US_EQUITY_INTRADAY_SHADOW_POLICY.md`。动态发现仍由 Active 负责；Alpaca
+插件的 IEX/SIP 响应必须先经过 `scripts/us_equity_intraday_shadow.py` 白名单转换和
+数据等级判断，再运行盘前或盘中的完整 Top20 → Top3 → 唯一 Top1 影子漏斗。
+
+阶段零不修改生产动作，所有结果必须保持 `formal_action_eligible=false`、
+`production_rule_changed=false`，也不得进入 Paper/真钱 ROI。价格低于 5 美元、OTC、
+停牌和身份/流动性不合格标的必须在排名前剔除；候选级来源失败只降级该候选。
 
 ## 硬性边界
 
@@ -24,6 +35,7 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
 | 统一短期衍生品前置影子证据 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/IMPULSE_CAPTURE_ENGINE_POLICY.md`、`references/DERIVATIVES_SHADOW_EVIDENCE_POLICY.md` |
 | 美国 crypto 法案、监管投票或周末政策催化 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/US_CRYPTO_LEGISLATIVE_EVENT_RADAR_POLICY.md`、`references/DYNAMIC_SCAN_POOL_POLICY.md` |
 | 美股开盘/财报候选 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/US_OPEN_DYNAMIC_SCANNER_POLICY.md`、`references/RESEARCH_COMMITTEE_POLICY.md` |
+| 美股盘前/盘中完整影子扫描 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/US_EQUITY_INTRADAY_SHADOW_POLICY.md`、`references/RESEARCH_COMMITTEE_POLICY.md` |
 | Paper/验证复盘 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/PAPER_MONITOR_WORKFLOW.md`、`references/VALIDATION_PROGRESS_RUNNER.md`、`references/DUAL_SAMPLE_AND_FORWARD_VALIDATION_POLICY.md` |
 | Sharpe/Sortino、风险调整路径或价格修复排序 | `references/V3_ACTIVE_HANDOFF_CONTRACT.md`、`references/RISK_ADJUSTED_PATH_QUALITY_POLICY.md` |
 

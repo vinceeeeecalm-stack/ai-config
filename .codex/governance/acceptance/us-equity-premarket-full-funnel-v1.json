@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-premarket-full-funnel-v1",
+  "title": "盘前完整全市场影子漏斗",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["美东交易日 04:00–09:29 夹具", "动态候选包含 IREN 型机会和不合格对照"],
+  "steps": ["运行动态资格、板块、量价、催化、估值和资本风险门", "形成 Top20、Top3 和唯一 research_top1", "分别输入 IEX_ONLY、双源验证和宽价差"],
+  "expected": ["盘前不是仅候选发现层", "IEX_ONLY 最高 WAIT_FOR_ENTRY", "双实时源且全部硬门通过可产生影子 ENTER_NOW", "宽价差为 NO_TRADE"],
+  "evidence": ["盘前 ENTER/WAIT 夹具", "确定性排名摘要"]
+}

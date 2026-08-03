@@ -1,0 +1,10 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "us-equity-production-no-change-v1",
+  "title": "阶段零不改变生产与 Crypto 运行资产",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": ["现有 Crypto 自动化和美股生产扫描器已发布"],
+  "steps": ["比较变更前后生产配置与动作路径", "检查 Crypto 自动化文件与运行账本", "检查影子输出资格字段"],
+  "expected": ["生产排名和动作规则未改变", "Crypto 采样阈值、时钟与账本未改变", "所有新输出 formal_action_eligible=false、production_rule_changed=false", "live_orders_enabled=false"],
+  "evidence": ["Git diff 审计", "生产隔离测试", "自动化未修改检查"]
+}

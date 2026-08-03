@@ -50,6 +50,22 @@
       "formal_use_allowed": true
     },
     {
+      "field_group": "us_equity_realtime_market_evidence",
+      "authority": "Public Equity Investing 插件的 Alpaca 授权只读 market clock、资产身份、snapshot、quote、trade 与闭合 1m/5m bars，经 AlpacaMarketSnapshotV1 白名单转换",
+      "writer": "插件只读连接器与本地确定性白名单适配器；不得写入账户或订单",
+      "freshness_seconds": 60,
+      "fallback": "IEX 必须标明非 consolidated；IEX 加第二公共实时源才可为 IEX_CROSS_VERIFIED；过期或差异超过 1% 为 STALE_OR_CONFLICTED/NO_TRADE",
+      "formal_use_allowed": true
+    },
+    {
+      "field_group": "us_equity_stage0_shadow_outcomes",
+      "authority": "us_equity_intraday_shadow.py 在同一绑定快照上的确定性影子漏斗、持续候选、生命周期和漏检账本",
+      "writer": "受治理的影子运行服务",
+      "freshness_seconds": 0,
+      "fallback": "只能进入回归证据；不得改变生产动作、Paper/真钱 ROI 或 BUSINESS_READY",
+      "formal_use_allowed": false
+    },
+    {
       "field_group": "profit_outcome_status",
       "authority": "profit_oriented_dual_sleeve.py 对冻结合同、最小回执和权威快照的确定性计算",
       "writer": "持有治理锁的唯一写入任务或受控运行服务",
