@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-us-equity-intraday-explosive-opportunity-v1-20260803",
+  "project_id": "investing-monorepo",
+  "goal_id": "us-equity-intraday-explosive-opportunity-v1",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "3676412295dd48263b5a4dd14e34e7d8443b8879",
+    "branch": "main",
+    "dirty": false
+  },
+  "source_digest": "9a312aa301716608105aa4c8369d0303d562097ef7de326c2255ccf47c7a29ef",
+  "build_version": "3676412",
+  "runtime_version": "3676412",
+  "database_version": null,
+  "last_verification_id": "verify-us-equity-intraday-explosive-opportunity-v1-runtime_verified-2160cabf",
+  "independent_verification_id": "verify-us-equity-intraday-explosive-opportunity-v1-independent-round3-019fc81f",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 8,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-03T15:22:30.294199Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}
