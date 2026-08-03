@@ -1,0 +1,44 @@
+{
+  "schema_version": "GoalContractV1",
+  "id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "title": "阶段一衍生品影子候选交接可靠性恢复",
+  "business_outcome": "让统一短期机会引擎在动态候选包含 Binance 批量参数不接受的交易符号时，仍能持续形成权威现货候选与衍生品影子交接；真实无候选或来源失败必须结构化降级而不是崩溃，从而保护十四天前向样本、七天结算和晋升判断的完整性。",
+  "scope": [
+    "让合并后的显式与动态候选身份校验复用 Binance /api/v3/exchangeInfo 的批量失败全量快照 fallback",
+    "保留 active、spot、permission、leveraged、stablecoin、commodity 和 tokenized-security 边界，不以 ticker 存在替代产品身份",
+    "区分权威验证后的真实空候选与 discovery 合约/来源失败；两者都不得写入伪观察",
+    "让 derivatives_shadow_cycle 对已知安全降级返回结构化状态、all_blockers 和零追加摘要，而不是裸 traceback",
+    "每轮把成功或安全降级摘要写入 runtime latest-cycle，同时继续向调用方输出 JSON",
+    "把最新采样失败纳入统一阶段就绪审计的 all_blockers 与唯一阻断优先级",
+    "增加非 ASCII 批量污染、局部恢复、真实空候选、合约失败、latest-cycle 和 readiness 阻断回归",
+    "同步全局 Skill 镜像并发布 GitHub main"
+  ],
+  "non_goals": [
+    "不修改阶段一 OI、funding、basis、现货确认或 directional state 阈值",
+    "不修改生产排名、research_top1、ENTER_NOW、WAIT_FOR_ENTRY、NO_TRADE、入场、止损、退出或仓位",
+    "不启动阶段二或重置十四天观察窗口",
+    "不回填两次漏采、不伪造空候选观察、不把影子结果计入 Paper 或真钱 ROI",
+    "不自动下单、转账、换仓、质押或调用私有 API"
+  ],
+  "constraints": [
+    "同一工作树只允许当前 CODEX_THREAD_ID 写入",
+    "身份 fallback 只能使用 Binance /api/v3/exchangeInfo，同一轮本地过滤并保留来源审计",
+    "候选级来源失败只能淘汰或降级相应候选，不能清空仍可验证的候选",
+    "没有任何合格候选时允许结构化 NO_UPDATE，但必须区分市场空集与数据失败",
+    "失败摘要必须 formal_action_eligible=false、paper_roi_eligible=false、real_money_roi_eligible=false、business_ready_eligible=false、live_orders_enabled=false、private_api_used=false",
+    "历史观察、结果、治理记录和发布证据保持追加式，不覆盖既有数据",
+    "修复不得占用或改变每十四天唯一赚钱假设名额"
+  ],
+  "acceptance_scenario_ids": [
+    "merged-spot-identity-batch-poison-recovery-v2",
+    "shadow-cycle-structured-empty-and-failure-v2",
+    "shadow-cycle-latest-state-readiness-v2",
+    "shadow-cycle-runtime-recovery-isolation-v2"
+  ],
+  "required_level": "RUNTIME_VERIFIED",
+  "risk": "high",
+  "supersedes_id": "unified-shortterm-phase-readiness-audit-v1",
+  "frozen_at": "2026-08-03T12:43:36.630919Z",
+  "frozen_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "content_hash": "9ea3080bcdcf1677fbc7d50e50787e66f28d13a2ea9a5ba471da6102f211205c"
+}

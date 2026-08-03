@@ -1,0 +1,70 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-discovery-handoff-failover-v2-tested-51487196",
+  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "level": "TESTED",
+  "source_digest": "799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "result": "PASS",
+  "checks": [
+    {
+      "command": "python3 scripts/verify-monorepo-policy.py",
+      "exit_code": 0,
+      "duration_ms": 339,
+      "stdout_sha256": "40387dac8d92b5f1c5745bcba8390fdb2cecd77b827c7ffc63f98b9f23bb9f26",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s manual-investment-strategy-operator/tests -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_ms": 420,
+      "stdout_sha256": "ea9aaaf133d70aaf111c3eb9df4ab7c911c1903c9af0d88a37d28fe2eaa329be",
+      "stderr_sha256": "d694d8779a04903df6152a623acdb3c36281f4bbac1bf0fdf6136651e3d2724d"
+    },
+    {
+      "command": "python3 -m unittest discover -s active-alpha-paper-monitor/tests -p 'test_*.py' -v",
+      "exit_code": 0,
+      "duration_ms": 1758,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e27c94c2cbe902b12d7b818d0f78fb4901d531dcf8042b37b66b9f599e6b7c63"
+    },
+    {
+      "command": "python3 closed-loop-delivery-governor/scripts/test_governance.py",
+      "exit_code": 0,
+      "duration_ms": 8905,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "332219c6467ec3bd240632045f9c2492cad822f75068eb87a94a41cdde47d2b6"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/profit_oriented_dual_sleeve.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 50,
+      "stdout_sha256": "128a45224326a3e5e3a5802d0e34e672392e2f5d18a6a882b5cd83d03932d773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/universal_investment_core.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 51,
+      "stdout_sha256": "0b8ed624e57a2049022348ec330713a485bc8fca4d3560a2d485160d1c40a7e6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 manual-investment-strategy-operator/scripts/unified_shortterm_phase_readiness.py --self-test",
+      "exit_code": 0,
+      "duration_ms": 65,
+      "stdout_sha256": "c2c8d09bd989f6d1302eb08dc77e7c9e176b13fb2990f1eba5c4cc73a16ef3fb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m compileall -q active-alpha-paper-monitor/scripts manual-investment-strategy-operator/scripts",
+      "exit_code": 0,
+      "duration_ms": 66,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-03T13:07:51.281574Z"
+}

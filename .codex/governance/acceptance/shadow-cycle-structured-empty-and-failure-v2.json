@@ -1,0 +1,21 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "shadow-cycle-structured-empty-and-failure-v2",
+  "title": "真实空候选和数据失败结构化降级",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "分别提供权威验证后的空候选 discovery 和缺少必需 handoff 的不完整 discovery"
+  ],
+  "steps": [
+    "运行 derivatives_shadow_cycle",
+    "检查退出状态、JSON 摘要、append_result 和 all_blockers",
+    "检查观察账本"
+  ],
+  "expected": [
+    "真实空候选返回结构化 NO_UPDATE，不抛 traceback",
+    "不完整 discovery 返回结构化 DATA_DEGRADED 和明确 blocker",
+    "两种情况都不追加伪观察",
+    "所有执行、Paper、真钱和 BUSINESS_READY 权限保持 false"
+  ],
+  "evidence": []
+}

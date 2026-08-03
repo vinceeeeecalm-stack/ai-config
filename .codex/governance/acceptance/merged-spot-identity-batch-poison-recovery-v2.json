@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "merged-spot-identity-batch-poison-recovery-v2",
+  "title": "异常批量符号不能清空已验证候选",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "动态与显式候选合并后包含至少一个 Binance 批量 symbols 参数不接受的符号",
+    "同一 exchangeInfo 全量快照包含普通 active SPOT 候选"
+  ],
+  "steps": [
+    "运行合并候选身份校验",
+    "检查 batch、fallback、恢复数量和淘汰原因",
+    "生成 derivatives shadow handoff"
+  ],
+  "expected": [
+    "跳过或拒绝必败批量请求并调用同一权威端点全量快照",
+    "普通 active SPOT 候选继续进入 top_candidates 与同序 handoff",
+    "不合格产品仍按候选级原因排除",
+    "单个异常符号不能让全轮变成空候选"
+  ],
+  "evidence": []
+}

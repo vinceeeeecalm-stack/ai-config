@@ -1,0 +1,47 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-discovery-handoff-failover-v2-independent-019fc7af",
+  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "0cdb751aff50a7ab56cca9ee1188de8783cbe3fad6661d31f3875ab91563e708",
+  "implementation_owner_thread_id": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8",
+  "verifier_thread_id": "019fc7af-b85d-77b3-b191-0adf8b4e69ba",
+  "result": "FAIL",
+  "checks": [
+    {
+      "name": "frozen_contract_and_staged_diff",
+      "status": "PASS",
+      "evidence": "冻结目标、四个验收场景、完整 staged diff 与 source digest 绑定通过。"
+    },
+    {
+      "name": "identity_failure_and_append_isolation",
+      "status": "PASS",
+      "evidence": "非 ASCII batch fallback、候选局部失败、结构化降级、latest-cycle 绑定和 no-append 公开探针通过。"
+    },
+    {
+      "name": "authoritative_empty_classification",
+      "status": "FAIL",
+      "evidence": "eligible_candidate_count=7 且缺少权威 exchange_spot_identity 的矛盾输入仍被误判为 verified empty。"
+    },
+    {
+      "name": "repository_state_before_after",
+      "status": "NOT_VERIFIED",
+      "evidence": "复验被要求停止前未完成最终状态与关键哈希对比；验证者未故意执行写入命令。"
+    }
+  ],
+  "findings": [
+    {
+      "id": "P1-unverified-empty-market-authority",
+      "severity": "P1",
+      "title": "非权威或内部矛盾的 discovery 可能被误报为真实空市场",
+      "location": "active-alpha-paper-monitor/scripts/derivatives_shadow_cycle.py:verified_empty_discovery",
+      "resolution": "由 dev-derivatives-shadow-unverified-empty-authority-v2-closed 修复并等待新的独立复验。"
+    }
+  ],
+  "severity_counts": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 0
+  },
+  "created_at": "2026-08-03T13:00:00Z"
+}

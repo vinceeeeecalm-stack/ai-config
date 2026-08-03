@@ -84,6 +84,43 @@ class UnifiedShortTermPhaseReadinessTests(unittest.TestCase):
         self.assertEqual(result["unique_blocker"], "phase1_automation_not_active")
         self.assertIn("恢复", result["unique_next_step"])
 
+    def test_latest_cycle_failure_blocks_runtime_until_a_new_healthy_cycle(self):
+        latest = self.repo / "active-alpha-paper-monitor/runtime/derivatives-shadow-v2-latest-cycle.json"
+        safety = {
+            "production_rule_changed": False,
+            "formal_action_eligible": False,
+            "paper_roi_eligible": False,
+            "real_money_roi_eligible": False,
+            "business_ready_eligible": False,
+            "live_orders_enabled": False,
+            "private_api_used": False,
+            "human_confirmation_required": True,
+        }
+        latest.write_text(json.dumps({
+            "schema_version": "DerivativesShadowCycleV1",
+            "run_status": "DATA_DEGRADED",
+            "captured_at": "2026-08-02T00:00:00Z",
+            "snapshot_id": "failure-1",
+            "all_blockers": ["candidate_and_handoff_lists_required"],
+            **safety,
+        }), encoding="utf-8")
+        degraded = self.audit()
+        self.assertEqual(degraded["phase1_status"], "RUNTIME_DEGRADED")
+        self.assertEqual(degraded["unique_blocker"], "candidate_and_handoff_lists_required")
+        self.assertIn("candidate_and_handoff_lists_required", degraded["all_blockers"])
+
+        latest.write_text(json.dumps({
+            "schema_version": "DerivativesShadowCycleV1",
+            "run_status": "SHADOW_EVIDENCE_COLLECTED",
+            "captured_at": "2026-08-02T04:00:00Z",
+            "snapshot_id": "healthy-2",
+            "all_blockers": [],
+            **safety,
+        }), encoding="utf-8")
+        recovered = self.audit()
+        self.assertEqual(recovered["phase1_status"], "EVIDENCE_COLLECTING")
+        self.assertNotIn("candidate_and_handoff_lists_required", recovered["all_blockers"])
+
     def test_malformed_or_unsafe_automation_cannot_pass_by_token_presence(self):
         self.automation.write_text('kind="heartbeat"\nstatus="ACTIVE"\nrrule="NOT_AN_RRULE;UNTIL=20260823T161500Z"\nprompt="derivatives_shadow_cycle.py derivatives_shadow_outcome_reviewer.py derivatives_shadow_promotion_evaluator.py 2026-08-16T04:15:00Z 不要启动阶段二 不要自动下单 不要把影子结果计入 Paper/真钱 ROI 或 BUSINESS_READY AUTO_LIVE_ORDER PRIVATE_API"\n', encoding="utf-8")
         result = self.audit()

@@ -496,6 +496,34 @@ class StablecoinEligibilityTests(unittest.TestCase):
             "verified_authoritative_fallback",
         )
 
+    def test_merged_identity_lookup_reuses_non_ascii_full_snapshot_fallback(self):
+        full_snapshot = {
+            "symbols": [
+                {
+                    "symbol": symbol,
+                    "baseAsset": symbol.removesuffix("USDT"),
+                    "status": "TRADING",
+                    "isSpotTradingAllowed": True,
+                    "permissionSets": [["SPOT"]],
+                }
+                for symbol in ("币安人生USDT", "AAVEUSDT")
+            ]
+        }
+
+        with patch.object(M, "fetch_json", return_value=full_snapshot) as fetch:
+            definitions = M.fetch_exchange_definitions(
+                ["币安人生USDT", "AAVEUSDT"],
+                8,
+                max_bases=2,
+                transport="curl",
+            )
+
+        self.assertEqual(set(definitions), {"币安人生USDT", "AAVEUSDT"})
+        self.assertEqual(fetch.call_count, 1)
+        audit = M.DISCOVERY_AUDIT["exchange_spot_identity"]
+        self.assertEqual(audit["batch_status"], "skipped_illegal_symbols_parameter")
+        self.assertEqual(audit["recovered_definition_count"], 2)
+
     def test_suffix_collision_uses_public_identity_and_preserves_native_crypto(self):
         ticker_rows = [
             {"symbol": "SHIBUSDT", "quoteVolume": "1000"},

@@ -1,0 +1,21 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "shadow-cycle-latest-state-readiness-v2",
+  "title": "最新采样状态进入阶段就绪阻断",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "阶段一自动采样成功或安全降级"
+  ],
+  "steps": [
+    "检查 runtime latest-cycle 文件与标准输出",
+    "运行 unified_shortterm_phase_readiness",
+    "对比最新 cycle 状态和 readiness blockers"
+  ],
+  "expected": [
+    "标准输出与 latest-cycle 绑定同一 snapshot 或 failure id",
+    "最新采样失败时 readiness all_blockers 包含具体 cycle blocker",
+    "最新采样恢复后旧瞬时 blocker 不继续冒充当前阻断",
+    "历史两次漏采仍保留审计，不被回填"
+  ],
+  "evidence": []
+}

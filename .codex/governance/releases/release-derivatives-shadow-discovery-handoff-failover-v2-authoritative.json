@@ -1,0 +1,29 @@
+{
+  "schema_version": "ReleaseEvidenceV1",
+  "id": "release-derivatives-shadow-discovery-handoff-failover-v2-authoritative",
+  "project_id": "investing-monorepo",
+  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "achieved_level": "RUNTIME_VERIFIED",
+  "blocked": false,
+  "blockers": [],
+  "git": {
+    "available": true,
+    "commit": "62725c0ae22740035706588ee173b6acc61f1a98",
+    "branch": "codex/derivatives-shadow-discovery-handoff-failover-v2",
+    "dirty": false
+  },
+  "source_digest": "799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5",
+  "build_version": "62725c0ae22740035706588ee173b6acc61f1a98",
+  "runtime_version": "62725c0ae22740035706588ee173b6acc61f1a98",
+  "database_version": "not_applicable",
+  "last_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-runtime_verified-49c88dee",
+  "independent_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-independent-rerun-019fc7af",
+  "open_deviation_counts": {
+    "P0": 0,
+    "P1": 8,
+    "P2": 1,
+    "P3": 0
+  },
+  "created_at": "2026-08-03T13:15:36.640881Z",
+  "created_by": "019fb5a2-45d4-7f10-ae62-07d8390a4ca8"
+}

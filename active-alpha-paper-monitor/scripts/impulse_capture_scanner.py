@@ -861,29 +861,24 @@ def fetch_exchange_definitions(
     max_bases=3,
     transport="urllib",
 ):
-    """Fetch exchange identities in bounded batches for merged symbol inputs."""
+    """Fetch merged-input identities with the same fail-closed fallback as discovery.
 
-    definitions = {}
-    for offset in range(0, len(symbols), 100):
-        batch = symbols[offset : offset + 100]
-        rows = (
-            fetch_json(
-                "/api/v3/exchangeInfo",
-                {"symbols": json.dumps(batch, separators=(",", ":"))},
-                timeout=min(timeout, 5.0),
-                max_bases=max_bases,
-                transport=transport,
-            ).get("symbols")
-            or []
-        )
-        definitions.update(
-            {
-                str(item.get("symbol") or ""): item
-                for item in rows
-                if item.get("symbol")
-            }
-        )
-    return definitions
+    A single historical or non-ASCII symbol can invalidate Binance's complete
+    ``symbols`` batch.  Reusing the authoritative full-snapshot fallback here
+    prevents that one row from erasing otherwise verified active-SPOT inputs.
+    """
+
+    rows = fetch_discovery_exchange_definitions(
+        symbols,
+        timeout,
+        max_bases=max_bases,
+        transport=transport,
+    )
+    return {
+        str(item.get("symbol") or ""): item
+        for item in rows
+        if item.get("symbol")
+    }
 
 
 def build_public_crypto_identity(payload):
@@ -965,7 +960,13 @@ def fetch_public_identity_search(symbol, timeout):
     }
 
 
-def fetch_discovery_exchange_definitions(preselected, timeout):
+def fetch_discovery_exchange_definitions(
+    preselected,
+    timeout,
+    *,
+    max_bases=DISCOVERY_PUBLIC_MAX_BASES,
+    transport="curl",
+):
     """Resolve active-spot identity without letting one bad batch erase the pool.
 
     Binance's ``symbols`` query can return an error payload for the whole batch
@@ -1008,8 +1009,8 @@ def fetch_discovery_exchange_definitions(preselected, timeout):
                 "/api/v3/exchangeInfo",
                 {"symbols": json.dumps(requested, separators=(",", ":"))},
                 timeout=min(timeout, DISCOVERY_PUBLIC_TIMEOUT_SECONDS),
-                max_bases=DISCOVERY_PUBLIC_MAX_BASES,
-                transport="curl",
+                max_bases=max_bases,
+                transport=transport,
             )
             if isinstance(batch_payload, dict):
                 batch_rows = batch_payload.get("symbols") or []
@@ -1035,8 +1036,8 @@ def fetch_discovery_exchange_definitions(preselected, timeout):
         full_payload = fetch_json(
             "/api/v3/exchangeInfo",
             timeout=min(timeout, DISCOVERY_FULL_EXCHANGE_TIMEOUT_SECONDS),
-            max_bases=DISCOVERY_PUBLIC_MAX_BASES,
-            transport="curl",
+            max_bases=max_bases,
+            transport=transport,
         )
         if isinstance(full_payload, dict):
             all_rows = full_payload.get("symbols") or []
