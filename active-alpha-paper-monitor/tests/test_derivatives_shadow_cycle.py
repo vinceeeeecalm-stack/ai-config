@@ -1,6 +1,8 @@
 import copy
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -67,6 +69,29 @@ def discovery():
     }
 
 
+def empty_discovery():
+    return {
+        "schema_version": "fast-candidate-funnel-v1",
+        "phase": "discovery",
+        "top_candidates": [],
+        "blocked_candidates": [],
+        "eligible_candidate_count": 0,
+        "derivatives_shadow_handoff": [],
+        "derivatives_shadow_handoff_enabled": True,
+        "fresh_transport_verified": True,
+        "errors": [],
+        "dynamic_discovery_audit": {
+            "exchange_spot_identity": {
+                "authority": "Binance /api/v3/exchangeInfo",
+                "batch_status": "verified",
+                "batch_definition_count": 4,
+                "full_snapshot_status": "not_attempted",
+                "formal_identity_relaxed": False,
+            }
+        },
+    }
+
+
 def sources():
     oi_history = [
         {
@@ -123,6 +148,7 @@ class DerivativesShadowCycleTests(unittest.TestCase):
 
     def test_cycle_keeps_all_safety_axes_false(self):
         result = M.run_cycle(discovery(), CONFIG, ledger=None, fixture_sources=sources())
+        self.assertEqual(result["append_result"], {"APPENDED": 0, "NO_UPDATE": 0})
         for field in (
             "production_rule_changed",
             "formal_action_eligible",
@@ -135,6 +161,74 @@ class DerivativesShadowCycleTests(unittest.TestCase):
             self.assertFalse(result[field])
         self.assertTrue(result["human_confirmation_required"])
         self.assertTrue(all(row["oi_alone_can_authorize"] is False for row in result["shadow_run"]["records"]))
+
+    def test_verified_empty_discovery_is_structured_no_update(self):
+        self.assertTrue(M.verified_empty_discovery(empty_discovery()))
+        result = M.structured_no_update(
+            empty_discovery(),
+            CONFIG,
+            run_status="NO_ELIGIBLE_CANDIDATES",
+            blockers=[],
+        )
+        self.assertEqual(result["candidate_count"], 0)
+        self.assertEqual(result["append_result"], {"APPENDED": 0, "NO_UPDATE": 0})
+        self.assertEqual(result["shadow_run"]["records"], [])
+        self.assertEqual(result["all_blockers"], [])
+
+    def test_unverified_or_contradictory_empty_discovery_is_degraded(self):
+        contradictory = empty_discovery()
+        contradictory["eligible_candidate_count"] = 7
+        self.assertFalse(M.verified_empty_discovery(contradictory))
+
+        missing_identity = empty_discovery()
+        missing_identity.pop("dynamic_discovery_audit")
+        self.assertFalse(M.verified_empty_discovery(missing_identity))
+
+        failed_identity = empty_discovery()
+        failed_identity["dynamic_discovery_audit"]["exchange_spot_identity"].update(
+            {
+                "batch_status": "transport_failed",
+                "full_snapshot_status": "transport_failed",
+            }
+        )
+        self.assertFalse(M.verified_empty_discovery(failed_identity))
+
+        with self.assertRaisesRegex(
+            M.collector.DerivativesShadowError,
+            "candidate_and_handoff_lists_required",
+        ):
+            M.run_cycle(contradictory, CONFIG, ledger=None)
+
+    def test_invalid_handoff_cli_writes_structured_latest_state_without_ledger_append(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            malformed = discovery()
+            malformed.pop("derivatives_shadow_handoff")
+            discovery_path = tmp / "discovery.json"
+            latest_path = tmp / "latest.json"
+            ledger_path = tmp / "observations.jsonl"
+            discovery_path.write_text(json.dumps(malformed), encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPTS / "derivatives_shadow_cycle.py"),
+                    "--discovery-input",
+                    str(discovery_path),
+                    "--ledger",
+                    str(ledger_path),
+                    "--latest-output",
+                    str(latest_path),
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["run_status"], "DATA_DEGRADED")
+            self.assertIn("candidate_and_handoff_lists_required", payload["all_blockers"])
+            self.assertEqual(json.loads(latest_path.read_text(encoding="utf-8")), payload)
+            self.assertFalse(ledger_path.exists())
 
     def test_candidate_local_failure_does_not_drop_round(self):
         result = M.run_cycle(discovery(), CONFIG, ledger=None, fixture_sources=sources())

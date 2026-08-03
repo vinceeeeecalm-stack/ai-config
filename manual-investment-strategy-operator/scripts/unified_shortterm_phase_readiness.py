@@ -260,6 +260,60 @@ def live_profit_state(path: Path | None) -> dict[str, Any]:
     }
 
 
+def latest_cycle_state(path: Path | None) -> dict[str, Any]:
+    if path is None or not path.exists():
+        return {"status": "UNKNOWN", "run_status": None, "blockers": []}
+    try:
+        payload = load_json(path)
+    except (OSError, json.JSONDecodeError, ReadinessAuditError):
+        return {
+            "status": "INVALID",
+            "run_status": None,
+            "blockers": ["phase1_latest_cycle_invalid"],
+        }
+    if payload.get("schema_version") != "DerivativesShadowCycleV1":
+        return {
+            "status": "INVALID",
+            "run_status": payload.get("run_status"),
+            "blockers": ["phase1_latest_cycle_schema_invalid"],
+        }
+    run_status = str(payload.get("run_status") or "UNKNOWN")
+    safety_invalid = any(
+        payload.get(field) is not expected
+        for field, expected in SAFETY.items()
+    )
+    if safety_invalid:
+        return {
+            "status": "INVALID",
+            "run_status": run_status,
+            "blockers": ["phase1_latest_cycle_safety_invalid"],
+        }
+    blockers = [str(item) for item in payload.get("all_blockers") or []]
+    if run_status == "DATA_DEGRADED":
+        blockers = blockers or ["phase1_latest_cycle_data_degraded"]
+        return {
+            "status": "DATA_DEGRADED",
+            "run_status": run_status,
+            "captured_at": payload.get("captured_at"),
+            "snapshot_id": payload.get("snapshot_id"),
+            "blockers": blockers,
+        }
+    if run_status not in {"SHADOW_EVIDENCE_COLLECTED", "NO_ELIGIBLE_CANDIDATES"}:
+        blockers = blockers or [f"phase1_latest_cycle_unknown_status:{run_status}"]
+        return {
+            "status": "INVALID",
+            "run_status": run_status,
+            "blockers": blockers,
+        }
+    return {
+        "status": "HEALTHY",
+        "run_status": run_status,
+        "captured_at": payload.get("captured_at"),
+        "snapshot_id": payload.get("snapshot_id"),
+        "blockers": [],
+    }
+
+
 def layer(layer_id: str, status: str, reason: str, evidence: list[str], blockers: list[str]) -> dict[str, Any]:
     return {"layer_id": layer_id, "status": status, "reason": reason, "evidence_ids": evidence, "blockers": blockers}
 
@@ -272,10 +326,12 @@ def build_readiness(
     observation_path: Path | None = None,
     outcome_path: Path | None = None,
     live_profit_path: Path | None = None,
+    latest_cycle_path: Path | None = None,
 ) -> dict[str, Any]:
     repo = repo.resolve()
     observation_path = observation_path or repo / "active-alpha-paper-monitor/runtime/derivatives-shadow-v2-observations.jsonl"
     outcome_path = outcome_path or repo / "active-alpha-paper-monitor/runtime/derivatives-shadow-v2-outcomes.jsonl"
+    latest_cycle_path = latest_cycle_path or repo / "active-alpha-paper-monitor/runtime/derivatives-shadow-v2-latest-cycle.json"
     releases = {
         "stage0": release_state(repo, "unified-short-term-opportunity-engine-v1"),
         "dynamic_candidate": release_state(repo, "crypto-dynamic-spot-eligibility-failover-v15"),
@@ -288,9 +344,15 @@ def build_readiness(
     outcomes, outcome_errors = load_jsonl_safe(outcome_path)
     promotion = load_promotion_evaluation(repo, outcome_path)
     live_profit = live_profit_state(live_profit_path)
+    latest_cycle = latest_cycle_state(latest_cycle_path)
     foundation_ok = releases["stage0"]["verified"] and releases["dynamic_candidate"]["verified"] and releases["manual_core"]["verified"]
     phase1_engineering_ok = releases["phase1_shadow"]["verified"] and releases["phase1_sampling"]["verified"]
-    phase1_runtime_ok = automation["active"] and observations["observation_count"] > 0 and observations["invalid_record_count"] == 0
+    phase1_runtime_ok = (
+        automation["active"]
+        and observations["observation_count"] > 0
+        and observations["invalid_record_count"] == 0
+        and not latest_cycle["blockers"]
+    )
     earliest_raw = promotion.get("earliest_production_promotion_at") or "2026-08-16T04:30:20Z"
     earliest = parse_time(earliest_raw, "earliest_production_promotion_at")
     decision = str(promotion.get("decision") or "EVIDENCE_MISSING")
@@ -308,7 +370,7 @@ def build_readiness(
     layers = [
         layer("unified_contract_and_stage0_baseline", "RUNTIME_VERIFIED" if releases["stage0"]["verified"] else "EVIDENCE_MISSING", "七个合同和无前视阶段零基线。", releases["stage0"]["evidence_ids"], releases["stage0"]["blockers"]),
         layer("dynamic_liquidity_candidate_pool", "RUNTIME_VERIFIED" if releases["dynamic_candidate"]["verified"] else "EVIDENCE_MISSING", "动态候选由独立发布的现货身份、流动性与局部失败运行证据支持。", releases["dynamic_candidate"]["evidence_ids"], releases["dynamic_candidate"]["blockers"]),
-        layer("derivatives_factors_front_loaded", phase1_status, "OI、funding、basis 与合约主动成交只在影子层连续采样，尚未改变生产排名。", releases["phase1_shadow"]["evidence_ids"] + releases["phase1_sampling"]["evidence_ids"], releases["phase1_shadow"]["blockers"] + releases["phase1_sampling"]["blockers"] + automation["blockers"] + observations["errors"]),
+        layer("derivatives_factors_front_loaded", phase1_status, "OI、funding、basis 与合约主动成交只在影子层连续采样，尚未改变生产排名。", releases["phase1_shadow"]["evidence_ids"] + releases["phase1_sampling"]["evidence_ids"], releases["phase1_shadow"]["blockers"] + releases["phase1_sampling"]["blockers"] + automation["blockers"] + observations["errors"] + latest_cycle["blockers"]),
         layer("persistent_near_miss_and_rank_acceleration", "SHADOW_ONLY", "阶段零具备确定性接口；阶段二尚未冻结和激活。", releases["stage0"]["evidence_ids"], ["phase2_not_activated"]),
         layer("adaptive_holding_clock", "SHADOW_ONLY", "分钟级至七天持有时钟仅完成影子合同；阶段三尚未激活。", releases["stage0"]["evidence_ids"], ["phase3_not_activated"]),
         layer("data_fairness_and_local_degradation", "PARTIAL_RUNTIME_VERIFIED" if phase1_engineering_ok else "EVIDENCE_MISSING", "阶段一已验证候选级局部降级；全市场覆盖公平仍待独立阶段。", releases["phase1_shadow"]["evidence_ids"], ["phase4_full_fairness_not_activated"]),
@@ -336,6 +398,10 @@ def build_readiness(
     elif not automation["active"]:
         unique_blocker = automation["blockers"][0]
         unique_next_step = "恢复已批准的阶段一有界采样/结算自动化，不修改赚钱规则。"
+        next_eligible_phase = None
+    elif latest_cycle["blockers"]:
+        unique_blocker = latest_cycle["blockers"][0]
+        unique_next_step = "恢复阶段一 discovery→handoff 当前采样链；保留已有观察并禁止回填漏采。"
         next_eligible_phase = None
     elif observations["observation_count"] == 0 or observations["invalid_record_count"]:
         unique_blocker = "phase1_observation_evidence_missing_or_invalid"
@@ -378,6 +444,7 @@ def build_readiness(
             "promotion_decision": decision,
             "promotion_earliest_at": iso(earliest),
             "automation": automation,
+            "latest_cycle": latest_cycle,
         },
         "layer_status": layers,
         "all_blockers": blockers,
@@ -427,6 +494,7 @@ def main() -> int:
     parser.add_argument("--observations")
     parser.add_argument("--outcomes")
     parser.add_argument("--live-profit-summary")
+    parser.add_argument("--latest-cycle")
     parser.add_argument("--as-of")
     parser.add_argument("--output")
     parser.add_argument("--self-test", action="store_true")
@@ -442,6 +510,7 @@ def main() -> int:
             observation_path=Path(args.observations).expanduser() if args.observations else None,
             outcome_path=Path(args.outcomes).expanduser() if args.outcomes else None,
             live_profit_path=Path(args.live_profit_summary).expanduser() if args.live_profit_summary else None,
+            latest_cycle_path=Path(args.latest_cycle).expanduser() if args.latest_cycle else None,
         )
     rendered = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:

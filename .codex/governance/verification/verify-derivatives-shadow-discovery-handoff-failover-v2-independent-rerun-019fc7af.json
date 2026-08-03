@@ -1,0 +1,43 @@
+{
+  "schema_version": "VerificationResultV1",
+  "id": "verify-derivatives-shadow-discovery-handoff-failover-v2-independent-rerun-019fc7af",
+  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
+  "level": "RUNTIME_VERIFIED",
+  "source_digest": "799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5",
+  "verifier_thread_id": "019fc7af-b85d-77b3-b191-0adf8b4e69ba",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "source_digest_binding",
+      "status": "PASS",
+      "evidence": "前后独立重算均匹配 799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5，verification_stale=false。"
+    },
+    {
+      "name": "authoritative_empty_classification",
+      "status": "PASS",
+      "evidence": "非零 eligible count、缺失 identity audit、身份源 transport failed 均不能成为 verified empty；权威一致空集仍返回 NO_ELIGIBLE_CANDIDATES。"
+    },
+    {
+      "name": "contradictory_cli_degradation",
+      "status": "PASS",
+      "evidence": "矛盾输入返回 DATA_DEGRADED、candidate_and_handoff_lists_required、APPENDED=0、NO_UPDATE=0 且无 stderr。"
+    },
+    {
+      "name": "safety_and_append_boundaries",
+      "status": "PASS",
+      "evidence": "所有生产动作、Paper/真钱 ROI、BUSINESS_READY、自动下单与私有 API 权限保持 false；OI 单独授权保持 false；正常 fixture 禁用 ledger 时不追加。"
+    },
+    {
+      "name": "repository_integrity",
+      "status": "PASS",
+      "evidence": "staged diff SHA-256 前后均为 d2e9807ebea121c6a31e4b52bbe42cc3f44f2519bb5989c63ca4f972899e5a8a；porcelain-v2 状态与关键文件哈希前后一致。"
+    },
+    {
+      "name": "read_only_execution",
+      "status": "PASS",
+      "evidence": "验证者未修改文件、暂存、提交、写 runtime、追加账本、运行真实扫描或触发任何交易。"
+    }
+  ],
+  "findings": [],
+  "created_at": "2026-08-03T13:10:00Z"
+}

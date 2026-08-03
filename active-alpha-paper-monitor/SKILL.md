@@ -49,7 +49,9 @@ description: 主动 Alpha 发现、历史验证、paper trading 与事件监控 
    `scripts/derivatives_shadow_collector.py` 补充 OI、funding、basis 和合约主动成交。
    持续前向采样必须通过 `scripts/derivatives_shadow_cycle.py` 运行同一冻结阶段一规则；
    它只追加七天观察，不改变生产排名、正式动作或任何 ROI。重复快照必须 `NO_UPDATE`，
-   自动采样必须有明确截止时间，不能无限运行。
+   自动采样必须有明确截止时间，不能无限运行。动态候选身份批量请求被单个异常符号污染时，
+   合并候选校验必须复用同一 `exchangeInfo` 全量快照 fallback；真实空候选与来源/合约失败
+   必须输出不同的结构化零追加状态并更新 latest-cycle，不得抛裸异常或写入伪观察。
    该数据不进入当前 discovery score、Top1 或正式 handoff 动作；OI 单独上升只能输出冲突标签。
    达到冻结的七天 `review_due_at` 后，先运行
    `scripts/derivatives_shadow_outcome_reviewer.py`，用观察后的闭合 15m 现货 K 线同时结算

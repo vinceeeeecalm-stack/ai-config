@@ -1,11 +1,11 @@
 {
   "schema_version": "GovernanceStatusV1",
-  "goal_id": "unified-shortterm-phase-readiness-audit-v1",
+  "goal_id": "derivatives-shadow-discovery-handoff-failover-v2",
   "highest_level": "RUNTIME_VERIFIED",
-  "source_digest": "99e1c733307f5c6847cf52aa563f1585fe564270cf7d0a3ba74491517a7755fc",
+  "source_digest": "799cd9c77eac0fc4685ebc35504d8892c37165287ce27304e4898d191de574f5",
   "blocked": false,
   "blockers": [],
-  "last_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-runtime_verified-6bc3ad19",
-  "independent_verification_id": "verify-unified-shortterm-phase-readiness-audit-v1-independent-round2-019fbc78-99e1c733",
-  "updated_at": "2026-08-02T15:14:27.485609Z"
+  "last_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-runtime_verified-49c88dee",
+  "independent_verification_id": "verify-derivatives-shadow-discovery-handoff-failover-v2-independent-rerun-019fc7af",
+  "updated_at": "2026-08-03T13:13:11.835306Z"
 }

@@ -1,0 +1,22 @@
+{
+  "schema_version": "AcceptanceScenarioV1",
+  "id": "shadow-cycle-runtime-recovery-isolation-v2",
+  "title": "真实公开运行恢复且不污染生产与收益",
+  "level": "RUNTIME_VERIFIED",
+  "preconditions": [
+    "仓库处于目标分支且工作树由当前治理锁持有",
+    "只允许公开市场数据"
+  ],
+  "steps": [
+    "运行 bounded derivatives shadow cycle",
+    "运行到期 reviewer 与 promotion evaluator",
+    "核对账本追加、来源覆盖、安全字段和生产状态"
+  ],
+  "expected": [
+    "至少一个可验证候选时形成同序 handoff 并追加真实观察",
+    "单候选来源失败只局部降级",
+    "生产规则、Top1、正式动作、Paper ROI 和真钱 ROI 均不改变",
+    "晋升门仍只能 MORE_EVIDENCE_REQUIRED、REJECT 或 PROMOTION_REVIEW_ELIGIBLE"
+  ],
+  "evidence": []
+}
